@@ -31,20 +31,26 @@ pub fn get_venv_dir() -> PathBuf {
 }
 
 fn is_symlink(symlink_path: &Path) -> bool {
-    return symlink_path.symlink_metadata().map(|metadata| metadata.file_type().is_symlink()).unwrap_or(false);
+    return symlink_path
+        .symlink_metadata()
+        .map(|metadata| metadata.file_type().is_symlink())
+        .unwrap_or(false);
 }
 
-fn points_to(symlink_path: &Path, target_path: &Path) -> bool{
-    return symlink_path.read_link().ok().map_or(false, |link| link.starts_with(&target_path));
+fn points_to(symlink_path: &Path, target_path: &Path) -> bool {
+    return symlink_path
+        .read_link()
+        .ok()
+        .map_or(false, |link| link.starts_with(&target_path));
 }
 
-pub fn check_symlink(symlink: &str, target_path: &Path) -> bool {    
+pub fn check_symlink(symlink: &str, target_path: &Path) -> bool {
     let symlink_path = get_bin_dir().join(symlink);
 
-    return is_symlink(&symlink_path) && points_to(&symlink_path, &target_path)
+    return is_symlink(&symlink_path) && points_to(&symlink_path, &target_path);
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Deserialize, Serialize, dbg_pls::DebugPls)]
 pub struct Metadata {
     // order is important!!
     pub name: String,
@@ -87,17 +93,37 @@ impl Metadata {
     pub fn format_human(&self) -> String {
         let mut result = format!("- {}\n", self.name); // todo: colorized extra's (+ install spec?)
 
-        result.push_str(&format!("{}Installed Version: {} on {}.\n",INDENT, self.installed_version.cyan(), self.python.bright_blue()));
+        result.push_str(&format!(
+            "{}Installed Version: {} on {}.\n",
+            INDENT,
+            self.installed_version.cyan(),
+            self.python.bright_blue()
+        ));
 
+        let formatted_injects = self
+            .injected
+            .iter()
+            .map(|k| format!("'{}'", k.green()))
+            .join(", ");
+        result.push_str(&format!(
+            "{}Injected Packages: {}\n",
+            INDENT, formatted_injects
+        ));
 
-        let formatted_injects = self.injected.iter().map(|k| format!("'{}'", k.green())).join(", ");
-        result.push_str(&format!("{}Injected Packages: {}\n", INDENT,formatted_injects));
-
-
-        let formatted_scripts = self.scripts.iter().map(|(key, value)|if *value { key.green().to_string() } else { key.red().to_string() }).join(" | ");
+        let formatted_scripts = self
+            .scripts
+            .iter()
+            .map(|(key, value)| {
+                if *value {
+                    key.green().to_string()
+                } else {
+                    key.red().to_string()
+                }
+            })
+            .join(" | ");
         result.push_str(&format!("{}Scripts: {}", INDENT, formatted_scripts));
 
-        return result
+        return result;
     }
 }
 

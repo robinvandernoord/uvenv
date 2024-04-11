@@ -62,12 +62,12 @@ const PYTHON_HELP_TEXT: &str =
 
 #[derive(Debug, Parser)]
 pub struct ListOptions {
-    #[clap(short, long, help = "Short output")]
-    short: bool,
-    #[clap(long, help = "Verbose output")]
-    verbose: bool,
-    #[clap(long, help = "Output in JSON format")]
-    json: bool,
+    #[clap(short, long, help = "Short output", conflicts_with_all = ["verbose", "json"])]
+    pub short: bool,
+    #[clap(short, long, help = "Verbose output", conflicts_with_all = ["short", "json"])]
+    pub verbose: bool,
+    #[clap(short, long, help = "Output in JSON format")]
+    pub json: bool,
 }
 
 #[derive(Debug, Parser)]

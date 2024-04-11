@@ -20,13 +20,20 @@ impl Process for ListOptions {
         for _dir in must_exist {
             if let Ok(dir) = _dir {
                 if let Some(metadata) = Metadata::for_dir(&dir.path()) {
-
                     // todo: format human short
                     // todo: format verbose (struct dump)
                     // todo: format json
                     //        + short/verbose ?
 
-                    println!("{}", &metadata.format_human());
+                    if self.verbose {
+                        println!("{}", dbg_pls::color(&metadata));
+                    } else if self.short {
+                        panic!("Not implemented")
+                    } else if self.json {
+                        panic!("Not implemented")
+                    } else {
+                        println!("{}", &metadata.format_human());
+                    }
                 }
             }
         }
