@@ -1,8 +1,8 @@
 use crate::cli::{Process, RunuvOptions};
 
 impl Process for RunuvOptions {
-    fn process(self) -> u32 {
+    fn process(self) -> Result<u32, String> {
         dbg!("process - runuv");
-        return 0;
+        return Ok(2);
     }
 }

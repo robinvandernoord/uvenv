@@ -1,8 +1,8 @@
 use crate::cli::{EnsurepathOptions, Process};
 
 impl Process for EnsurepathOptions {
-    fn process(self) -> u32 {
+    fn process(self) -> Result<u32, String> {
         dbg!("process - ensurepath");
-        return 0;
+        return Ok(2);
     }
 }

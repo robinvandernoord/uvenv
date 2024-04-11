@@ -2883,8 +2883,13 @@ version = "0.1.0"
 dependencies = [
  "anstyle",
  "clap",
+ "home",
+ "itertools",
+ "owo-colors",
  "pyo3",
  "pyo3-asyncio",
+ "rmp-serde",
+ "serde",
  "tokio",
  "uv-client",
 ]

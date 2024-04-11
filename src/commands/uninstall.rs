@@ -1,8 +1,8 @@
 use crate::cli::{Process, UninstallOptions};
 
 impl Process for UninstallOptions {
-    fn process(self) -> u32 {
+    fn process(self) -> Result<u32, String> {
         dbg!("process - uninstall");
-        return 0;
+        return Ok(2);
     }
 }

@@ -1,5 +1,7 @@
 mod cli;
 mod commands;
+mod helpers;
+mod metadata;
 
 use crate::cli::{Args, Process};
 use pyo3::prelude as pyo;
@@ -8,7 +10,13 @@ async fn async_main_rs() -> u32 {
     // let args = Args::parse_from(env::args().skip(1)); // first argument is now 'python' instead of 'uvx' so skip it
     let args = Args::parse_from_python();
 
-    args.cmd.process()
+    return match args.cmd.process() {
+        Ok(code) => code,
+        Err(msg) => {
+            eprintln!("Something went wrong | {}", msg);
+            1
+        }
+    };
 }
 
 #[pyo::pyfunction]

@@ -1,8 +1,8 @@
 use crate::cli::{InjectOptions, Process};
 
 impl Process for InjectOptions {
-    fn process(self) -> u32 {
+    fn process(self) -> Result<u32, String> {
         dbg!("process - inject");
-        return 0;
+        return Ok(2);
     }
 }

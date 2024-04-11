@@ -1,8 +1,8 @@
 use crate::cli::{Process, RunpythonOptions};
 
 impl Process for RunpythonOptions {
-    fn process(self) -> u32 {
+    fn process(self) -> Result<u32, String> {
         dbg!("process - runpython");
-        return 0;
+        return Ok(2);
     }
 }

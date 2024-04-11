@@ -1,8 +1,8 @@
 use crate::cli::{Process, UpgradeAllOptions};
 
 impl Process for UpgradeAllOptions {
-    fn process(self) -> u32 {
+    fn process(self) -> Result<u32, String> {
         dbg!("process - upgrade-all");
-        return 0;
+        return Ok(2);
     }
 }

@@ -41,7 +41,7 @@ pub fn get_styles() -> clap::builder::Styles {
 }
 
 pub trait Process {
-    fn process(self) -> u32;
+    fn process(self) -> Result<u32, String>;
 }
 
 #[derive(Parser, Debug)]
@@ -183,7 +183,7 @@ pub enum Commands {
 }
 
 impl Process for Commands {
-    fn process(self) -> u32 {
+    fn process(self) -> Result<u32, String> {
         return match self {
             Commands::List(opts) => opts.process(),
             Commands::Install(opts) => opts.process(),
