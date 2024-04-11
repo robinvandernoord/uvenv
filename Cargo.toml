@@ -10,6 +10,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 clap = { version = "4.5.4", features = ["derive"] }
-uv-client = { git = "https://github.com/astral-sh/uv.git", branch = "main" }
-pyo3 = "0.20.0"
 anstyle = "1.0.6"
+uv-client = { git = "https://github.com/astral-sh/uv.git", branch = "main" }
+pyo3 = { version = "0.20.0", features = ["extension-module"] }
+pyo3-asyncio = { version = "0.20.0", features = ["tokio-runtime"] }
+tokio = "1.4"

@@ -23,4 +23,5 @@ features = ["pyo3/extension-module"]
 strip = true 
 
 [project.scripts]
-uvx = "uvx:main"
+# uvx = "uvx:main"
+uvx = "uvx:main_py"
