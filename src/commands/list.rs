@@ -59,7 +59,7 @@ impl Process for ListOptions {
                     if self.verbose {
                         println!("{}", dbg_pls::color(&metadata));
                     } else if self.short {
-                        panic!("Not implemented")
+                        println!("{}", &metadata.format_short());
                     } else {
                         println!("{}", &metadata.format_human());
                     }

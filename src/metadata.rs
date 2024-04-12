@@ -90,8 +90,28 @@ impl Metadata {
         }
     }
 
+    pub fn format_short(&self) -> String {
+        return format!("- {} {}", self.name, self.installed_version.cyan());
+    }
+
     pub fn format_human(&self) -> String {
-        let mut result = format!("- {}\n", self.name); // todo: colorized extra's (+ install spec?)
+        let mut result = format!("- {}", self.name); // todo: colorized extra's (+ install spec?)
+
+        if self.extras.len() > 0 {
+            result.push_str(&format!(
+                "[{}]",
+                self.extras
+                    .iter()
+                    .map(|k| format!("'{}'", k.green()))
+                    .join(",")
+            ));
+        }
+
+        if self.requested_version.len() > 0 {
+            result.push_str(&format!(" {}", self.requested_version.cyan()));
+        }
+
+        result.push_str("\n");
 
         result.push_str(&format!(
             "{}Installed Version: {} on {}.\n",
