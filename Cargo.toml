@@ -9,16 +9,25 @@ name = "uvx"
 crate-type = ["cdylib"]
 
 [dependencies]
+# cli
 clap = { version = "4.5.4", features = ["derive"] }
-anstyle = "1.0.6"
-uv-client = { git = "https://github.com/astral-sh/uv.git", branch = "main" }
+# python
 pyo3 = { version = "0.20.0", features = ["extension-module"] }
 pyo3-asyncio = { version = "0.20.0", features = ["tokio-runtime"] }
+# async
 tokio = "1.4"
+# serialize
 rmp-serde = "1.1.2"
 serde = { version = "1.0.197", features = ["derive"] }
-home = "0.5.9"
-owo-colors = "4.0.0"
-itertools = "0.12.1"
-dbg-pls = { version = "0.4.3", features = ["pretty", "colors", "derive"] }
 serde_json = "1.0.115"
+# helpers
+home = "0.5.9"
+itertools = "0.12.1"
+# fancy
+anstyle = "1.0.6"
+owo-colors = "4.0.0"
+dbg-pls = { version = "0.4.3", features = ["pretty", "colors", "derive"] }
+# uv
+# uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.1.31" }
+pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.1.31" }
+async_http_range_reader = "=0.7.0" # pin to specific version which uv expects

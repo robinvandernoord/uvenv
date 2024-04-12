@@ -72,17 +72,17 @@ pub struct ListOptions {
 
 #[derive(Debug, Parser)]
 pub struct InstallOptions {
-    package_name: String,
+    pub package_name: String,
     #[clap(
         short = 'f',
         long,
         help = "Overwrite currently installed executables with the same name (in ~/.local/bin)"
     )]
-    force: bool,
+    pub force: bool,
     #[clap(long, help = "Run without `uv` cache")]
-    no_cache: bool,
+    pub no_cache: bool,
     #[clap(long, help = PYTHON_HELP_TEXT)]
-    python: Option<String>,
+    pub python: Option<String>,
 }
 
 #[derive(Debug, Parser)]

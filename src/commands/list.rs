@@ -51,10 +51,6 @@ impl Process for ListOptions {
         for _dir in must_exist {
             if let Ok(dir) = _dir {
                 if let Some(metadata) = Metadata::for_dir(&dir.path()) {
-                    // todo: format human short
-                    // todo: format verbose (struct dump)
-                    // todo: format json
-                    //        + short/verbose ?
 
                     if self.verbose {
                         println!("{}", dbg_pls::color(&metadata));
