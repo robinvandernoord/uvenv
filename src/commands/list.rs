@@ -1,8 +1,35 @@
-
+use std::fs::ReadDir;
 
 use crate::cli::{ListOptions, Process};
 use crate::helpers::ResultToString;
 use crate::metadata::{get_venv_dir, Metadata};
+use owo_colors::OwoColorize;
+
+impl ListOptions {
+    pub fn process_json(self, must_exist: ReadDir) -> Result<u32, String> {
+        let mut result: Vec<Metadata> = vec![];
+
+        for _dir in must_exist {
+            if let Ok(dir) = _dir {
+                if let Some(metadata) = Metadata::for_dir(&dir.path()) {
+                    result.push(metadata)
+                }
+            }
+        }
+
+        let json: String;
+
+        if self.short {
+            json = serde_json::to_string(&result).map_err_to_string()?;
+        } else {
+            json = serde_json::to_string_pretty(&result).map_err_to_string()?;
+        }
+
+        print!("{}", json);
+
+        Ok(0)
+    }
+}
 
 impl Process for ListOptions {
     fn process(self) -> Result<u32, String> {
@@ -17,6 +44,10 @@ impl Process for ListOptions {
             }
         };
 
+        if self.json {
+            return self.process_json(must_exist);
+        }
+
         for _dir in must_exist {
             if let Ok(dir) = _dir {
                 if let Some(metadata) = Metadata::for_dir(&dir.path()) {
@@ -29,11 +60,14 @@ impl Process for ListOptions {
                         println!("{}", dbg_pls::color(&metadata));
                     } else if self.short {
                         panic!("Not implemented")
-                    } else if self.json {
-                        panic!("Not implemented")
                     } else {
                         println!("{}", &metadata.format_human());
                     }
+                } else {
+                    // todo: better logging
+                    let venv_name = dir.file_name().into_string().unwrap_or_default();
+
+                    eprintln!("! metadata for '{}' could not be read!", venv_name.red());
                 }
             }
         }

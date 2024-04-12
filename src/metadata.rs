@@ -132,10 +132,10 @@ pub fn load_metadata(filename: &Path) -> Result<Metadata, String> {
     let file = File::open(filename).map_err_to_string()?;
 
     // Read the contents of the file into a Metadata struct
-    // let metadata: Metadata = rmp_serde::decode::from_read(file).map_err_to_string()?;
-    let mut metadata: Metadata = rmp_serde::decode::from_read(file).unwrap();
+    let mut metadata: Metadata = rmp_serde::decode::from_read(file).map_err_to_string()?;
 
-    metadata.check_scripts(&filename.parent().unwrap());
+    // fixme: make this optional or move it:
+    let _ = &metadata.check_scripts(&filename.parent().unwrap());
 
     Ok(metadata)
 }

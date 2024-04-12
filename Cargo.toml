@@ -21,3 +21,4 @@ home = "0.5.9"
 owo-colors = "4.0.0"
 itertools = "0.12.1"
 dbg-pls = { version = "0.4.3", features = ["pretty", "colors", "derive"] }
+serde_json = "1.0.115"
