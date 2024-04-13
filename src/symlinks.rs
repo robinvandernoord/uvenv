@@ -8,7 +8,6 @@ use configparser::ini::Ini;
 use std::fs;
 
 pub fn console_scripts(entry_points_path: &str) -> Result<Vec<String>, String> {
-    dbg!(&entry_points_path);
     let Ok(ini) = fs::read_to_string(entry_points_path) else {
         return Ok(Vec::new()); // file missing = empty list
     };
@@ -33,9 +32,7 @@ pub fn find_symlinks(meta: &Metadata, venv: &PythonEnvironment) -> Vec<String> {
         .join(dist_info_fname)
         .join("entry_points.txt");
     let entrypoints_path = entrypoints_ini.to_str().unwrap_or_default();
-    let scripts = console_scripts(entrypoints_path).unwrap_or_default();
-
-    return dbg!(scripts);
+    return console_scripts(entrypoints_path).unwrap_or_default();
 }
 
 pub fn create_symlink(
