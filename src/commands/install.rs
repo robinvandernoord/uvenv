@@ -1,4 +1,4 @@
-use crate::animate::{show_loading_indicator, AnimationSettings, AnimationStyle};
+use crate::animate::{show_loading_indicator, AnimationSettings};
 use crate::cli::{InstallOptions, Process};
 use crate::helpers::ResultToString;
 use crate::metadata::Metadata;
@@ -61,7 +61,7 @@ async fn ensure_venv(
     }
 }
 
-fn store_metadata(
+async fn store_metadata(
     requirement_name: &str,
     requirement: &Requirement,
     inject: &Vec<&str>,
@@ -95,11 +95,11 @@ fn store_metadata(
         metadata.installed_version = version;
     }
 
-    metadata.save(&venv.to_path_buf())?;
+    metadata.save(&venv.to_path_buf()).await?;
     return Ok(metadata);
 }
 
-pub fn install_symlinks(
+pub async fn install_symlinks(
     meta: &mut Metadata,
     venv: &PythonEnvironment,
     force: bool,
@@ -118,7 +118,7 @@ pub fn install_symlinks(
     }
 
     meta.scripts = results;
-    meta.save(&venv_root.to_path_buf())?;
+    meta.save(&venv_root.to_path_buf()).await?;
 
     Ok(())
 }
@@ -134,10 +134,10 @@ pub async fn install_package(
     let requirement = Requirement::from_str(install_spec).map_err_to_string()?;
 
     let venv_path = ensure_venv(maybe_venv, &requirement, python, force).await?;
-    let uv_venv = activate_venv(&venv_path)?;
+    let uv_venv = activate_venv(&venv_path).await?;
 
     if let Err(e) = _install_package(install_spec, &inject, no_cache, force).await {
-        remove_venv(&venv_path);
+        remove_venv(&venv_path).await;
 
         return Err(e);
     }
@@ -149,9 +149,10 @@ pub async fn install_package(
         &inject,
         &install_spec,
         &uv_venv,
-    )?;
+    )
+    .await?;
 
-    install_symlinks(&mut metadata, &uv_venv, force, &[])?;
+    install_symlinks(&mut metadata, &uv_venv, force, &[]).await?;
 
     Ok(format!(
         "📦 {} ({}) installed!",

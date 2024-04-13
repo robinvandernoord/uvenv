@@ -4,7 +4,6 @@ use owo_colors::OwoColorize;
 use pep508_rs::PackageName;
 use std::path::PathBuf;
 
-use std::{env, fs};
 use uv_interpreter::PythonEnvironment;
 
 pub async fn create_venv(
@@ -42,14 +41,14 @@ pub async fn create_venv(
     return Ok(venv_path);
 }
 
-pub fn activate_venv(venv: &PathBuf) -> Result<PythonEnvironment, String> {
+pub async fn activate_venv(venv: &PathBuf) -> Result<PythonEnvironment, String> {
     let venv_str = venv.to_str().unwrap_or_default();
-    env::set_var("VIRTUAL_ENV", venv_str);
+    std::env::set_var("VIRTUAL_ENV", venv_str);
 
     return uv_venv(None)
         .ok_or_else(|| format!("Could not properly activate venv '{}'!", venv_str));
 }
 
-pub fn remove_venv(venv: &PathBuf) {
-    let _ = fs::remove_dir_all(venv);
+pub async fn remove_venv(venv: &PathBuf) {
+    let _ = tokio::fs::remove_dir_all(venv).await;
 }

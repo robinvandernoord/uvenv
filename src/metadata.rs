@@ -4,9 +4,10 @@ use itertools::Itertools;
 use owo_colors::OwoColorize;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use std::fs::File;
-use std::io::Write;
 use std::path::{Path, PathBuf};
+use tokio::fs::File;
+use tokio::io::AsyncReadExt;
+use tokio::io::AsyncWriteExt;
 
 const BIN_DIR: &'static str = ".local/bin";
 const WORK_DIR: &'static str = ".local/uvx";
@@ -65,19 +66,20 @@ impl Metadata {
         };
     }
 
-    pub fn for_dir(dirname: &PathBuf) -> Option<Metadata> {
+    pub async fn for_dir(dirname: &PathBuf, recheck_scripts: bool) -> Option<Metadata> {
         let meta_path = dirname.join(".metadata");
 
-        return Metadata::for_file(&meta_path);
+        return Metadata::for_file(&meta_path, recheck_scripts).await;
     }
 
-    pub fn for_file(filename: &PathBuf) -> Option<Metadata> {
-        return load_metadata(filename).ok();
+    pub async fn for_file(filename: &PathBuf, recheck_scripts: bool) -> Option<Metadata> {
+        let result = load_metadata(filename, recheck_scripts).await;
+        return result.ok();
     }
 
-    pub fn save(&self, dirname: &PathBuf) -> Result<(), String> {
+    pub async fn save(&self, dirname: &PathBuf) -> Result<(), String> {
         let meta_path = dirname.join(".metadata");
-        return store_metadata(&meta_path, &self);
+        return store_metadata(&meta_path, &self).await;
     }
 
     pub fn check_scripts(&mut self, venv_path: &Path) {
@@ -143,27 +145,31 @@ impl Metadata {
     }
 }
 
-pub fn load_metadata(filename: &Path) -> Result<Metadata, String> {
+pub async fn load_metadata(filename: &Path, recheck_scripts: bool) -> Result<Metadata, String> {
     // Open the msgpack file
-    let file = File::open(filename).map_err_to_string()?;
+    let mut file = File::open(filename).await.map_err_to_string()?;
+
+    let mut buf = Vec::new();
+    file.read_to_end(&mut buf).await.map_err_to_string()?;
 
     // Read the contents of the file into a Metadata struct
-    let mut metadata: Metadata = rmp_serde::decode::from_read(file).map_err_to_string()?;
+    let mut metadata: Metadata = rmp_serde::decode::from_slice(&buf[..]).map_err_to_string()?;
 
-    // fixme: make this optional or move it:
-    let _ = &metadata.check_scripts(&filename.parent().unwrap());
+    if recheck_scripts {
+        let _ = &metadata.check_scripts(&filename.parent().unwrap());
+    }
 
     Ok(metadata)
 }
 
-pub fn store_metadata(filename: &Path, metadata: &Metadata) -> Result<(), String> {
+pub async fn store_metadata(filename: &Path, metadata: &Metadata) -> Result<(), String> {
     // Open the msgpack file
-    let mut file = File::create(filename).map_err_to_string()?;
+    let mut file = File::create(filename).await.map_err_to_string()?;
 
     // Read the contents of the file into a Metadata struct
     let bytes = rmp_serde::encode::to_vec(metadata).map_err_to_string()?;
 
-    file.write_all(&bytes).map_err_to_string()?;
+    file.write_all(&bytes).await.map_err_to_string()?;
 
     Ok(())
 }

@@ -6,12 +6,12 @@ use crate::metadata::{get_venv_dir, Metadata};
 use owo_colors::OwoColorize;
 
 impl ListOptions {
-    pub fn process_json(self, must_exist: ReadDir) -> Result<u32, String> {
+    pub async fn process_json(self, must_exist: ReadDir) -> Result<u32, String> {
         let mut result: Vec<Metadata> = vec![];
 
         for _dir in must_exist {
             if let Ok(dir) = _dir {
-                if let Some(metadata) = Metadata::for_dir(&dir.path()) {
+                if let Some(metadata) = Metadata::for_dir(&dir.path(), true).await {
                     result.push(metadata)
                 }
             }
@@ -45,12 +45,12 @@ impl Process for ListOptions {
         };
 
         if self.json {
-            return self.process_json(must_exist);
+            return self.process_json(must_exist).await;
         }
 
         for _dir in must_exist {
             if let Ok(dir) = _dir {
-                if let Some(metadata) = Metadata::for_dir(&dir.path()) {
+                if let Some(metadata) = Metadata::for_dir(&dir.path(), true).await {
                     if self.verbose {
                         println!("{}", dbg_pls::color(&metadata));
                     } else if self.short {
