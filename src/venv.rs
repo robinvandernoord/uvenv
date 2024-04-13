@@ -1,11 +1,9 @@
-use crate::cli::{InstallOptions, Process};
-use crate::helpers::ResultToString;
-use crate::metadata::{get_venv_dir, Metadata};
-use crate::uv::{uv, uv_get_installed_version, uv_venv, ExtractVersion, Helpers};
+use crate::metadata::get_venv_dir;
+use crate::uv::{uv, uv_venv};
 use owo_colors::OwoColorize;
-use pep508_rs::{PackageName, Requirement};
-use std::path::{Path, PathBuf};
-use std::str::FromStr;
+use pep508_rs::PackageName;
+use std::path::PathBuf;
+
 use std::{env, fs};
 use uv_interpreter::PythonEnvironment;
 

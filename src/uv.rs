@@ -1,14 +1,10 @@
-use crate::cli::{InstallOptions, Process};
-use crate::helpers::ResultToString;
-use crate::metadata::{get_venv_dir, Metadata};
 use directories::ProjectDirs;
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
-use std::env;
-use std::fmt::format;
-use std::path::{Path, PathBuf};
+
+use std::path::PathBuf;
 use std::process::Command;
-use std::str::FromStr;
+
 use uv_cache::Cache;
 use uv_installer::SitePackages;
 use uv_interpreter::PythonEnvironment;

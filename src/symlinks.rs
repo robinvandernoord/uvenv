@@ -1,11 +1,9 @@
-use std::collections::HashMap;
 use std::os::unix::fs as unix_fs;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 use uv_interpreter::PythonEnvironment;
 
-use crate::helpers::ResultToString;
-use crate::metadata::{get_bin_dir, get_work_dir, Metadata};
+use crate::metadata::{get_bin_dir, Metadata};
 use configparser::ini::Ini;
 use std::fs;
 

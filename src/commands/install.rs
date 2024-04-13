@@ -1,16 +1,16 @@
 use crate::cli::{InstallOptions, Process};
 use crate::helpers::ResultToString;
-use crate::metadata::{get_venv_dir, Metadata};
+use crate::metadata::Metadata;
 use crate::symlinks::{create_symlink, find_symlinks};
-use crate::uv::{uv, uv_get_installed_version, uv_venv, ExtractVersion, Helpers};
+use crate::uv::{uv, uv_get_installed_version, ExtractVersion, Helpers};
 use crate::venv::{activate_venv, create_venv, remove_venv};
-use owo_colors::OwoColorize;
-use pep508_rs::{PackageName, Requirement};
+
+use pep508_rs::Requirement;
 use std::collections::HashMap;
-use std::fmt::format;
+
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
-use std::{env, fs};
+
 use uv_interpreter::PythonEnvironment;
 
 fn _install_package(
