@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use std::{env, fs};
 use uv_interpreter::PythonEnvironment;
 
-pub fn create_venv(
+pub async fn create_venv(
     package_name: &PackageName,
     python: Option<String>,
     force: bool,
@@ -37,7 +37,7 @@ pub fn create_venv(
         args.push("--seed");
     }
 
-    uv(args)?;
+    uv(args).await?;
 
     return Ok(venv_path);
 }

@@ -32,7 +32,7 @@ impl ListOptions {
 }
 
 impl Process for ListOptions {
-    fn process(self) -> Result<u32, String> {
+    async fn process(self) -> Result<u32, String> {
         let venv_dir_path = get_venv_dir();
         let possibly_missing = std::fs::read_dir(&venv_dir_path);
 

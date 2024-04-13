@@ -3,16 +3,16 @@ use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
 
 use std::path::PathBuf;
-use std::process::Command;
+use tokio::process::Command;
 
 use uv_cache::Cache;
 use uv_installer::SitePackages;
 use uv_interpreter::PythonEnvironment;
 
-pub fn uv(args: Vec<&str>) -> Result<bool, String> {
+pub async fn uv(args: Vec<&str>) -> Result<bool, String> {
     let err_prefix = format!("uv {}", &args[0]);
 
-    let result = Command::new("uv").args(args).output();
+    let result = Command::new("uv").args(args).output().await;
 
     match result {
         Ok(result) => match result.status.code() {

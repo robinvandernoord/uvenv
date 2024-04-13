@@ -41,7 +41,7 @@ pub fn get_styles() -> clap::builder::Styles {
 }
 
 pub trait Process {
-    fn process(self) -> Result<u32, String>;
+    async fn process(self) -> Result<u32, String>;
 }
 
 #[derive(Parser, Debug)]
@@ -183,20 +183,20 @@ pub enum Commands {
 }
 
 impl Process for Commands {
-    fn process(self) -> Result<u32, String> {
+    async fn process(self) -> Result<u32, String> {
         return match self {
-            Commands::List(opts) => opts.process(),
-            Commands::Install(opts) => opts.process(),
-            Commands::Upgrade(opts) => opts.process(),
-            Commands::Uninstall(opts) => opts.process(),
-            Commands::Reinstall(opts) => opts.process(),
-            Commands::Inject(opts) => opts.process(),
-            Commands::UpgradeAll(opts) => opts.process(),
-            Commands::Runuv(opts) => opts.process(),
-            Commands::Runpip(opts) => opts.process(),
-            Commands::Runpython(opts) => opts.process(),
-            Commands::Ensurepath(opts) => opts.process(),
-            Commands::SelfUpdate(opts) => opts.process(),
+            Commands::List(opts) => opts.process().await,
+            Commands::Install(opts) => opts.process().await,
+            Commands::Upgrade(opts) => opts.process().await,
+            Commands::Uninstall(opts) => opts.process().await,
+            Commands::Reinstall(opts) => opts.process().await,
+            Commands::Inject(opts) => opts.process().await,
+            Commands::UpgradeAll(opts) => opts.process().await,
+            Commands::Runuv(opts) => opts.process().await,
+            Commands::Runpip(opts) => opts.process().await,
+            Commands::Runpython(opts) => opts.process().await,
+            Commands::Ensurepath(opts) => opts.process().await,
+            Commands::SelfUpdate(opts) => opts.process().await,
         };
     }
 }

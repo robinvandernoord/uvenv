@@ -1,3 +1,4 @@
+use crate::animate::{show_loading_indicator, AnimationSettings, AnimationStyle};
 use crate::cli::{InstallOptions, Process};
 use crate::helpers::ResultToString;
 use crate::metadata::Metadata;
@@ -13,7 +14,7 @@ use std::str::FromStr;
 
 use uv_interpreter::PythonEnvironment;
 
-fn _install_package(
+async fn _install_package(
     package_name: &str,
     inject: &Vec<&str>,
     no_cache: bool,
@@ -29,10 +30,17 @@ fn _install_package(
         args.push("--no-cache")
     }
 
-    return uv(args);
+    let promise = uv(args);
+
+    return show_loading_indicator(
+        promise,
+        format!("installing {}", package_name),
+        AnimationSettings::default(),
+    )
+    .await;
 }
 
-fn ensure_venv(
+async fn ensure_venv(
     maybe_venv: Option<&Path>,
     requirement: &Requirement,
     python: Option<String>,
@@ -49,7 +57,7 @@ fn ensure_venv(
                 Ok(buf)
             }
         }
-        None => create_venv(&requirement.name, python, force, true),
+        None => create_venv(&requirement.name, python, force, true).await,
     }
 }
 
@@ -115,7 +123,7 @@ pub fn install_symlinks(
     Ok(())
 }
 
-pub fn install_package(
+pub async fn install_package(
     install_spec: &str,
     maybe_venv: Option<&Path>,
     python: Option<String>,
@@ -125,10 +133,10 @@ pub fn install_package(
 ) -> Result<String, String> {
     let requirement = Requirement::from_str(install_spec).map_err_to_string()?;
 
-    let venv_path = ensure_venv(maybe_venv, &requirement, python, force)?;
+    let venv_path = ensure_venv(maybe_venv, &requirement, python, force).await?;
     let uv_venv = activate_venv(&venv_path)?;
 
-    if let Err(e) = _install_package(install_spec, &inject, no_cache, force) {
+    if let Err(e) = _install_package(install_spec, &inject, no_cache, force).await {
         remove_venv(&venv_path);
 
         return Err(e);
@@ -152,7 +160,7 @@ pub fn install_package(
 }
 
 impl Process for InstallOptions {
-    fn process(self) -> Result<u32, String> {
+    async fn process(self) -> Result<u32, String> {
         match install_package(
             &self.package_name,
             None,
@@ -160,7 +168,9 @@ impl Process for InstallOptions {
             self.force,
             vec![],
             self.no_cache,
-        ) {
+        )
+        .await
+        {
             Ok(msg) => {
                 println!("{}", msg);
                 return Ok(0);
