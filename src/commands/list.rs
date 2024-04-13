@@ -51,7 +51,6 @@ impl Process for ListOptions {
         for _dir in must_exist {
             if let Ok(dir) = _dir {
                 if let Some(metadata) = Metadata::for_dir(&dir.path()) {
-
                     if self.verbose {
                         println!("{}", dbg_pls::color(&metadata));
                     } else if self.short {

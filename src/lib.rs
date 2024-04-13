@@ -2,6 +2,9 @@ mod cli;
 mod commands;
 mod helpers;
 mod metadata;
+mod symlinks;
+mod uv;
+mod venv;
 
 use crate::cli::{Args, Process};
 use pyo3::prelude as pyo;
