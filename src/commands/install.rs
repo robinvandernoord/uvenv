@@ -69,13 +69,13 @@ async fn store_metadata(
     venv: &PythonEnvironment,
 ) -> Result<Metadata, String> {
     let mut metadata = Metadata::new(&requirement_name);
+    let _ = metadata.fill(Some(&venv));
 
     let python_info = venv.interpreter().markers();
 
     metadata.install_spec = String::from(install_spec);
 
     metadata.requested_version = requirement.version();
-    metadata.installed_version = String::new();
 
     metadata.python = format!(
         "{} {}",
@@ -113,7 +113,9 @@ pub async fn install_symlinks(
     for symlink in symlinks {
         results.insert(
             symlink.clone(),
-            create_symlink(&symlink, &venv_root, force, binaries).await.unwrap_or(false),
+            create_symlink(&symlink, &venv_root, force, binaries)
+                .await
+                .unwrap_or(false),
         );
     }
 
@@ -137,7 +139,7 @@ pub async fn install_package(
     let uv_venv = activate_venv(&venv_path).await?;
 
     if let Err(e) = _install_package(install_spec, &inject, no_cache, force).await {
-        remove_venv(&venv_path).await;
+        let _ = remove_venv(&venv_path).await;
 
         return Err(e);
     }

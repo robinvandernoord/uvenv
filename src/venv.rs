@@ -1,3 +1,4 @@
+use crate::helpers::ResultToString;
 use crate::metadata::get_venv_dir;
 use crate::uv::{uv, uv_venv};
 use owo_colors::OwoColorize;
@@ -49,6 +50,7 @@ pub async fn activate_venv(venv: &PathBuf) -> Result<PythonEnvironment, String> 
         .ok_or_else(|| format!("Could not properly activate venv '{}'!", venv_str));
 }
 
-pub async fn remove_venv(venv: &PathBuf) {
-    let _ = tokio::fs::remove_dir_all(venv).await;
+pub async fn remove_venv(venv: &PathBuf) -> Result<(), String> {
+    tokio::fs::remove_dir_all(venv).await.map_err_to_string()?;
+    Ok(())
 }

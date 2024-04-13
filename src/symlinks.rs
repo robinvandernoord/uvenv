@@ -54,7 +54,8 @@ pub async fn create_symlink(
                 symlink, bin_dir
             ));
         }
-        tokio::fs::remove_file(&target_path).await
+        tokio::fs::remove_file(&target_path)
+            .await
             .map_err(|_| format!("Failed to create symlink {:?}", &target_path))?;
     }
 
@@ -66,7 +67,8 @@ pub async fn create_symlink(
         ));
     }
 
-    tokio::fs::symlink(&symlink_path, &target_path).await
+    tokio::fs::symlink(&symlink_path, &target_path)
+        .await
         .map_err(|_| format!("Failed to create symlink {:?}", &target_path))?;
 
     return Ok(true);
@@ -94,12 +96,24 @@ pub async fn check_symlink(symlink: &str, target_path: &Path) -> bool {
 
 pub async fn remove_symlink(symlink: &str) -> Result<(), String> {
     let bin_dir = get_bin_dir();
-
     let target_path = bin_dir.join(symlink);
-    if target_path.exists() && is_symlink(&target_path) {
-        tokio::fs::remove_file(&target_path).await
+
+    dbg!(&bin_dir);
+    dbg!(&target_path);
+
+    if is_symlink(&target_path) {
+        tokio::fs::remove_file(&target_path)
+            .await
             .map_err(|_| format!("Failed to remove symlink {:?}", &target_path))?;
     };
+
+    Ok(())
+}
+
+pub async fn remove_symlinks(symlinks: Vec<String>) -> Result<(), String> {
+    for symlink in symlinks {
+        remove_symlink(&symlink).await?;
+    }
 
     Ok(())
 }

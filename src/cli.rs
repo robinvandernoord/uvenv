@@ -98,13 +98,13 @@ pub struct UpgradeOptions {
 
 #[derive(Debug, Parser)]
 pub struct UninstallOptions {
-    package_name: String,
+    pub package_name: String,
     #[clap(
         short = 'f',
         long,
         help = "Remove executable with the same name (in ~/.local/bin) even if related venv was not found"
     )]
-    force: bool,
+    pub force: bool,
 }
 
 #[derive(Debug, Parser)]

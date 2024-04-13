@@ -5,25 +5,29 @@ use crate::helpers::ResultToString;
 use crate::metadata::{get_venv_dir, Metadata};
 use owo_colors::OwoColorize;
 
-impl ListOptions {
-    pub async fn process_json(self, must_exist: ReadDir) -> Result<u32, String> {
-        let mut result: Vec<Metadata> = vec![];
+async fn read_from_folder(metadata_dir: ReadDir) -> Vec<Metadata> {
+    let mut result: Vec<Metadata> = vec![];
+    for _dir in metadata_dir {
+        if let Ok(dir) = _dir {
+            if let Some(metadata) = Metadata::for_dir(&dir.path(), true).await {
+                result.push(metadata)
+            } else {
+                let venv_name = dir.file_name().into_string().unwrap_or_default();
 
-        for _dir in must_exist {
-            if let Ok(dir) = _dir {
-                if let Some(metadata) = Metadata::for_dir(&dir.path(), true).await {
-                    result.push(metadata)
-                }
+                eprintln!("! metadata for '{}' could not be read!", venv_name.red());
             }
         }
+    }
+    result
+}
 
-        let json: String;
-
-        if self.short {
-            json = serde_json::to_string(&result).map_err_to_string()?;
+impl ListOptions {
+    pub async fn process_json(self, items: &Vec<Metadata>) -> Result<u32, String> {
+        let json = if self.short {
+            serde_json::to_string(items).map_err_to_string()?
         } else {
-            json = serde_json::to_string_pretty(&result).map_err_to_string()?;
-        }
+            serde_json::to_string_pretty(items).map_err_to_string()?
+        };
 
         print!("{}", json);
 
@@ -44,26 +48,19 @@ impl Process for ListOptions {
             }
         };
 
+        let items = read_from_folder(must_exist).await;
+
         if self.json {
-            return self.process_json(must_exist).await;
+            return self.process_json(&items).await;
         }
 
-        for _dir in must_exist {
-            if let Ok(dir) = _dir {
-                if let Some(metadata) = Metadata::for_dir(&dir.path(), true).await {
-                    if self.verbose {
-                        println!("{}", dbg_pls::color(&metadata));
-                    } else if self.short {
-                        println!("{}", &metadata.format_short());
-                    } else {
-                        println!("{}", &metadata.format_human());
-                    }
-                } else {
-                    // todo: better logging
-                    let venv_name = dir.file_name().into_string().unwrap_or_default();
-
-                    eprintln!("! metadata for '{}' could not be read!", venv_name.red());
-                }
+        for metadata in items {
+            if self.verbose {
+                println!("{}", dbg_pls::color(&metadata));
+            } else if self.short {
+                println!("{}", &metadata.format_short());
+            } else {
+                println!("{}", &metadata.format_human());
             }
         }
 
