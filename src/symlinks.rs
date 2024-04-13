@@ -1,14 +1,12 @@
-use std::os::unix::fs as unix_fs;
 use std::path::Path;
 
 use uv_interpreter::PythonEnvironment;
 
 use crate::metadata::{get_bin_dir, Metadata};
 use configparser::ini::Ini;
-use std::fs;
 
-pub fn console_scripts(entry_points_path: &str) -> Result<Vec<String>, String> {
-    let Ok(ini) = fs::read_to_string(entry_points_path) else {
+pub async fn console_scripts(entry_points_path: &str) -> Result<Vec<String>, String> {
+    let Ok(ini) = tokio::fs::read_to_string(entry_points_path).await else {
         return Ok(Vec::new()); // file missing = empty list
     };
 
@@ -24,7 +22,7 @@ pub fn console_scripts(entry_points_path: &str) -> Result<Vec<String>, String> {
     return Ok(console_scripts.keys().map(|k| k.to_string()).collect());
 }
 
-pub fn find_symlinks(meta: &Metadata, venv: &PythonEnvironment) -> Vec<String> {
+pub async fn find_symlinks(meta: &Metadata, venv: &PythonEnvironment) -> Vec<String> {
     let dist_info_fname = format!("{}-{}.dist-info", &meta.name, &meta.installed_version);
     let entrypoints_ini = venv
         .interpreter()
@@ -32,10 +30,10 @@ pub fn find_symlinks(meta: &Metadata, venv: &PythonEnvironment) -> Vec<String> {
         .join(dist_info_fname)
         .join("entry_points.txt");
     let entrypoints_path = entrypoints_ini.to_str().unwrap_or_default();
-    return console_scripts(entrypoints_path).unwrap_or_default();
+    return console_scripts(entrypoints_path).await.unwrap_or_default();
 }
 
-pub fn create_symlink(
+pub async fn create_symlink(
     symlink: &str,
     venv: &Path,
     force: bool,
@@ -56,7 +54,7 @@ pub fn create_symlink(
                 symlink, bin_dir
             ));
         }
-        fs::remove_file(&target_path)
+        tokio::fs::remove_file(&target_path).await
             .map_err(|_| format!("Failed to create symlink {:?}", &target_path))?;
     }
 
@@ -68,7 +66,7 @@ pub fn create_symlink(
         ));
     }
 
-    unix_fs::symlink(&symlink_path, &target_path)
+    tokio::fs::symlink(&symlink_path, &target_path).await
         .map_err(|_| format!("Failed to create symlink {:?}", &target_path))?;
 
     return Ok(true);
@@ -88,18 +86,18 @@ pub fn points_to(symlink_path: &Path, target_path: &Path) -> bool {
         .map_or(false, |link| link.starts_with(&target_path));
 }
 
-pub fn check_symlink(symlink: &str, target_path: &Path) -> bool {
+pub async fn check_symlink(symlink: &str, target_path: &Path) -> bool {
     let symlink_path = get_bin_dir().join(symlink);
 
     return is_symlink(&symlink_path) && points_to(&symlink_path, &target_path);
 }
 
-pub fn remove_symlink(symlink: &str) -> Result<(), String> {
+pub async fn remove_symlink(symlink: &str) -> Result<(), String> {
     let bin_dir = get_bin_dir();
 
     let target_path = bin_dir.join(symlink);
     if target_path.exists() && is_symlink(&target_path) {
-        fs::remove_file(&target_path)
+        tokio::fs::remove_file(&target_path).await
             .map_err(|_| format!("Failed to remove symlink {:?}", &target_path))?;
     };
 

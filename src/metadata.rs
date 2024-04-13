@@ -82,9 +82,9 @@ impl Metadata {
         return store_metadata(&meta_path, &self).await;
     }
 
-    pub fn check_scripts(&mut self, venv_path: &Path) {
+    pub async fn check_scripts(&mut self, venv_path: &Path) {
         for (key, value) in self.scripts.iter_mut() {
-            *value = check_symlink(key, venv_path);
+            *value = check_symlink(key, venv_path).await;
         }
     }
 
@@ -156,7 +156,7 @@ pub async fn load_metadata(filename: &Path, recheck_scripts: bool) -> Result<Met
     let mut metadata: Metadata = rmp_serde::decode::from_slice(&buf[..]).map_err_to_string()?;
 
     if recheck_scripts {
-        let _ = &metadata.check_scripts(&filename.parent().unwrap());
+        let _ = &metadata.check_scripts(&filename.parent().unwrap()).await;
     }
 
     Ok(metadata)

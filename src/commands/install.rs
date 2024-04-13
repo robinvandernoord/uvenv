@@ -107,13 +107,13 @@ pub async fn install_symlinks(
 ) -> Result<(), String> {
     let venv_root = venv.root();
 
-    let symlinks = find_symlinks(&meta, venv);
+    let symlinks = find_symlinks(&meta, venv).await;
 
     let mut results = HashMap::new();
     for symlink in symlinks {
         results.insert(
             symlink.clone(),
-            create_symlink(&symlink, &venv_root, force, binaries).unwrap_or(false),
+            create_symlink(&symlink, &venv_root, force, binaries).await.unwrap_or(false),
         );
     }
 
