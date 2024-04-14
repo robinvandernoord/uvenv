@@ -28,6 +28,37 @@ pub async fn update_metadata(
     Ok(new_version)
 }
 
+fn build_msg(
+    old_version: String,
+    new_version: String,
+    metadata: &mut Metadata,
+) -> Result<String, String> {
+    let mut msg = String::new();
+    if old_version == new_version {
+        msg.push_str(&format!(
+            "🌟 '{}' is already up to date at version {}!",
+            &metadata.name.green(),
+            &new_version.cyan()
+        ));
+        if metadata.requested_version != "" {
+            msg.push_str(&format!("\n💡 This package was installed with a version constraint ({}). If you want to ignore this constraint, use `{}`.",
+            &metadata.requested_version.cyan(),
+
+            format!("uvx upgrade --force {}", &metadata.name).green()
+        ));
+        }
+    } else {
+        msg.push_str(&format!(
+            "🚀 Successfully updated '{}' from version {} to version {}!",
+            metadata.name.green(),
+            old_version.cyan(),
+            new_version.cyan()
+        ));
+    }
+
+    Ok(msg)
+}
+
 pub async fn _upgrade_package(
     requirement: &Requirement,
     metadata: &mut Metadata,
@@ -80,43 +111,7 @@ pub async fn _upgrade_package(
 
     let new_version = update_metadata(metadata, &requirement, &environ, version).await?;
 
-    /*
-     if old_version == new_version:
-        msg = f"🌟 '{package_name}' is already up to date at version {new_version}!"
-        if meta.requested_version:
-            msg += (
-                f"\n💡 This package was installed with a version constraint ({meta.requested_version}). "
-                f"If you want to ignore this constraint, use `uvx upgrade --force {package_name}`."
-            )
-
-    else:
-        msg = f"🚀 Successfully updated '{package_name}' from version {old_version} to version {new_version}!"
-     */
-
-    let mut msg = String::new();
-    if old_version == new_version {
-        msg.push_str(&format!(
-            "🌟 '{}' is already up to date at version {}!",
-            &metadata.name.green(),
-            &new_version.cyan()
-        ));
-        if metadata.requested_version != "" {
-            msg.push_str(&format!("\n💡 This package was installed with a version constraint ({}). If you want to ignore this constraint, use `{}`.",
-            &metadata.requested_version.cyan(),
-
-            format!("uvx upgrade --force {}", &metadata.name).green()
-        ));
-        }
-    } else {
-        msg.push_str(&format!(
-            "🚀 Successfully updated '{}' from version {} to version {}!",
-            metadata.name.green(),
-            old_version.cyan(),
-            new_version.cyan()
-        ));
-    }
-
-    Ok(msg)
+    build_msg(old_version, new_version, metadata)
 }
 
 pub async fn upgrade_package(
