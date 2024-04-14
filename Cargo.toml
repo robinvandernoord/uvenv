@@ -26,7 +26,7 @@ itertools = "0.12.1"
 # fancy
 anstyle = "1.0.6"
 owo-colors = "4.0.0"
-dbg-pls = { version = "0.4.3", features = ["pretty", "colors", "derive"] }
+# dbg-pls = { version = "0.4.3", features = ["pretty", "colors", "derive"] }
 # uv
 # uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.1.31" }
 install-wheel-rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.1.31" }
@@ -37,3 +37,4 @@ pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.1.31" }
 async_http_range_reader = "=0.7.0" # pin to specific version which uv expects
 directories = "5.0.1"
 configparser = "3.0.4"
+tempfile = "3.10.1"

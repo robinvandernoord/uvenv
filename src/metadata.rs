@@ -35,7 +35,7 @@ pub fn get_venv_dir() -> PathBuf {
     return work_dir.join("venvs");
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize, dbg_pls::DebugPls)]
+#[derive(Debug, PartialEq, Deserialize, Serialize)] // dbg_pls::DebugPls
 pub struct Metadata {
     // order is important!!
     pub name: String,
