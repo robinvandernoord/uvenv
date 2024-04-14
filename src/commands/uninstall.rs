@@ -1,3 +1,4 @@
+use crate::pip::parse_requirement;
 use crate::uv::Helpers;
 use owo_colors::OwoColorize;
 
@@ -5,8 +6,6 @@ use crate::cli::{Process, UninstallOptions};
 use crate::metadata::{venv_path, Metadata};
 use crate::symlinks::{find_symlinks, remove_symlink, remove_symlinks};
 use crate::venv::{activate_venv, remove_venv};
-
-use super::install::parse_requirement;
 
 pub async fn uninstall_package(package_name: &str, force: bool) -> Result<String, String> {
     let (requirement, _) = parse_requirement(package_name).await?;

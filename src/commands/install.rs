@@ -1,8 +1,8 @@
 use crate::animate::{show_loading_indicator, AnimationSettings};
 use crate::cli::{InstallOptions, Process};
-use crate::helpers::ResultToString;
+
 use crate::metadata::Metadata;
-use crate::pip::fake_install;
+use crate::pip::parse_requirement;
 use crate::symlinks::{create_symlink, find_symlinks};
 use crate::uv::{uv, uv_get_installed_version, ExtractInfo, Helpers};
 use crate::venv::{activate_venv, create_venv, remove_venv};
@@ -11,7 +11,6 @@ use pep508_rs::Requirement;
 use std::collections::HashMap;
 
 use std::path::{Path, PathBuf};
-use std::str::FromStr;
 
 use uv_interpreter::PythonEnvironment;
 
@@ -127,32 +126,6 @@ pub async fn install_symlinks(
     meta.save(&venv_root.to_path_buf()).await?;
 
     Ok(())
-}
-
-pub async fn try_parse_local_requirement(
-    install_spec: &str,
-) -> Result<(Requirement, String), String> {
-    // fake install and extract the relevant info
-    let promise = fake_install(install_spec);
-
-    let result = show_loading_indicator(
-        promise,
-        format!("Trying to install local package {}", install_spec),
-        AnimationSettings::default(),
-    )
-    .await?;
-
-    let new_install_spec = result.to_spec();
-    let requirement = Requirement::from_str(&new_install_spec).map_err_to_string()?;
-
-    return Ok((requirement, new_install_spec));
-}
-
-pub async fn parse_requirement(install_spec: &str) -> Result<(Requirement, String), String> {
-    match Requirement::from_str(install_spec) {
-        Ok(requirement) => Ok((requirement, String::from(install_spec))),
-        Err(_) => try_parse_local_requirement(install_spec).await,
-    }
 }
 
 pub async fn install_package(

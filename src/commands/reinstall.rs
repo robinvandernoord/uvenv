@@ -2,11 +2,9 @@ use owo_colors::OwoColorize;
 
 use crate::{
     cli::{Process, ReinstallOptions},
-    commands::{
-        install::{install_package, parse_requirement},
-        uninstall::uninstall_package,
-    },
+    commands::{install::install_package, uninstall::uninstall_package},
     metadata::{venv_path, Metadata},
+    pip::parse_requirement,
     uv::ExtractInfo,
 };
 
