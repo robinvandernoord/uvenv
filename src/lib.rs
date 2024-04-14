@@ -3,6 +3,7 @@ mod cli;
 mod commands;
 mod helpers;
 mod metadata;
+mod pip;
 mod symlinks;
 mod uv;
 mod venv;

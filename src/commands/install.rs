@@ -2,6 +2,7 @@ use crate::animate::{show_loading_indicator, AnimationSettings};
 use crate::cli::{InstallOptions, Process};
 use crate::helpers::ResultToString;
 use crate::metadata::Metadata;
+use crate::pip::fake_install;
 use crate::symlinks::{create_symlink, find_symlinks};
 use crate::uv::{uv, uv_get_installed_version, ExtractVersion, Helpers};
 use crate::venv::{activate_venv, create_venv, remove_venv};
@@ -125,6 +126,32 @@ pub async fn install_symlinks(
     Ok(())
 }
 
+pub async fn try_parse_local_requirement(
+    install_spec: &str,
+) -> Result<(Requirement, String), String> {
+    // fake install and extract the relevant info
+    let promise = fake_install(install_spec);
+
+    let result = show_loading_indicator(
+        promise,
+        format!("Trying to install local package {}", install_spec),
+        AnimationSettings::default(),
+    )
+    .await?;
+
+    let new_install_spec = result.to_spec();
+    let requirement = Requirement::from_str(&new_install_spec).map_err_to_string()?;
+
+    return Ok((requirement, new_install_spec));
+}
+
+pub async fn parse_requirement(install_spec: &str) -> Result<(Requirement, String), String> {
+    match Requirement::from_str(install_spec) {
+        Ok(requirement) => Ok((requirement, String::from(install_spec))),
+        Err(_) => try_parse_local_requirement(install_spec).await,
+    }
+}
+
 pub async fn install_package(
     install_spec: &str,
     maybe_venv: Option<&Path>,
@@ -133,7 +160,7 @@ pub async fn install_package(
     inject: Vec<&str>,
     no_cache: bool,
 ) -> Result<String, String> {
-    let requirement = Requirement::from_str(install_spec).map_err_to_string()?;
+    let (requirement, resolved_install_spec) = parse_requirement(install_spec).await?;
 
     let venv_path = ensure_venv(maybe_venv, &requirement, python, force).await?;
     let uv_venv = activate_venv(&venv_path).await?;
@@ -149,7 +176,7 @@ pub async fn install_package(
         &requirement_name,
         &requirement,
         &inject,
-        &install_spec,
+        &resolved_install_spec,
         &uv_venv,
     )
     .await?;

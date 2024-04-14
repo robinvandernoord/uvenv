@@ -1,0 +1,135 @@
+use tempfile::NamedTempFile;
+use tokio::process::Command;
+
+use crate::helpers::ResultToString;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+struct PipDownloadInfo {
+    url: String,
+    dir_info: serde_json::Value, // Since dir_info is an empty object, we can use serde_json::Value here
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct PipMetadata {
+    metadata_version: String,
+    name: String,
+    version: String,
+    classifier: Vec<String>,
+    requires_dist: Vec<String>,
+    requires_python: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct PipInstallItem {
+    download_info: PipDownloadInfo,
+    is_direct: bool,
+    is_yanked: bool,
+    requested: bool,
+    requested_extras: Option<Vec<String>>,
+    metadata: PipMetadata,
+}
+
+// #[derive(Debug, Serialize, Deserialize)]
+// struct Environment {
+//     implementation_name: String,
+//     implementation_version: String,
+//     os_name: String,
+//     platform_machine: String,
+//     platform_release: String,
+//     platform_system: String,
+//     platform_version: String,
+//     python_full_version: String,
+//     platform_python_implementation: String,
+//     python_version: String,
+//     sys_platform: String,
+// }
+
+#[derive(Debug, Serialize, Deserialize)]
+struct PipData {
+    version: String,
+    pip_version: String,
+    install: Vec<PipInstallItem>,
+    // environment: Environment,
+}
+
+pub async fn pip(args: Vec<&str>) -> Result<bool, String> {
+    let err_prefix = format!("pip {}", &args[0]);
+
+    let result = Command::new("pip").args(args).output().await;
+
+    match result {
+        Ok(result) => match result.status.code() {
+            Some(0) => Ok(true),
+            Some(_) | None => {
+                let err = String::from_utf8(result.stderr).unwrap_or_default();
+                Err(format!("{} | {}", err_prefix, err))
+            }
+        },
+        Err(result) => Err(format!("{} | {}", err_prefix, result.to_string())),
+    }
+}
+
+#[derive(Debug)]
+pub struct FakeInstallResult {
+    pub name: String,
+    pub file_url: String,
+}
+
+impl FakeInstallResult {
+    pub fn to_spec(&self) -> String {
+        return format!("{} @ {}", self.name, self.file_url);
+    }
+}
+
+pub async fn fake_install(install_spec: &str) -> Result<FakeInstallResult, String> {
+    let mut args: Vec<&str> = vec![
+        "install",
+        "--no-deps",
+        "--dry-run",
+        "--ignore-installed",
+        "--report",
+    ];
+
+    let tempfile = NamedTempFile::new().map_err_to_string()?;
+    let Some(tempfile_path) = tempfile.as_ref().to_str() else {
+        return Err(String::from(
+            "No temp file could be created for a dry pip install.",
+        ));
+    };
+
+    args.push(tempfile_path); // tmpfile
+    args.push(install_spec); // tmpfile
+
+    pip(args).await?;
+
+    let json_file = tempfile.reopen().map_err_to_string()?;
+
+    let pip_data: PipData = serde_json::from_reader(json_file).map_err_to_string()?;
+
+    let Some(install) = pip_data.install.get(0) else {
+        return Err(String::from(
+            "Failed to find package name for local install.",
+        ));
+    };
+
+    // let empty_vec = Vec::new();
+    // let extras = match &install.requested_extras {
+    //     Some(extras) => extras,
+    //     None => &empty_vec,
+    // };
+
+    let full_name = match &install.requested_extras {
+        Some(extras) => {
+            format!("{}[{}]", &install.metadata.name, extras.join(","))
+        }
+        None => String::from(&install.metadata.name),
+    };
+
+    let file_url = &install.download_info.url;
+
+    Ok(FakeInstallResult {
+        name: full_name,
+        file_url: String::from(file_url),
+    })
+}

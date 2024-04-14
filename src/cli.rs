@@ -83,6 +83,7 @@ pub struct InstallOptions {
     pub no_cache: bool,
     #[clap(long, help = PYTHON_HELP_TEXT)]
     pub python: Option<String>,
+    // todo: 'editable
 }
 
 #[derive(Debug, Parser)]
