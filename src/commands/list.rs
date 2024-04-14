@@ -29,7 +29,7 @@ impl ListOptions {
             serde_json::to_string_pretty(items).map_err_to_string()?
         };
 
-        print!("{}", json);
+        println!("{}", json);
 
         Ok(0)
     }

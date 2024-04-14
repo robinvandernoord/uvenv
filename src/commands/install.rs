@@ -7,6 +7,7 @@ use crate::symlinks::{create_symlink, find_symlinks};
 use crate::uv::{uv, uv_get_installed_version, ExtractInfo, Helpers};
 use crate::venv::{activate_venv, create_venv, remove_venv};
 
+use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
 use std::collections::HashMap;
 
@@ -162,7 +163,8 @@ pub async fn install_package(
 
     Ok(format!(
         "📦 {} ({}) installed!",
-        requirement_name, metadata.installed_version
+        requirement_name,
+        metadata.installed_version.cyan()
     )) // :package:
 }
 
