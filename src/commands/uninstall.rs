@@ -20,7 +20,8 @@ pub async fn uninstall_package(package_name: &str, force: bool) -> Result<String
         } else {
             remove_symlink(&requirement_name).await?;
             return Err(format!(
-                "No virtualenv for '{}', stopping.",
+                "{}: No virtualenv for '{}'.",
+                "Warning".yellow(),
                 &requirement_name.green()
             ));
         }

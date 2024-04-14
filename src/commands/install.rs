@@ -73,6 +73,7 @@ async fn store_metadata(
     requirement_name: &str,
     requirement: &Requirement,
     inject: &Vec<&str>,
+    editable: bool,
     install_spec: &str,
     venv: &PythonEnvironment,
 ) -> Result<Metadata, String> {
@@ -81,8 +82,8 @@ async fn store_metadata(
 
     let python_info = venv.interpreter().markers();
 
+    metadata.editable = editable;
     metadata.install_spec = String::from(install_spec);
-
     metadata.requested_version = requirement.version();
 
     metadata.python = format!(
@@ -92,7 +93,6 @@ async fn store_metadata(
     metadata.python_raw = venv.stdlib_as_string();
 
     metadata.extras = requirement.extras();
-
     metadata.injected = inject.iter().map(|inj| inj.to_string()).collect();
 
     if let Ok(version) = uv_get_installed_version(&requirement.name, Some(venv)) {
@@ -154,6 +154,7 @@ pub async fn install_package(
         &requirement_name,
         &requirement,
         &inject,
+        editable,
         &resolved_install_spec,
         &uv_venv,
     )

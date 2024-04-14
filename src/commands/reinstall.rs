@@ -14,6 +14,7 @@ pub async fn reinstall(
     force: bool,
     with_injected: bool,
     no_cache: bool,
+    editable: bool,
 ) -> Result<String, String> {
     let (requirement, _resolved_install_spec) = parse_requirement(install_spec).await?;
     let requirement_name = requirement.name.to_string();
@@ -31,7 +32,8 @@ pub async fn reinstall(
 
     let current_metadata = Metadata::for_requirement(&requirement, false).await;
 
-    let install_spec_changed = requirement.version() != "" || requirement.extras().len() > 0;
+    let install_spec_changed =
+        editable || requirement.version() != "" || requirement.extras().len() > 0;
 
     if let Err(err) = uninstall_package(&requirement_name, force).await {
         eprintln!(
@@ -53,8 +55,6 @@ pub async fn reinstall(
         Vec::new()
     };
 
-    let editable = false; // todo: new or old editable
-
     return install_package(
         new_install_spec,
         None,
@@ -75,6 +75,7 @@ impl Process for ReinstallOptions {
             self.force,
             !self.without_injected,
             self.no_cache,
+            self.editable,
         )
         .await
         {

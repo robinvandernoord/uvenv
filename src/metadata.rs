@@ -53,9 +53,10 @@ pub struct Metadata {
     pub installed_version: String,
     pub python: String,
     pub python_raw: String,
-
     #[serde(default)]
     pub injected: HashSet<String>,
+    #[serde(default)]
+    pub editable: bool,
 }
 
 impl Metadata {
@@ -70,6 +71,7 @@ impl Metadata {
             python: String::new(),
             python_raw: String::new(),
             injected: HashSet::new(),
+            editable: false,
         };
     }
 
@@ -184,6 +186,10 @@ impl Metadata {
 
         if self.requested_version.len() > 0 {
             result.push_str(&format!(" {}", self.requested_version.cyan()));
+        }
+
+        if self.editable {
+            result.push_str(&format!(" {}", "--editable".yellow()))
         }
 
         result.push_str("\n");

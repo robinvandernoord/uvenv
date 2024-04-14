@@ -123,7 +123,8 @@ pub struct ReinstallOptions {
     pub without_injected: bool,
     #[clap(long, help = "Run without `uv` cache")]
     pub no_cache: bool,
-    // todo: editable
+    #[clap(long, short, help = "(Re)install as editable")]
+    pub editable: bool,
 }
 
 #[derive(Debug, Parser)]
