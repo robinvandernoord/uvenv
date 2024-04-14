@@ -1,23 +1,18 @@
-use crate::helpers::ResultToString;
 use crate::uv::Helpers;
 use owo_colors::OwoColorize;
-use pep508_rs::Requirement;
-use std::str::FromStr;
 
-use crate::metadata::Metadata;
+use crate::cli::{Process, UninstallOptions};
+use crate::metadata::{venv_path, Metadata};
 use crate::symlinks::{find_symlinks, remove_symlink, remove_symlinks};
 use crate::venv::{activate_venv, remove_venv};
-use crate::{
-    cli::{Process, UninstallOptions},
-    metadata::get_venv_dir,
-};
+
+use super::install::parse_requirement;
 
 pub async fn uninstall_package(package_name: &str, force: bool) -> Result<String, String> {
-    let requirement = Requirement::from_str(package_name).map_err_to_string()?;
+    let (requirement, _) = parse_requirement(package_name).await?;
     let requirement_name = requirement.name.to_string();
 
-    let workdir = get_venv_dir();
-    let venv_dir = workdir.join(&requirement_name);
+    let venv_dir = venv_path(&requirement_name);
 
     if !venv_dir.exists() {
         if !force {

@@ -1,5 +1,5 @@
 use crate::helpers::ResultToString;
-use crate::metadata::get_venv_dir;
+use crate::metadata::venv_path;
 use crate::uv::{uv, uv_venv};
 use owo_colors::OwoColorize;
 use pep508_rs::PackageName;
@@ -13,8 +13,7 @@ pub async fn create_venv(
     force: bool,
     with_pip: bool,
 ) -> Result<PathBuf, String> {
-    let venvs = get_venv_dir();
-    let venv_path = venvs.join(&package_name.to_string());
+    let venv_path = venv_path(&package_name.to_string());
 
     if !force && venv_path.exists() {
         return Err(

@@ -111,18 +111,18 @@ pub struct UninstallOptions {
 
 #[derive(Debug, Parser)]
 pub struct ReinstallOptions {
-    package: String,
+    pub package: String,
     #[clap(long, help = PYTHON_HELP_TEXT)]
-    python: Option<String>,
+    pub python: Option<String>,
     #[clap(short = 'f', long, help = "See `install --force`")]
-    force: bool,
+    pub force: bool,
     #[clap(
         long,
         help = "Don't include previously injected libraries in reinstall"
     )]
-    without_injected: bool,
+    pub without_injected: bool,
     #[clap(long, help = "Run without `uv` cache")]
-    no_cache: bool,
+    pub no_cache: bool,
 }
 
 #[derive(Debug, Parser)]

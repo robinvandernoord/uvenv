@@ -35,6 +35,10 @@ pub fn get_venv_dir() -> PathBuf {
     return work_dir.join("venvs");
 }
 
+pub fn venv_path(venv_name: &str) -> PathBuf {
+    return get_venv_dir().join(venv_name);
+}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize)] // dbg_pls::DebugPls
 pub struct Metadata {
     // order is important!!
@@ -139,17 +143,33 @@ impl Metadata {
         return format!("- {} {}", self.name, self.installed_version.cyan());
     }
 
+    pub fn vec_extras(&self) -> Vec<&str> {
+        self.extras.iter().map(|k| k.as_ref()).collect()
+    }
+
+    pub fn vec_injected(&self) -> Vec<&str> {
+        self.injected.iter().map(|k| k.as_ref()).collect()
+    }
+
+    pub fn format_extras(&self) -> String {
+        self.extras
+            .iter()
+            .map(|k| format!("'{}'", k.green()))
+            .join(",")
+    }
+
+    pub fn format_injected(&self) -> String {
+        self.injected
+            .iter()
+            .map(|k| format!("'{}'", k.green()))
+            .join(", ")
+    }
+
     pub fn format_human(&self) -> String {
         let mut result = format!("- {}", self.name); // todo: colorized extra's (+ install spec?)
 
         if self.extras.len() > 0 {
-            result.push_str(&format!(
-                "[{}]",
-                self.extras
-                    .iter()
-                    .map(|k| format!("'{}'", k.green()))
-                    .join(",")
-            ));
+            result.push_str(&format!("[{}]", self.format_extras()));
         }
 
         if self.requested_version.len() > 0 {
@@ -165,11 +185,7 @@ impl Metadata {
             self.python.bright_blue()
         ));
 
-        let formatted_injects = self
-            .injected
-            .iter()
-            .map(|k| format!("'{}'", k.green()))
-            .join(", ");
+        let formatted_injects = self.format_injected();
         result.push_str(&format!(
             "{}Injected Packages: {}\n",
             INDENT, formatted_injects

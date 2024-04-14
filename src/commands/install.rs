@@ -4,7 +4,7 @@ use crate::helpers::ResultToString;
 use crate::metadata::Metadata;
 use crate::pip::fake_install;
 use crate::symlinks::{create_symlink, find_symlinks};
-use crate::uv::{uv, uv_get_installed_version, ExtractVersion, Helpers};
+use crate::uv::{uv, uv_get_installed_version, ExtractInfo, Helpers};
 use crate::venv::{activate_venv, create_venv, remove_venv};
 
 use pep508_rs::Requirement;
@@ -91,11 +91,7 @@ async fn store_metadata(
     );
     metadata.python_raw = venv.stdlib_as_string();
 
-    metadata.extras = requirement
-        .extras
-        .iter()
-        .map(|extra| extra.to_string())
-        .collect();
+    metadata.extras = requirement.extras();
 
     metadata.injected = inject.iter().map(|inj| inj.to_string()).collect();
 

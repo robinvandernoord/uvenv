@@ -98,9 +98,6 @@ pub async fn remove_symlink(symlink: &str) -> Result<(), String> {
     let bin_dir = get_bin_dir();
     let target_path = bin_dir.join(symlink);
 
-    dbg!(&bin_dir);
-    dbg!(&target_path);
-
     if is_symlink(&target_path) {
         tokio::fs::remove_file(&target_path)
             .await

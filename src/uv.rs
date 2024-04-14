@@ -2,7 +2,7 @@ use directories::ProjectDirs;
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
 
-use std::path::PathBuf;
+use std::{collections::HashSet, path::PathBuf};
 use tokio::process::Command;
 
 use uv_cache::Cache;
@@ -86,11 +86,12 @@ impl Helpers for PythonEnvironment {
     }
 }
 
-pub trait ExtractVersion {
+pub trait ExtractInfo {
     fn version(&self) -> String;
+    fn extras(&self) -> HashSet<String>;
 }
 
-impl ExtractVersion for Requirement {
+impl ExtractInfo for Requirement {
     fn version(&self) -> String {
         match self.version_or_url.clone() {
             Some(version) => match version {
@@ -99,5 +100,9 @@ impl ExtractVersion for Requirement {
             },
             None => String::new(),
         }
+    }
+
+    fn extras(&self) -> HashSet<String> {
+        self.extras.iter().map(|extra| extra.to_string()).collect()
     }
 }
