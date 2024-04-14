@@ -20,8 +20,9 @@ async fn _install_package(
     inject: &Vec<&str>,
     no_cache: bool,
     force: bool,
+    editable: bool,
 ) -> Result<bool, String> {
-    let mut args: Vec<&str> = vec!["pip", "install", package_name];
+    let mut args: Vec<&str> = vec!["pip", "install"];
 
     if inject.len() > 0 {
         args.append(&mut inject.clone())
@@ -30,6 +31,12 @@ async fn _install_package(
     if no_cache || force {
         args.push("--no-cache")
     }
+
+    if editable {
+        // -e should go right before package name!
+        args.push("--editable")
+    }
+    args.push(package_name);
 
     let promise = uv(args);
 
@@ -159,13 +166,14 @@ pub async fn install_package(
     force: bool,
     inject: Vec<&str>,
     no_cache: bool,
+    editable: bool,
 ) -> Result<String, String> {
     let (requirement, resolved_install_spec) = parse_requirement(install_spec).await?;
 
     let venv_path = ensure_venv(maybe_venv, &requirement, python, force).await?;
     let uv_venv = activate_venv(&venv_path).await?;
 
-    if let Err(e) = _install_package(install_spec, &inject, no_cache, force).await {
+    if let Err(e) = _install_package(install_spec, &inject, no_cache, force, editable).await {
         let _ = remove_venv(&venv_path).await;
 
         return Err(e);
@@ -198,6 +206,7 @@ impl Process for InstallOptions {
             self.force,
             vec![],
             self.no_cache,
+            self.editable,
         )
         .await
         {
