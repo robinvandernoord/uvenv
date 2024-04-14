@@ -1,8 +1,9 @@
 use std::path::Path;
 
+use pep508_rs::Requirement;
 use uv_interpreter::PythonEnvironment;
 
-use crate::metadata::{get_bin_dir, Metadata};
+use crate::metadata::get_bin_dir;
 use configparser::ini::Ini;
 
 pub async fn console_scripts(entry_points_path: &str) -> Result<Vec<String>, String> {
@@ -22,8 +23,19 @@ pub async fn console_scripts(entry_points_path: &str) -> Result<Vec<String>, Str
     return Ok(console_scripts.keys().map(|k| k.to_string()).collect());
 }
 
-pub async fn find_symlinks(meta: &Metadata, venv: &PythonEnvironment) -> Vec<String> {
-    let dist_info_fname = format!("{}-{}.dist-info", &meta.name, &meta.installed_version);
+pub async fn find_symlinks(
+    requirement: &Requirement,
+    installed_version: &str,
+    venv: &PythonEnvironment,
+) -> Vec<String> {
+    let dist_info_fname = format!(
+        "{}-{}.dist-info",
+        requirement.name.as_dist_info_name(),
+        installed_version
+    );
+
+    dbg!(&dist_info_fname);
+
     let entrypoints_ini = venv
         .interpreter()
         .purelib()

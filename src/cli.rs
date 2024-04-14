@@ -68,6 +68,8 @@ pub struct ListOptions {
     pub verbose: bool,
     #[clap(short, long, help = "Output in JSON format", conflicts_with_all = ["verbose"])]
     pub json: bool,
+
+    pub venv_names: Vec<String>,
 }
 
 #[derive(Debug, Parser)]

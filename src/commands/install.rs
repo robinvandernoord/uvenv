@@ -106,12 +106,13 @@ async fn store_metadata(
 pub async fn install_symlinks(
     meta: &mut Metadata,
     venv: &PythonEnvironment,
+    requirement: &Requirement,
     force: bool,
     binaries: &[&str],
 ) -> Result<(), String> {
     let venv_root = venv.root();
 
-    let symlinks = find_symlinks(&meta, venv).await;
+    let symlinks = find_symlinks(&requirement, &meta.installed_version, venv).await;
 
     let mut results = HashMap::new();
     for symlink in symlinks {
@@ -160,7 +161,7 @@ pub async fn install_package(
     )
     .await?;
 
-    install_symlinks(&mut metadata, &uv_venv, force, &[]).await?;
+    install_symlinks(&mut metadata, &uv_venv, &requirement, force, &[]).await?;
 
     Ok(format!(
         "📦 {} ({}) installed!",

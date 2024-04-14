@@ -22,7 +22,7 @@ async fn read_from_folder(metadata_dir: ReadDir) -> Vec<Metadata> {
 }
 
 impl ListOptions {
-    pub async fn process_json(self, items: &Vec<Metadata>) -> Result<u32, String> {
+    pub async fn process_json(self, items: &Vec<&Metadata>) -> Result<u32, String> {
         let json = if self.short {
             serde_json::to_string(items).map_err_to_string()?
         } else {
@@ -48,13 +48,23 @@ impl Process for ListOptions {
             }
         };
 
-        let items = read_from_folder(must_exist).await;
+        let all_items = read_from_folder(must_exist).await;
+
+        let filtered_items: Vec<&Metadata> = if self.venv_names.len() > 0 {
+            // add filter
+            all_items
+                .iter()
+                .filter(|k| self.venv_names.contains(&k.name))
+                .collect()
+        } else {
+            all_items.iter().collect() // iter collect to make it the same type as the other branch...
+        };
 
         if self.json {
-            return self.process_json(&items).await;
+            return self.process_json(&filtered_items).await;
         }
 
-        for metadata in items {
+        for metadata in filtered_items {
             if self.verbose {
                 // println!("{}", dbg_pls::color(&metadata));
                 println!("{:#?}", &metadata);

@@ -32,7 +32,7 @@ pub async fn uninstall_package(package_name: &str, force: bool) -> Result<String
     let metadata = Metadata::for_requirement(&requirement, false).await;
 
     // symlinks = find_symlinks(package_name, venv_path) or [package_name]
-    let symlinks = find_symlinks(&metadata, &venv).await;
+    let symlinks = find_symlinks(&requirement, &metadata.installed_version, &venv).await;
 
     remove_symlinks(symlinks).await?;
 
