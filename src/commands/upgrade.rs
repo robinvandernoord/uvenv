@@ -4,13 +4,12 @@ use pep508_rs::Requirement;
 use uv_interpreter::PythonEnvironment;
 
 use crate::helpers::StringExt;
+use crate::venv::setup_environ_from_requirement;
 use crate::{
     animate::{show_loading_indicator, AnimationSettings},
     cli::{Process, UpgradeOptions},
-    metadata::{venv_path, Metadata},
-    pip::parse_requirement,
+    metadata::Metadata,
     uv::{uv, uv_get_installed_version, ExtractInfo, Helpers},
-    venv::activate_venv,
 };
 
 pub async fn update_metadata(
@@ -121,20 +120,7 @@ pub async fn upgrade_package(
     skip_injected: bool,
 ) -> Result<String, String> {
     // No virtualenv for '{package_name}', stopping. Use 'uvx install' instead.
-    let (requirement, _) = parse_requirement(install_spec).await?;
-    let requirement_name = requirement.name.to_string();
-
-    let venv_dir = venv_path(&requirement_name);
-
-    if !venv_dir.exists() {
-        return Err(format!(
-            "No virtualenv for '{}', stopping. Use '{}' instead.",
-            install_spec.green(),
-            "uvx install".green(),
-        ));
-    }
-
-    let environ = activate_venv(&venv_dir).await?;
+    let (requirement, environ) = setup_environ_from_requirement(install_spec).await?;
 
     let mut metadata = Metadata::for_requirement(&requirement, true).await;
 

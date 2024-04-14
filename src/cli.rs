@@ -139,17 +139,20 @@ pub struct UpgradeAllOptions {
 
 #[derive(Debug, Parser)]
 pub struct RunuvOptions {
-    venv: String,
+    pub venv: String,
+    pub uv_args: Vec<String>,
 }
 
 #[derive(Debug, Parser)]
 pub struct RunpipOptions {
     venv: String,
+    pip_args: Vec<String>,
 }
 
 #[derive(Debug, Parser)]
 pub struct RunpythonOptions {
     venv: String,
+    python_args: Vec<String>,
 }
 
 #[derive(Debug, Parser)]

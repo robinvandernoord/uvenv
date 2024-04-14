@@ -1,8 +1,9 @@
 use crate::helpers::ResultToString;
 use crate::metadata::venv_path;
+use crate::pip::parse_requirement;
 use crate::uv::{uv, uv_venv};
 use owo_colors::OwoColorize;
-use pep508_rs::PackageName;
+use pep508_rs::{PackageName, Requirement};
 use std::path::PathBuf;
 
 use uv_interpreter::PythonEnvironment;
@@ -47,6 +48,19 @@ pub async fn activate_venv(venv: &PathBuf) -> Result<PythonEnvironment, String> 
 
     return uv_venv(None)
         .ok_or_else(|| format!("Could not properly activate venv '{}'!", venv_str));
+}
+
+pub async fn setup_environ_from_requirement(
+    install_spec: &str,
+) -> Result<(Requirement, PythonEnvironment), String> {
+    let (requirement, _) = parse_requirement(install_spec).await?;
+    let requirement_name = requirement.name.to_string();
+    let venv_dir = venv_path(&requirement_name);
+    if !venv_dir.exists() {
+        return Err(format!("No virtualenv for '{}'.", install_spec.green(),));
+    }
+    let environ = activate_venv(&venv_dir).await?;
+    Ok((requirement, environ))
 }
 
 pub async fn remove_venv(venv: &PathBuf) -> Result<(), String> {

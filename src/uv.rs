@@ -1,6 +1,7 @@
 use directories::ProjectDirs;
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
+use std::{ffi::OsStr, process::Stdio};
 
 use std::{collections::HashSet, path::PathBuf};
 use tokio::process::Command;
@@ -9,8 +10,14 @@ use uv_cache::Cache;
 use uv_installer::SitePackages;
 use uv_interpreter::PythonEnvironment;
 
-pub async fn uv(args: Vec<&str>) -> Result<bool, String> {
-    let err_prefix = format!("uv {}", &args[0]);
+use crate::helpers::ResultToString;
+
+pub async fn uv<S>(args: Vec<S>) -> Result<bool, String>
+where
+    S: AsRef<OsStr>,
+{
+    let subcommand = &args[0].as_ref().to_str().unwrap_or_default(); // cursed but makes it work with both &str and String
+    let err_prefix = format!("uv {}", subcommand);
 
     let result = Command::new("uv").args(args).output().await;
 
@@ -24,6 +31,27 @@ pub async fn uv(args: Vec<&str>) -> Result<bool, String> {
         },
         Err(result) => Err(format!("{} | {}", err_prefix, result.to_string())),
     }
+}
+
+pub async fn run_with_output<S1, S2>(command: S1, args: Vec<S2>) -> Result<(), String>
+where
+    S1: AsRef<OsStr>,
+    S2: AsRef<OsStr>,
+{
+    let mut cmd = Command::new(command);
+    cmd.args(args);
+    cmd.stdout(Stdio::inherit());
+    cmd.stderr(Stdio::inherit());
+    cmd.status().await.map_err_to_string()?;
+
+    Ok(())
+}
+
+pub async fn uv_with_output<S>(args: Vec<S>) -> Result<(), String>
+where
+    S: AsRef<OsStr>,
+{
+    return run_with_output("uv", args).await;
 }
 
 pub fn uv_cache() -> Option<Cache> {
