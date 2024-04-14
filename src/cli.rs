@@ -154,8 +154,8 @@ pub struct RunpythonOptions {
 
 #[derive(Debug, Parser)]
 pub struct EnsurepathOptions {
-    #[clap(long, help = "Force update")]
-    force: bool,
+    #[clap(long, short, help = "Force update")]
+    pub force: bool,
 }
 
 #[derive(Debug, Parser)]

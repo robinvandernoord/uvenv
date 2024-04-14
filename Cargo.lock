@@ -3198,6 +3198,7 @@ version = "0.1.0"
 dependencies = [
  "anstyle",
  "async_http_range_reader",
+ "chrono",
  "clap",
  "configparser",
  "directories",

@@ -38,3 +38,4 @@ async_http_range_reader = "=0.7.0" # pin to specific version which uv expects
 directories = "5.0.1"
 configparser = "3.0.4"
 tempfile = "3.10.1"
+chrono = "0.4.37"
