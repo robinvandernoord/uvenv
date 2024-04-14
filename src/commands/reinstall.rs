@@ -29,10 +29,7 @@ pub async fn reinstall(
         );
     }
 
-    let current_metadata = match Metadata::for_dir(&venv_dir, false).await {
-        Some(m) => m,
-        None => Metadata::find(&requirement),
-    };
+    let current_metadata = Metadata::for_requirement(&requirement, false).await;
 
     let install_spec_changed = requirement.version() != "" || requirement.extras().len() > 0;
 

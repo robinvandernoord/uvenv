@@ -28,10 +28,7 @@ pub async fn uninstall_package(package_name: &str, force: bool) -> Result<String
 
     let venv = activate_venv(&venv_dir).await?;
 
-    let metadata = match Metadata::for_dir(&venv_dir, false).await {
-        Some(m) => m,
-        None => Metadata::find(&requirement),
-    };
+    let metadata = Metadata::for_requirement(&requirement, false).await;
 
     // symlinks = find_symlinks(package_name, venv_path) or [package_name]
     let symlinks = find_symlinks(&metadata, &venv).await;

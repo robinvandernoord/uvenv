@@ -123,6 +123,16 @@ impl Metadata {
         return Metadata::for_file(&meta_path, recheck_scripts).await;
     }
 
+    pub async fn for_requirement(requirement: &Requirement, recheck_scripts: bool) -> Metadata {
+        let requirement_name = requirement.name.to_string();
+        let venv_dir = venv_path(&requirement_name);
+
+        match Metadata::for_dir(&venv_dir, recheck_scripts).await {
+            Some(m) => m,
+            None => Metadata::find(&requirement),
+        }
+    }
+
     pub async fn for_file(filename: &PathBuf, recheck_scripts: bool) -> Option<Metadata> {
         let result = load_metadata(filename, recheck_scripts).await;
         return result.ok();

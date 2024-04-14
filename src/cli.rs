@@ -89,13 +89,13 @@ pub struct InstallOptions {
 
 #[derive(Debug, Parser)]
 pub struct UpgradeOptions {
-    package_name: String,
+    pub package_name: String,
     #[clap(short = 'f', long, help = "Ignore previous version constraint")]
-    force: bool,
+    pub force: bool,
     #[clap(long, help = "Don't also upgrade injected packages")]
-    skip_injected: bool,
+    pub skip_injected: bool,
     #[clap(long, help = "Run without `uv` cache")]
-    no_cache: bool,
+    pub no_cache: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -123,6 +123,7 @@ pub struct ReinstallOptions {
     pub without_injected: bool,
     #[clap(long, help = "Run without `uv` cache")]
     pub no_cache: bool,
+    // todo: editable
 }
 
 #[derive(Debug, Parser)]
