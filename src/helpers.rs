@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 pub trait ResultToString<T, E> {
     fn map_err_to_string(self) -> Result<T, String>;
 }
@@ -22,5 +24,15 @@ impl<S: Into<String>> StringExt for S {
             s.push_str(dflt);
         }
         return s;
+    }
+}
+
+pub trait PathToString {
+    fn to_string(self) -> String;
+}
+
+impl PathToString for PathBuf {
+    fn to_string(self) -> String {
+        self.into_os_string().into_string().unwrap_or_default()
     }
 }

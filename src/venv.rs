@@ -1,4 +1,4 @@
-use crate::helpers::ResultToString;
+use crate::helpers::{PathToString, ResultToString};
 use crate::metadata::venv_path;
 use crate::pip::parse_requirement;
 use crate::uv::{uv, uv_venv};
@@ -66,4 +66,9 @@ pub async fn setup_environ_from_requirement(
 pub async fn remove_venv(venv: &PathBuf) -> Result<(), String> {
     tokio::fs::remove_dir_all(venv).await.map_err_to_string()?;
     Ok(())
+}
+
+pub fn venv_script(venv: &PythonEnvironment, script: &str) -> String {
+    let script_path = venv.scripts().join(script);
+    return script_path.to_string();
 }

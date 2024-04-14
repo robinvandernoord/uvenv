@@ -1,6 +1,8 @@
 use directories::ProjectDirs;
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
+use std::env::{self};
+use std::str::FromStr;
 use std::{ffi::OsStr, process::Stdio};
 
 use std::{collections::HashSet, path::PathBuf};
@@ -10,16 +12,44 @@ use uv_cache::Cache;
 use uv_installer::SitePackages;
 use uv_interpreter::PythonEnvironment;
 
-use crate::helpers::ResultToString;
+use crate::helpers::{PathToString, ResultToString};
+
+pub fn _get_uv_binary() -> Option<String> {
+    // arg 0 = python
+    // arg 1 = .../bin/uvx
+    let Some(binary) = env::args().nth(1) else {
+        return None;
+    };
+
+    let Ok(binary_path) = PathBuf::from_str(&binary) else {
+        return None;
+    };
+    let Some(parent) = binary_path.parent() else {
+        return None;
+    };
+    let uv_binary = parent.join("uv").to_string();
+
+    Some(uv_binary)
+}
+
+pub fn get_uv_binary() -> String {
+    match _get_uv_binary() {
+        Some(bin) => bin,
+        None => String::from("uv"),
+    }
+}
 
 pub async fn uv<S>(args: Vec<S>) -> Result<bool, String>
 where
     S: AsRef<OsStr>,
 {
+    // venv could be unavailable, use 'uv' from this library's requirement
+    let script = get_uv_binary();
+
     let subcommand = &args[0].as_ref().to_str().unwrap_or_default(); // cursed but makes it work with both &str and String
     let err_prefix = format!("uv {}", subcommand);
 
-    let result = Command::new("uv").args(args).output().await;
+    let result = Command::new(script).args(args).output().await;
 
     match result {
         Ok(result) => match result.status.code() {
@@ -51,7 +81,9 @@ pub async fn uv_with_output<S>(args: Vec<S>) -> Result<(), String>
 where
     S: AsRef<OsStr>,
 {
-    return run_with_output("uv", args).await;
+    let script = get_uv_binary();
+
+    return run_with_output(script, args).await;
 }
 
 pub fn uv_cache() -> Option<Cache> {

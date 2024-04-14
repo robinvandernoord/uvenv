@@ -145,14 +145,14 @@ pub struct RunuvOptions {
 
 #[derive(Debug, Parser)]
 pub struct RunpipOptions {
-    venv: String,
-    pip_args: Vec<String>,
+    pub venv: String,
+    pub pip_args: Vec<String>,
 }
 
 #[derive(Debug, Parser)]
 pub struct RunpythonOptions {
-    venv: String,
-    python_args: Vec<String>,
+    pub venv: String,
+    pub python_args: Vec<String>,
 }
 
 #[derive(Debug, Parser)]
