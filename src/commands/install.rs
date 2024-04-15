@@ -64,7 +64,7 @@ async fn ensure_venv(
             } else {
                 Ok(buf)
             }
-        }
+        },
         None => create_venv(&requirement.name, python, force, true).await,
     }
 }
@@ -186,7 +186,7 @@ impl Process for InstallOptions {
             Ok(msg) => {
                 println!("{}", msg);
                 return Ok(0);
-            }
+            },
             Err(msg) => return Err(msg),
         }
     }

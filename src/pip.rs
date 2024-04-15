@@ -70,7 +70,7 @@ pub async fn pip(args: Vec<&str>) -> Result<bool, String> {
             Some(_) | None => {
                 let err = String::from_utf8(result.stderr).unwrap_or_default();
                 Err(format!("{} | {}", err_prefix, err))
-            }
+            },
         },
         Err(result) => Err(format!("{} | {}", err_prefix, result.to_string())),
     }
@@ -128,7 +128,7 @@ pub async fn fake_install(install_spec: &str) -> Result<FakeInstallResult, Strin
     let full_name = match &install.requested_extras {
         Some(extras) => {
             format!("{}[{}]", &install.metadata.name, extras.join(","))
-        }
+        },
         None => String::from(&install.metadata.name),
     };
 
@@ -141,7 +141,7 @@ pub async fn fake_install(install_spec: &str) -> Result<FakeInstallResult, Strin
 }
 
 pub async fn try_parse_local_requirement(
-    install_spec: &str,
+    install_spec: &str
 ) -> Result<(Requirement, String), String> {
     // fake install and extract the relevant info
     let promise = fake_install(install_spec);

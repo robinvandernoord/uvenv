@@ -1,0 +1,4 @@
+edition = "2021"
+fn_params_layout = "vertical"
+match_block_trailing_comma = true
+use_try_shorthand = true

@@ -85,7 +85,10 @@ impl Metadata {
     }
 
     /// try to guess/deduce some values
-    pub fn fill(&mut self, maybe_venv: Option<&PythonEnvironment>) -> Option<()> {
+    pub fn fill(
+        &mut self,
+        maybe_venv: Option<&PythonEnvironment>,
+    ) -> Option<()> {
         let _v: PythonEnvironment;
 
         let venv = match maybe_venv {
@@ -94,7 +97,7 @@ impl Metadata {
                 Some(v) => {
                     _v = v;
                     &_v
-                }
+                },
                 None => return None,
             },
         };
@@ -119,13 +122,19 @@ impl Metadata {
         return Some(());
     }
 
-    pub async fn for_dir(dirname: &PathBuf, recheck_scripts: bool) -> Option<Metadata> {
+    pub async fn for_dir(
+        dirname: &PathBuf,
+        recheck_scripts: bool,
+    ) -> Option<Metadata> {
         let meta_path = dirname.join(".metadata");
 
         return Metadata::for_file(&meta_path, recheck_scripts).await;
     }
 
-    pub async fn for_requirement(requirement: &Requirement, recheck_scripts: bool) -> Metadata {
+    pub async fn for_requirement(
+        requirement: &Requirement,
+        recheck_scripts: bool,
+    ) -> Metadata {
         let requirement_name = requirement.name.to_string();
         let venv_dir = venv_path(&requirement_name);
 
@@ -135,17 +144,26 @@ impl Metadata {
         }
     }
 
-    pub async fn for_file(filename: &PathBuf, recheck_scripts: bool) -> Option<Metadata> {
+    pub async fn for_file(
+        filename: &PathBuf,
+        recheck_scripts: bool,
+    ) -> Option<Metadata> {
         let result = load_metadata(filename, recheck_scripts).await;
         return result.ok();
     }
 
-    pub async fn save(&self, dirname: &PathBuf) -> Result<(), String> {
+    pub async fn save(
+        &self,
+        dirname: &PathBuf,
+    ) -> Result<(), String> {
         let meta_path = dirname.join(".metadata");
         return store_metadata(&meta_path, &self).await;
     }
 
-    pub async fn check_scripts(&mut self, venv_path: &Path) {
+    pub async fn check_scripts(
+        &mut self,
+        venv_path: &Path,
+    ) {
         for (key, value) in self.scripts.iter_mut() {
             *value = check_symlink(key, venv_path).await;
         }
@@ -225,7 +243,10 @@ impl Metadata {
     }
 }
 
-pub async fn load_metadata(filename: &Path, recheck_scripts: bool) -> Result<Metadata, String> {
+pub async fn load_metadata(
+    filename: &Path,
+    recheck_scripts: bool,
+) -> Result<Metadata, String> {
     // Open the msgpack file
     let mut file = File::open(filename).await.map_err_to_string()?;
 
@@ -242,7 +263,10 @@ pub async fn load_metadata(filename: &Path, recheck_scripts: bool) -> Result<Met
     Ok(metadata)
 }
 
-pub async fn store_metadata(filename: &Path, metadata: &Metadata) -> Result<(), String> {
+pub async fn store_metadata(
+    filename: &Path,
+    metadata: &Metadata,
+) -> Result<(), String> {
     // Open the msgpack file
     let mut file = File::create(filename).await.map_err_to_string()?;
 

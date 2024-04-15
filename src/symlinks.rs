@@ -98,14 +98,20 @@ pub fn is_symlink(symlink_path: &Path) -> bool {
         .unwrap_or(false);
 }
 
-pub fn points_to(symlink_path: &Path, target_path: &Path) -> bool {
+pub fn points_to(
+    symlink_path: &Path,
+    target_path: &Path,
+) -> bool {
     return symlink_path
         .read_link()
         .ok()
         .map_or(false, |link| link.starts_with(&target_path));
 }
 
-pub async fn check_symlink(symlink: &str, target_path: &Path) -> bool {
+pub async fn check_symlink(
+    symlink: &str,
+    target_path: &Path,
+) -> bool {
     let symlink_path = get_bin_dir().join(symlink);
 
     return is_symlink(&symlink_path) && points_to(&symlink_path, &target_path);

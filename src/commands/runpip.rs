@@ -4,7 +4,10 @@ use crate::{
     venv::{setup_environ_from_requirement, venv_script},
 };
 
-pub async fn runpip(venv_name: &str, pip_args: Vec<String>) -> Result<String, String> {
+pub async fn runpip(
+    venv_name: &str,
+    pip_args: Vec<String>,
+) -> Result<String, String> {
     let (_, env) = setup_environ_from_requirement(venv_name).await?;
 
     let script = venv_script(&env, "pip");
@@ -20,7 +23,7 @@ impl Process for RunpipOptions {
             Ok(msg) => {
                 println!("{}", msg);
                 return Ok(0);
-            }
+            },
             Err(msg) => return Err(msg),
         }
     }

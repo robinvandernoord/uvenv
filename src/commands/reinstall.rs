@@ -82,7 +82,7 @@ impl Process for ReinstallOptions {
             Ok(msg) => {
                 println!("{}", msg);
                 return Ok(0);
-            }
+            },
             Err(msg) => return Err(msg),
         }
     }

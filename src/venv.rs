@@ -51,7 +51,7 @@ pub async fn activate_venv(venv: &PathBuf) -> Result<PythonEnvironment, String> 
 }
 
 pub async fn setup_environ_from_requirement(
-    install_spec: &str,
+    install_spec: &str
 ) -> Result<(Requirement, PythonEnvironment), String> {
     let (requirement, _) = parse_requirement(install_spec).await?;
     let requirement_name = requirement.name.to_string();
@@ -68,7 +68,10 @@ pub async fn remove_venv(venv: &PathBuf) -> Result<(), String> {
     Ok(())
 }
 
-pub fn venv_script(venv: &PythonEnvironment, script: &str) -> String {
+pub fn venv_script(
+    venv: &PythonEnvironment,
+    script: &str,
+) -> String {
     let script_path = venv.scripts().join(script);
     return script_path.to_string();
 }

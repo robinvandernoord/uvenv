@@ -7,7 +7,10 @@ use crate::metadata::{venv_path, Metadata};
 use crate::symlinks::{find_symlinks, remove_symlink, remove_symlinks};
 use crate::venv::{activate_venv, remove_venv};
 
-pub async fn uninstall_package(package_name: &str, force: bool) -> Result<String, String> {
+pub async fn uninstall_package(
+    package_name: &str,
+    force: bool,
+) -> Result<String, String> {
     let (requirement, _) = parse_requirement(package_name).await?;
     let requirement_name = requirement.name.to_string();
 
@@ -55,7 +58,7 @@ impl Process for UninstallOptions {
             Ok(msg) => {
                 println!("{}", msg);
                 return Ok(0);
-            }
+            },
             Err(msg) => return Err(msg),
         }
     }

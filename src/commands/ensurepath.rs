@@ -19,7 +19,10 @@ pub fn now() -> String {
     }
 }
 
-pub async fn append(file: &PathBuf, text: String) -> Result<(), String> {
+pub async fn append(
+    file: &PathBuf,
+    text: String,
+) -> Result<(), String> {
     let mut file = OpenOptions::new()
         .append(true)
         .open(file)
@@ -31,7 +34,10 @@ pub async fn append(file: &PathBuf, text: String) -> Result<(), String> {
     Ok(())
 }
 
-pub async fn add_to_bashrc(text: &str, with_comment: bool) -> Result<(), String> {
+pub async fn add_to_bashrc(
+    text: &str,
+    with_comment: bool,
+) -> Result<(), String> {
     /*    with (Path.home() / ".bashrc").resolve().open("a") as f:
            now = str(datetime.now()).split(".")[0]
            final_text = "\n"

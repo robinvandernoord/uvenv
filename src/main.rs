@@ -23,7 +23,7 @@ async fn main() {
         Err(msg) => {
             eprintln!("Something went wrong | {}", msg);
             1
-        }
+        },
     };
 
     std::process::exit(code);

@@ -68,13 +68,16 @@ where
             Some(_) | None => {
                 let err = String::from_utf8(result.stderr).unwrap_or_default();
                 Err(format!("{} | {}", err_prefix, err))
-            }
+            },
         },
         Err(result) => Err(format!("{} | {}", err_prefix, result.to_string())),
     }
 }
 
-pub async fn run_with_output<S1, S2>(command: S1, args: Vec<S2>) -> Result<(), String>
+pub async fn run_with_output<S1, S2>(
+    command: S1,
+    args: Vec<S2>,
+) -> Result<(), String>
 where
     S1: AsRef<OsStr>,
     S2: AsRef<OsStr>,
@@ -125,7 +128,7 @@ pub fn uv_get_installed_version(
         None => {
             _venv = uv_venv(None).ok_or_else(|| format!("{}", "Failed to set up venv!".red()))?;
             SitePackages::from_executable(&_venv)
-        }
+        },
     }
     .ok();
 

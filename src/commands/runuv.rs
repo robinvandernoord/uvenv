@@ -4,7 +4,10 @@ use crate::{
     venv::setup_environ_from_requirement,
 };
 
-pub async fn runuv(venv_name: &str, uv_args: Vec<String>) -> Result<String, String> {
+pub async fn runuv(
+    venv_name: &str,
+    uv_args: Vec<String>,
+) -> Result<String, String> {
     setup_environ_from_requirement(venv_name).await?;
 
     uv_with_output(uv_args).await?;
@@ -18,7 +21,7 @@ impl Process for RunuvOptions {
             Ok(msg) => {
                 println!("{}", msg);
                 return Ok(0);
-            }
+            },
             Err(msg) => return Err(msg),
         }
     }

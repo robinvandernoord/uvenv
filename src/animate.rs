@@ -33,12 +33,15 @@ fn get_spinner_chars(style: &AnimationStyle) -> Vec<char> {
     match style {
         AnimationStyle::Classic => {
             return vec!['|', '/', '-', '\\'];
-        }
+        },
         AnimationStyle::Modern => return vec!['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'],
     }
 }
 
-pub async fn animation(message: String, style: AnimationSettings) {
+pub async fn animation(
+    message: String,
+    style: AnimationSettings,
+) {
     let spinner_chars = get_spinner_chars(&style.style);
     let _order = &style.order;
     let mut idx = 0;
@@ -46,10 +49,10 @@ pub async fn animation(message: String, style: AnimationSettings) {
         match &_order {
             AnimationOrder::Before => {
                 eprint!("\r{} {} ", &spinner_chars[idx], &message);
-            }
+            },
             AnimationOrder::After => {
                 eprint!("\r{} {} ", &message, &spinner_chars[idx]);
-            }
+            },
         };
 
         idx = (idx + 1) % spinner_chars.len();
