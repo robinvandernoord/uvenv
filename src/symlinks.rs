@@ -40,7 +40,14 @@ pub async fn find_symlinks(
         .join(dist_info_fname)
         .join("entry_points.txt");
     let entrypoints_path = entrypoints_ini.to_str().unwrap_or_default();
-    return console_scripts(entrypoints_path).await.unwrap_or_default();
+    let scripts = console_scripts(entrypoints_path).await.unwrap_or_default();
+
+    if scripts.len() > 0 {
+        scripts
+    } else {
+        // no scripts found, use requirement name as fallback (e.g. for `uv`)
+        vec![requirement.name.to_string()]
+    }
 }
 
 pub async fn create_symlink(
