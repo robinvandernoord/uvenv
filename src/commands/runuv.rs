@@ -13,7 +13,7 @@ pub async fn runuv(venv_name: &str, uv_args: Vec<String>) -> Result<String, Stri
 }
 
 impl Process for RunuvOptions {
-    async fn process(self) -> Result<u32, String> {
+    async fn process(self) -> Result<i32, String> {
         match runuv(&self.venv, self.uv_args).await {
             Ok(msg) => {
                 println!("{}", msg);

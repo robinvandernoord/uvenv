@@ -136,7 +136,7 @@ pub async fn upgrade_package(
 }
 
 impl Process for UpgradeOptions {
-    async fn process(self) -> Result<u32, String> {
+    async fn process(self) -> Result<i32, String> {
         match upgrade_package(
             &self.package_name,
             self.force,

@@ -68,7 +68,7 @@ pub async fn reinstall(
 }
 
 impl Process for ReinstallOptions {
-    async fn process(self) -> Result<u32, String> {
+    async fn process(self) -> Result<i32, String> {
         match reinstall(
             &self.package,
             self.python,

@@ -18,11 +18,4 @@ dependencies = [
 ]
 
 [tool.maturin]
-features = ["pyo3/extension-module"]
-# bindings = "bin" 
-# bindings = "pyo3" 
-strip = true 
-
-[project.scripts]
-# uvx = "uvx:main"
-uvx = "uvx:main_py"
+bindings = "bin"

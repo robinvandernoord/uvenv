@@ -75,7 +75,7 @@ pub async fn ensure_path(force: bool) -> Result<(), String> {
 }
 
 impl Process for EnsurepathOptions {
-    async fn process(self) -> Result<u32, String> {
+    async fn process(self) -> Result<i32, String> {
         ensure_path(self.force).await?;
         return Ok(0);
     }

@@ -16,9 +16,11 @@ use uv_interpreter::PythonEnvironment;
 use crate::helpers::{PathToString, ResultToString};
 
 pub async fn _get_uv_binary() -> Option<String> {
+    // if bundled with entrypoint:
     // arg 0 = python
-    // arg 1 = .../bin/uvx
-    let Some(binary) = env::args().nth(1) else {
+    // arg 1 = .../bin/uvx (arg 0 otherwise)
+
+    let Some(binary) = env::args().nth(0) else {
         return None;
     };
 

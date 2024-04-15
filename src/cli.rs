@@ -1,5 +1,3 @@
-use std::env;
-
 use clap::{Parser, Subcommand};
 
 pub fn get_styles() -> clap::builder::Styles {
@@ -41,7 +39,7 @@ pub fn get_styles() -> clap::builder::Styles {
 }
 
 pub trait Process {
-    async fn process(self) -> Result<u32, String>;
+    async fn process(self) -> Result<i32, String>;
 }
 
 #[derive(Parser, Debug)]
@@ -51,11 +49,11 @@ pub struct Args {
     pub cmd: Commands,
 }
 
-impl Args {
-    pub fn parse_from_python() -> Args {
-        return Args::parse_from(env::args().skip(1)); // first argument is now 'python' instead of 'uvx' so skip it
-    }
-}
+// impl Args {
+//     pub fn parse_from_python() -> Args {
+//         return Args::parse_from(env::args().skip(1)); // first argument is now 'python' instead of 'uvx' so skip it
+//     }
+// }
 
 const PYTHON_HELP_TEXT: &str =
     "Python version or executable to use, e.g. `3.12`, `python3.12`, `/usr/bin/python3.12`";
@@ -192,7 +190,7 @@ pub enum Commands {
 }
 
 impl Process for Commands {
-    async fn process(self) -> Result<u32, String> {
+    async fn process(self) -> Result<i32, String> {
         return match self {
             Commands::List(opts) => opts.process().await,
             Commands::Install(opts) => opts.process().await,

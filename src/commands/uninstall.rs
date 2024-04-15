@@ -50,7 +50,7 @@ pub async fn uninstall_package(package_name: &str, force: bool) -> Result<String
 }
 
 impl Process for UninstallOptions {
-    async fn process(self) -> Result<u32, String> {
+    async fn process(self) -> Result<i32, String> {
         match uninstall_package(&self.package_name, self.force).await {
             Ok(msg) => {
                 println!("{}", msg);

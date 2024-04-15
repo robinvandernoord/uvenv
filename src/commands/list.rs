@@ -22,7 +22,7 @@ async fn read_from_folder(metadata_dir: ReadDir) -> Vec<Metadata> {
 }
 
 impl ListOptions {
-    pub async fn process_json(self, items: &Vec<&Metadata>) -> Result<u32, String> {
+    pub async fn process_json(self, items: &Vec<&Metadata>) -> Result<i32, String> {
         let json = if self.short {
             serde_json::to_string(items).map_err_to_string()?
         } else {
@@ -36,7 +36,7 @@ impl ListOptions {
 }
 
 impl Process for ListOptions {
-    async fn process(self) -> Result<u32, String> {
+    async fn process(self) -> Result<i32, String> {
         let venv_dir_path = get_venv_dir();
         let possibly_missing = std::fs::read_dir(&venv_dir_path);
 

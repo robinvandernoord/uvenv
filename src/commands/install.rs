@@ -171,7 +171,7 @@ pub async fn install_package(
 }
 
 impl Process for InstallOptions {
-    async fn process(self) -> Result<u32, String> {
+    async fn process(self) -> Result<i32, String> {
         match install_package(
             &self.package_name,
             None,
