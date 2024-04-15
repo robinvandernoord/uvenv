@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use clap_complete::Shell;
 
 pub fn get_styles() -> clap::builder::Styles {
     clap::builder::Styles::styled()
@@ -45,6 +46,9 @@ pub trait Process {
 #[derive(Parser, Debug)]
 #[clap(version, styles=get_styles())]
 pub struct Args {
+    #[arg(long = "generate", value_enum)]
+    generator: Option<Shell>,
+
     #[clap(subcommand)]
     pub cmd: Commands,
 }
@@ -127,6 +131,25 @@ pub struct ReinstallOptions {
     pub editable: bool,
 }
 
+
+#[derive(Debug, Parser)]
+pub struct ReinstallAllOptions {
+    #[clap(long, help = PYTHON_HELP_TEXT)]
+    pub python: Option<String>,
+    #[clap(short = 'f', long, help = "See `install --force`")]
+    pub force: bool,
+    #[clap(
+        long,
+        help = "Don't include previously injected libraries in reinstall"
+    )]
+    pub without_injected: bool,
+    #[clap(long, help = "Run without `uv` cache")]
+    pub no_cache: bool,
+    #[clap(long, short, help = "(Re)install as editable")]
+    pub editable: bool,
+}
+
+
 #[derive(Debug, Parser)]
 pub struct UpgradeAllOptions {
     #[clap(short = 'f', long, help = "Ignore previous version constraint")]
@@ -135,6 +158,27 @@ pub struct UpgradeAllOptions {
     skip_injected: bool,
     #[clap(long, help = "Run without `uv` cache")]
     no_cache: bool,
+}
+
+
+#[derive(Debug, Parser)]
+pub struct UninstallAllOptions {
+
+}
+
+#[derive(Debug, Parser)]
+pub struct RunOptions {
+    pub package_name: String,
+    #[clap(
+        short = 'f',
+        long,
+        help = "Overwrite currently installed executables with the same name (in ~/tmp/bin)"
+    )]
+    pub force: bool,
+    #[clap(long, help = "Run without `uv` cache")]
+    pub no_cache: bool,
+    #[clap(long, help = PYTHON_HELP_TEXT)]
+    pub python: Option<String>,
 }
 
 #[derive(Debug, Parser)]
@@ -175,6 +219,17 @@ pub struct InjectOptions {
     #[clap(long, help = "Run without `uv` cache")]
     pub no_cache: bool,
 }
+#[derive(Debug, Parser)]
+pub struct UnInjectOptions {
+    pub outof: String,
+    pub package_specs: Vec<String>,
+}
+
+#[derive(Debug, Parser)]
+pub struct CompletionsOptions {
+    #[clap(long, short, help = "Add to ~/.bashrc")]
+    pub install: bool,
+} 
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
@@ -182,14 +237,19 @@ pub enum Commands {
     Install(InstallOptions),
     Upgrade(UpgradeOptions),
     Uninstall(UninstallOptions),
+    UninstallAll(UninstallAllOptions),
     Reinstall(ReinstallOptions),
+    ReinstallAll(ReinstallAllOptions),
     Inject(InjectOptions),
+    Uninject(UnInjectOptions),
     UpgradeAll(UpgradeAllOptions),
+    Run(RunOptions),
     Runuv(RunuvOptions),
     Runpip(RunpipOptions),
     Runpython(RunpythonOptions),
     Ensurepath(EnsurepathOptions),
     SelfUpdate(SelfUpdateOptions),
+    Completions(CompletionsOptions),
 }
 
 impl Process for Commands {
@@ -207,6 +267,11 @@ impl Process for Commands {
             Commands::Runpython(opts) => opts.process().await,
             Commands::Ensurepath(opts) => opts.process().await,
             Commands::SelfUpdate(opts) => opts.process().await,
+            Commands::UninstallAll(opts) => opts.process().await,
+            Commands::ReinstallAll(opts) => opts.process().await,
+            Commands::Uninject(opts) => opts.process().await,
+            Commands::Completions(opts) => opts.process().await,
+            Commands::Run(opts) => opts.process().await,
         };
     }
 }

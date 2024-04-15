@@ -15,6 +15,7 @@ use crate::cli::{Args, Process};
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
+
     // If bundled via an entrypoint, the first argument is 'python' so skip it:
     // let args = Args::parse_from_python();
 
