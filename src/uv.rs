@@ -2,7 +2,7 @@ use directories::ProjectDirs;
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
 use std::env::{self};
-use std::str::FromStr;
+
 use std::{ffi::OsStr, process::Stdio};
 use tokio::fs::canonicalize;
 
@@ -18,13 +18,17 @@ use crate::helpers::{PathToString, ResultToString};
 pub async fn _get_uv_binary() -> Option<String> {
     // if bundled with entrypoint:
     // arg 0 = python
-    // arg 1 = .../bin/uvx (arg 0 otherwise)
+    // arg 1 = .../bin/uvx
+    // elif bundled as bin, use current_exe (because arg 0 is just 'uvx' instead of a path):
 
-    let Some(binary) = env::args().nth(0) else {
-        return None;
-    };
+    // let Some(binary) = env::args().nth(0) else {
+    //     return None;
+    // };
+    // let Ok(binary_path) = PathBuf::from_str(&binary) else {
+    //     return None;
+    // };
 
-    let Ok(binary_path) = PathBuf::from_str(&binary) else {
+    let Ok(binary_path) = &env::current_exe() else {
         return None;
     };
 
@@ -77,7 +81,7 @@ where
 pub async fn run_with_output<S1, S2>(
     command: S1,
     args: Vec<S2>,
-) -> Result<(), String>
+) -> Result<i32, String>
 where
     S1: AsRef<OsStr>,
     S2: AsRef<OsStr>,
@@ -86,12 +90,12 @@ where
     cmd.args(args);
     cmd.stdout(Stdio::inherit());
     cmd.stderr(Stdio::inherit());
-    cmd.status().await.map_err_to_string()?;
+    let code = cmd.status().await.map_err_to_string()?;
 
-    Ok(())
+    Ok(code.code().unwrap_or(-1))
 }
 
-pub async fn uv_with_output<S>(args: Vec<S>) -> Result<(), String>
+pub async fn uv_with_output<S>(args: Vec<S>) -> Result<i32, String>
 where
     S: AsRef<OsStr>,
 {

@@ -169,8 +169,11 @@ pub struct SelfUpdateOptions {
 
 #[derive(Debug, Parser)]
 pub struct InjectOptions {
-    into: String,
-    package_specs: Vec<String>,
+    pub into: String,
+    pub package_specs: Vec<String>,
+
+    #[clap(long, help = "Run without `uv` cache")]
+    pub no_cache: bool,
 }
 
 #[derive(Subcommand, Debug)]
