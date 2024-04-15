@@ -155,6 +155,7 @@ impl Metadata {
         return format!("- {} {}", self.name, self.installed_version.cyan());
     }
 
+    #[allow(dead_code)]
     pub fn vec_extras(&self) -> Vec<&str> {
         self.extras.iter().map(|k| k.as_ref()).collect()
     }

@@ -4,6 +4,7 @@ use pep508_rs::{PackageName, Requirement};
 use std::env::{self};
 use std::str::FromStr;
 use std::{ffi::OsStr, process::Stdio};
+use tokio::fs::canonicalize;
 
 use std::{collections::HashSet, path::PathBuf};
 use tokio::process::Command;
@@ -14,7 +15,7 @@ use uv_interpreter::PythonEnvironment;
 
 use crate::helpers::{PathToString, ResultToString};
 
-pub fn _get_uv_binary() -> Option<String> {
+pub async fn _get_uv_binary() -> Option<String> {
     // arg 0 = python
     // arg 1 = .../bin/uvx
     let Some(binary) = env::args().nth(1) else {
@@ -24,18 +25,26 @@ pub fn _get_uv_binary() -> Option<String> {
     let Ok(binary_path) = PathBuf::from_str(&binary) else {
         return None;
     };
-    let Some(parent) = binary_path.parent() else {
+
+    let Ok(real_path) = canonicalize(&binary_path).await else {
         return None;
     };
+
+    let Some(parent) = real_path.parent() else {
+        return None;
+    };
+
+    // resolve symlinks etc:
+
     let uv_binary = parent.join("uv").to_string();
 
     Some(uv_binary)
 }
 
-pub fn get_uv_binary() -> String {
-    match _get_uv_binary() {
+pub async fn get_uv_binary() -> String {
+    match _get_uv_binary().await {
         Some(bin) => bin,
-        None => String::from("uv"),
+        None => String::from("uv"), // fallback, hope 'uv' is available in global scope
     }
 }
 
@@ -44,7 +53,7 @@ where
     S: AsRef<OsStr>,
 {
     // venv could be unavailable, use 'uv' from this library's requirement
-    let script = get_uv_binary();
+    let script = get_uv_binary().await;
 
     let subcommand = &args[0].as_ref().to_str().unwrap_or_default(); // cursed but makes it work with both &str and String
     let err_prefix = format!("uv {}", subcommand);
@@ -81,7 +90,7 @@ pub async fn uv_with_output<S>(args: Vec<S>) -> Result<(), String>
 where
     S: AsRef<OsStr>,
 {
-    let script = get_uv_binary();
+    let script = get_uv_binary().await;
 
     return run_with_output(script, args).await;
 }

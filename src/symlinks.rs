@@ -34,8 +34,6 @@ pub async fn find_symlinks(
         installed_version
     );
 
-    dbg!(&dist_info_fname);
-
     let entrypoints_ini = venv
         .interpreter()
         .purelib()
