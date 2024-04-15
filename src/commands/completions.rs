@@ -1,17 +1,23 @@
-use std::io;
+use crate::cli::{CompletionsOptions, Process};
 
-use crate::cli::{Process, CompletionsOptions};
-use clap::Command;
-use clap_complete::{generate, Generator, Shell};
+use owo_colors::OwoColorize;
 
-fn print_completions<G: Generator>(gen: G, cmd: &mut Command) {
-    generate(gen, cmd, cmd.get_name().to_string(), &mut io::stdout());
-}
-
+use super::ensurepath::add_to_bashrc;
 
 impl Process for CompletionsOptions {
     async fn process(self) -> Result<i32, String> {
-        // print_completions();
-        return Ok(2);
+        let for_bash = r#"eval "$(uvx --generate=bash completions)""#;
+
+        if self.install {
+            add_to_bashrc(for_bash, true).await?;
+        } else {
+            eprintln!(
+                "Tip: place this line in your ~/.bashrc or run with '{}' to do this automatically!",
+                "--install".green()
+            );
+            println!("{}", for_bash);
+        }
+
+        return Ok(0);
     }
 }

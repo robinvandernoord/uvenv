@@ -47,7 +47,7 @@ pub trait Process {
 #[clap(version, styles=get_styles())]
 pub struct Args {
     #[arg(long = "generate", value_enum)]
-    generator: Option<Shell>,
+    pub generator: Option<Shell>,
 
     #[clap(subcommand)]
     pub cmd: Commands,
@@ -131,7 +131,6 @@ pub struct ReinstallOptions {
     pub editable: bool,
 }
 
-
 #[derive(Debug, Parser)]
 pub struct ReinstallAllOptions {
     #[clap(long, help = PYTHON_HELP_TEXT)]
@@ -149,7 +148,6 @@ pub struct ReinstallAllOptions {
     pub editable: bool,
 }
 
-
 #[derive(Debug, Parser)]
 pub struct UpgradeAllOptions {
     #[clap(short = 'f', long, help = "Ignore previous version constraint")]
@@ -160,11 +158,8 @@ pub struct UpgradeAllOptions {
     no_cache: bool,
 }
 
-
 #[derive(Debug, Parser)]
-pub struct UninstallAllOptions {
-
-}
+pub struct UninstallAllOptions {}
 
 #[derive(Debug, Parser)]
 pub struct RunOptions {
@@ -229,7 +224,8 @@ pub struct UnInjectOptions {
 pub struct CompletionsOptions {
     #[clap(long, short, help = "Add to ~/.bashrc")]
     pub install: bool,
-} 
+    // todo: support others than bash
+}
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
