@@ -15,19 +15,7 @@ use uv_interpreter::PythonEnvironment;
 
 use crate::helpers::{PathToString, ResultToString};
 
-pub async fn _get_uv_binary() -> Option<String> {
-    // if bundled with entrypoint:
-    // arg 0 = python
-    // arg 1 = .../bin/uvx
-    // elif bundled as bin, use current_exe (because arg 0 is just 'uvx' instead of a path):
-
-    // let Some(binary) = env::args().nth(0) else {
-    //     return None;
-    // };
-    // let Ok(binary_path) = PathBuf::from_str(&binary) else {
-    //     return None;
-    // };
-
+pub async fn find_sibling(name: &str) -> Option<PathBuf> {
     let Ok(binary_path) = &env::current_exe() else {
         return None;
     };
@@ -42,9 +30,25 @@ pub async fn _get_uv_binary() -> Option<String> {
 
     // resolve symlinks etc:
 
-    let uv_binary = parent.join("uv").to_string();
+    let binary = parent.join(name);
 
-    Some(uv_binary)
+    Some(binary)
+}
+
+pub async fn _get_uv_binary() -> Option<String> {
+    // if bundled with entrypoint:
+    // arg 0 = python
+    // arg 1 = .../bin/uvx
+    // elif bundled as bin, use current_exe (because arg 0 is just 'uvx' instead of a path):
+
+    // let Some(binary) = env::args().nth(0) else {
+    //     return None;
+    // };
+    // let Ok(binary_path) = PathBuf::from_str(&binary) else {
+    //     return None;
+    // };
+
+    return find_sibling("uv").await.map(|buf| buf.to_string());
 }
 
 pub async fn get_uv_binary() -> String {

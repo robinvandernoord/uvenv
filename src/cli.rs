@@ -211,8 +211,8 @@ pub struct EnsurepathOptions {
 
 #[derive(Debug, Parser)]
 pub struct SelfUpdateOptions {
-    #[clap(long, help = "Update with uv")]
-    with_uv: Option<bool>,
+    #[clap(long, help = "Update without also updating uv")]
+    pub without_uv: bool,
 }
 
 #[derive(Debug, Parser)]

@@ -197,7 +197,7 @@ impl Metadata {
     }
 
     pub fn format_human(&self) -> String {
-        let mut result = format!("- {}", self.name); // todo: colorized extra's (+ install spec?)
+        let mut result = format!("- {}", self.name);
 
         if self.extras.len() > 0 {
             result.push_str(&format!("[{}]", self.format_extras()));

@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::path::Path;
 use subprocess::Exec;
 
@@ -7,9 +8,9 @@ use crate::{
     venv::setup_environ_from_requirement,
 };
 
-pub fn process_subprocess(
+pub fn process_subprocess<S: AsRef<OsStr>>(
     exec_path: &Path,
-    args: &Vec<String>,
+    args: &Vec<S>,
 ) -> Result<i32, String> {
     Ok(
         match Exec::cmd(exec_path).args(args).join().map_err_to_string()? {
