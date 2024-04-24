@@ -30,12 +30,12 @@ impl AnimationSettings {
 }
 
 fn get_spinner_chars(style: &AnimationStyle) -> Vec<char> {
-    match style {
+    return match style {
         AnimationStyle::Classic => {
-            return vec!['|', '/', '-', '\\'];
+            vec!['|', '/', '-', '\\']
         },
-        AnimationStyle::Modern => return vec!['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'],
-    }
+        AnimationStyle::Modern => vec!['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'],
+    };
 }
 
 pub async fn animation(

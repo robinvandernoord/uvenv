@@ -161,11 +161,11 @@ pub struct ReinstallAllOptions {
 #[derive(Debug, Parser)]
 pub struct UpgradeAllOptions {
     #[clap(short = 'f', long, help = "Ignore previous version constraint")]
-    force: bool,
+    pub force: bool,
     #[clap(long, help = "Don't also upgrade injected packages")]
-    skip_injected: bool,
+    pub skip_injected: bool,
     #[clap(long, help = "Run without `uv` cache")]
-    no_cache: bool,
+    pub no_cache: bool,
 }
 
 #[derive(Debug, Parser)]

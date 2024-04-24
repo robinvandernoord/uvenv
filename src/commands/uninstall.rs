@@ -54,12 +54,12 @@ pub async fn uninstall_package(
 
 impl Process for UninstallOptions {
     async fn process(self) -> Result<i32, String> {
-        match uninstall_package(&self.package_name, self.force).await {
+        return match uninstall_package(&self.package_name, self.force).await {
             Ok(msg) => {
                 println!("{}", msg);
-                return Ok(0);
+                Ok(0)
             },
-            Err(msg) => return Err(msg),
-        }
+            Err(msg) => Err(msg),
+        };
     }
 }

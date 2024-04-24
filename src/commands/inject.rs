@@ -49,12 +49,12 @@ pub async fn inject_package(
 
 impl Process for InjectOptions {
     async fn process(self) -> Result<i32, String> {
-        match inject_package(&self.into, &self.package_specs, self.no_cache).await {
+        return match inject_package(&self.into, &self.package_specs, self.no_cache).await {
             Ok(msg) => {
                 println!("{}", msg);
-                return Ok(0);
+                Ok(0)
             },
-            Err(msg) => return Err(msg),
-        }
+            Err(msg) => Err(msg),
+        };
     }
 }

@@ -172,7 +172,7 @@ pub async fn install_package(
 
 impl Process for InstallOptions {
     async fn process(self) -> Result<i32, String> {
-        match install_package(
+        return match install_package(
             &self.package_name,
             None,
             self.python.as_ref(),
@@ -185,9 +185,9 @@ impl Process for InstallOptions {
         {
             Ok(msg) => {
                 println!("{}", msg);
-                return Ok(0);
+                Ok(0)
             },
-            Err(msg) => return Err(msg),
-        }
+            Err(msg) => Err(msg),
+        };
     }
 }

@@ -29,11 +29,9 @@ pub async fn run_python(
 
 impl Process for RunpythonOptions {
     async fn process(self) -> Result<i32, String> {
-        match run_python(&self.venv, self.python_args).await {
-            Ok(code) => {
-                return Ok(code);
-            },
-            Err(msg) => return Err(msg),
-        }
+        return match run_python(&self.venv, self.python_args).await {
+            Ok(code) => Ok(code),
+            Err(msg) => Err(msg),
+        };
     }
 }

@@ -137,7 +137,7 @@ pub async fn upgrade_package(
 
 impl Process for UpgradeOptions {
     async fn process(self) -> Result<i32, String> {
-        match upgrade_package(
+        return match upgrade_package(
             &self.package_name,
             self.force,
             self.no_cache,
@@ -147,9 +147,9 @@ impl Process for UpgradeOptions {
         {
             Ok(msg) => {
                 println!("{}", msg);
-                return Ok(0);
+                Ok(0)
             },
-            Err(msg) => return Err(msg),
-        }
+            Err(msg) => Err(msg),
+        };
     }
 }

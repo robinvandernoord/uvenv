@@ -15,11 +15,9 @@ pub async fn runuv(
 
 impl Process for RunuvOptions {
     async fn process(self) -> Result<i32, String> {
-        match runuv(&self.venv, self.uv_args).await {
-            Ok(code) => {
-                return Ok(code);
-            },
-            Err(msg) => return Err(msg),
-        }
+        return match runuv(&self.venv, self.uv_args).await {
+            Ok(code) => Ok(code),
+            Err(msg) => Err(msg),
+        };
     }
 }

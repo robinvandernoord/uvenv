@@ -17,11 +17,9 @@ pub async fn runpip(
 
 impl Process for RunpipOptions {
     async fn process(self) -> Result<i32, String> {
-        match runpip(&self.venv, self.pip_args).await {
-            Ok(code) => {
-                return Ok(code);
-            },
-            Err(msg) => return Err(msg),
-        }
+        return match runpip(&self.venv, self.pip_args).await {
+            Ok(code) => Ok(code),
+            Err(msg) => Err(msg),
+        };
     }
 }
