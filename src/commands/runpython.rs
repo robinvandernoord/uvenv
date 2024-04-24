@@ -10,11 +10,13 @@ pub async fn run_python(
     venv_name: &str,
     python_args: Vec<String>,
 ) -> Result<i32, String> {
-    setup_environ_from_requirement(venv_name).await?;
+    let (_, environ) = setup_environ_from_requirement(venv_name).await?;
+
+    let py = environ.interpreter().sys_executable();
 
     // Launch Python in interactive mode
     Ok(
-        match Exec::cmd("python")
+        match Exec::cmd(py)
             .args(&python_args)
             .join()
             .map_err_to_string()?
