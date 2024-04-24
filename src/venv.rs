@@ -13,8 +13,12 @@ pub async fn create_venv(
     python: Option<&String>,
     force: bool,
     with_pip: bool,
+    custom_prefix: Option<String>,
 ) -> Result<PathBuf, String> {
-    let venv_path = venv_path(&package_name.to_string());
+    let venv_path = match custom_prefix {
+        None => venv_path(&package_name.to_string()),
+        Some(prefix) => PathBuf::from(format!("{}{}", prefix, package_name)),
+    };
 
     if !force && venv_path.exists() {
         return Err(

@@ -171,16 +171,18 @@ pub struct UpgradeAllOptions {
 #[derive(Debug, Parser)]
 pub struct RunOptions {
     pub package_name: String,
-    #[clap(
-        short = 'f',
-        long,
-        help = "Overwrite currently installed executables with the same name (in ~/tmp/bin)"
-    )]
-    pub force: bool,
     #[clap(long, help = "Run without `uv` cache")]
     pub no_cache: bool,
     #[clap(long, help = PYTHON_HELP_TEXT)]
     pub python: Option<String>,
+    #[clap(long, help = "Don't remove the temporary venv when done running")]
+    pub keep: bool,
+    #[clap(
+        long,
+        help = "Custom name of an executable to run (e.g. 'semantic-release' in the package 'python-semantic-release')"
+    )]
+    pub binary: Option<String>,
+    pub args: Vec<String>,
 }
 
 #[derive(Debug, Parser)]

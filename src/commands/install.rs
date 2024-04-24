@@ -15,7 +15,7 @@ use std::path::{Path, PathBuf};
 
 use uv_interpreter::PythonEnvironment;
 
-async fn _install_package(
+pub async fn _install_package(
     package_name: &str,
     inject: &Vec<&str>,
     no_cache: bool,
@@ -65,7 +65,7 @@ async fn ensure_venv(
                 Ok(buf)
             }
         },
-        None => create_venv(&requirement.name, python, force, true).await,
+        None => create_venv(&requirement.name, python, force, true, None).await,
     }
 }
 

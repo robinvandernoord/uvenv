@@ -1,3 +1,4 @@
+use std::path::Path;
 use subprocess::Exec;
 
 use crate::{
@@ -5,6 +6,20 @@ use crate::{
     helpers::ResultToString,
     venv::setup_environ_from_requirement,
 };
+
+pub fn process_subprocess(
+    exec_path: &Path,
+    args: &Vec<String>,
+) -> Result<i32, String> {
+    Ok(
+        match Exec::cmd(exec_path).args(args).join().map_err_to_string()? {
+            subprocess::ExitStatus::Exited(int) => int as i32,
+            subprocess::ExitStatus::Signaled(int) => int as i32,
+            subprocess::ExitStatus::Other(int) => int,
+            subprocess::ExitStatus::Undetermined => 0,
+        },
+    )
+}
 
 pub async fn run_python(
     venv_name: &str,
@@ -15,18 +30,7 @@ pub async fn run_python(
     let py = environ.interpreter().sys_executable();
 
     // Launch Python in interactive mode
-    Ok(
-        match Exec::cmd(py)
-            .args(&python_args)
-            .join()
-            .map_err_to_string()?
-        {
-            subprocess::ExitStatus::Exited(int) => int as i32,
-            subprocess::ExitStatus::Signaled(int) => int as i32,
-            subprocess::ExitStatus::Other(int) => int,
-            subprocess::ExitStatus::Undetermined => 0,
-        },
-    )
+    return process_subprocess(py, &python_args);
 }
 
 impl Process for RunpythonOptions {
