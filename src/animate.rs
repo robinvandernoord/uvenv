@@ -22,20 +22,20 @@ pub struct AnimationSettings {
 
 impl AnimationSettings {
     pub fn default() -> AnimationSettings {
-        return AnimationSettings {
+        AnimationSettings {
             style: AnimationStyle::Modern,
             order: AnimationOrder::Before,
-        };
+        }
     }
 }
 
 fn get_spinner_chars(style: &AnimationStyle) -> Vec<char> {
-    return match style {
+    match style {
         AnimationStyle::Classic => {
             vec!['|', '/', '-', '\\']
         },
         AnimationStyle::Modern => vec!['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'],
-    };
+    }
 }
 
 pub async fn animation(
@@ -72,5 +72,5 @@ pub async fn show_loading_indicator<T, S: Into<String>>(
     spinner.abort(); // Abort the spinner loop as download completes
     eprint!("\r\x1B[2K"); // clear the line
 
-    return result;
+    result
 }

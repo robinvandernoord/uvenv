@@ -33,7 +33,7 @@ pub async fn reinstall(
     let current_metadata = Metadata::for_requirement(&requirement, false).await;
 
     let install_spec_changed =
-        editable || requirement.version() != "" || requirement.extras().len() > 0;
+        editable || !requirement.version().is_empty() || !requirement.extras().is_empty();
 
     if let Err(err) = uninstall_package(&requirement_name, force).await {
         eprintln!(
@@ -55,7 +55,7 @@ pub async fn reinstall(
         Vec::new()
     };
 
-    return install_package(
+    install_package(
         new_install_spec,
         None,
         python,
@@ -64,12 +64,12 @@ pub async fn reinstall(
         no_cache,
         editable,
     )
-    .await;
+    .await
 }
 
 impl Process for ReinstallOptions {
     async fn process(self) -> Result<i32, String> {
-        return match reinstall(
+        match reinstall(
             &self.package,
             self.python.as_ref(),
             self.force,
@@ -84,6 +84,6 @@ impl Process for ReinstallOptions {
                 Ok(0)
             },
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

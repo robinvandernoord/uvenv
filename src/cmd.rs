@@ -15,10 +15,7 @@ pub async fn find_sibling(name: &str) -> Option<PathBuf> {
         return None;
     };
 
-    let Some(parent) = real_path.parent() else {
-        return None;
-    };
-
+    let parent = real_path.parent()?;
     // resolve symlinks etc:
 
     let binary = parent.join(name);

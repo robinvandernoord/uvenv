@@ -10,14 +10,14 @@ pub async fn runuv(
 ) -> Result<i32, String> {
     setup_environ_from_requirement(venv_name).await?;
 
-    return uv_with_output(uv_args).await;
+    uv_with_output(uv_args).await
 }
 
 impl Process for RunuvOptions {
     async fn process(self) -> Result<i32, String> {
-        return match runuv(&self.venv, self.uv_args).await {
+        match runuv(&self.venv, self.uv_args).await {
             Ok(code) => Ok(code),
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

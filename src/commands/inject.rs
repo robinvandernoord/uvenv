@@ -9,7 +9,7 @@ use owo_colors::OwoColorize;
 
 pub async fn inject_package(
     venv_spec: &str,
-    to_inject_specs: &Vec<String>,
+    to_inject_specs: &[String],
     no_cache: bool,
 ) -> Result<String, String> {
     let (requirement, environ) = setup_environ_from_requirement(venv_spec).await?;
@@ -49,12 +49,12 @@ pub async fn inject_package(
 
 impl Process for InjectOptions {
     async fn process(self) -> Result<i32, String> {
-        return match inject_package(&self.into, &self.package_specs, self.no_cache).await {
+        match inject_package(&self.into, &self.package_specs, self.no_cache).await {
             Ok(msg) => {
                 println!("{}", msg);
                 Ok(0)
             },
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

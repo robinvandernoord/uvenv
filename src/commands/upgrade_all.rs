@@ -23,18 +23,18 @@ pub async fn upgrade_all(
         }
     }
 
-    return if all_ok {
+    if all_ok {
         Ok(())
     } else {
         Err(String::from("⚠️ Not all packages were properly upgraded!"))
-    };
+    }
 }
 
 impl Process for UpgradeAllOptions {
     async fn process(self) -> Result<i32, String> {
-        return match upgrade_all(self.force, self.no_cache, self.skip_injected).await {
+        match upgrade_all(self.force, self.no_cache, self.skip_injected).await {
             Ok(_) => Ok(0),
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

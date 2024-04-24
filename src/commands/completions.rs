@@ -18,6 +18,6 @@ impl Process for CompletionsOptions {
             println!("{}", for_bash);
         }
 
-        return Ok(0);
+        Ok(0)
     }
 }

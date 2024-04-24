@@ -13,7 +13,7 @@ use crate::{
 pub fn now() -> String {
     let dt = Local::now();
 
-    match dt.to_string().split_once(".") {
+    match dt.to_string().split_once('.') {
         None => String::new(),
         Some((datetime, _)) => datetime.to_string(),
     }
@@ -54,7 +54,7 @@ pub async fn add_to_bashrc(
     }
 
     final_text.push_str(text);
-    final_text.push_str("\n");
+    final_text.push('\n');
 
     append(&path, final_text).await
 }
@@ -65,7 +65,7 @@ pub async fn ensure_path(force: bool) -> Result<(), String> {
 
     let path = std::env::var("PATH").unwrap_or_default();
 
-    let parts: Vec<&str> = path.split(":").collect();
+    let parts: Vec<&str> = path.split(':').collect();
 
     if parts.contains(&bin_dir) && !force {
         return Err(format!("{}: {} is already added to your path. Use '--force' to add it to your .bashrc file anyway.",
@@ -83,6 +83,6 @@ pub async fn ensure_path(force: bool) -> Result<(), String> {
 impl Process for EnsurepathOptions {
     async fn process(self) -> Result<i32, String> {
         ensure_path(self.force).await?;
-        return Ok(0);
+        Ok(0)
     }
 }

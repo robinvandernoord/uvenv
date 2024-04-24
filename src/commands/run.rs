@@ -1,6 +1,6 @@
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use uv_interpreter::PythonEnvironment;
 
@@ -13,17 +13,17 @@ use crate::uv::uv_get_installed_version;
 use crate::venv::{activate_venv, create_venv, remove_venv};
 
 pub async fn find_executable(
-    requirement: &&Requirement,
+    requirement: &Requirement,
     binary: Option<&String>,
     package_spec: &str,
     venv: &PythonEnvironment,
-    venv_path: &PathBuf,
+    venv_path: &Path,
 ) -> Result<PathBuf, String> {
     let executable = match binary {
         Some(executable) => executable.to_owned(),
         None => {
             let installed_version = uv_get_installed_version(&requirement.name, Some(venv))?;
-            let symlinks = find_symlinks(&requirement, &installed_version, venv).await;
+            let symlinks = find_symlinks(requirement, &installed_version, venv).await;
 
             match symlinks.len() {
                 0 => {
@@ -61,13 +61,13 @@ pub async fn run_executable(
     binary: Option<&String>,
     package_spec: &str,
     venv: &PythonEnvironment,
-    venv_path: &PathBuf,
+    venv_path: &Path,
     args: Vec<String>,
 ) -> Result<i32, String> {
     let full_exec_path =
-        find_executable(&requirement, binary, package_spec, venv, venv_path).await?;
+        find_executable(requirement, binary, package_spec, venv, venv_path).await?;
 
-    return process_subprocess(full_exec_path.as_path(), &args);
+    process_subprocess(full_exec_path.as_path(), &args)
 }
 pub async fn run_package(
     package_spec: &str,
@@ -102,14 +102,13 @@ pub async fn run_package(
     }
 
     // ### 2 ###
-    let venv = &activate_venv(&venv_path).await?;
+    let venv = &activate_venv(venv_path).await?;
 
     // already expects activated venv:
     _install_package(package_spec, &Vec::new(), no_cache, false, false).await?;
 
     // ### 3 ###
-
-    let result = run_executable(&requirement, binary, package_spec, &venv, venv_path, args).await;
+    let result = run_executable(&requirement, binary, package_spec, venv, venv_path, args).await;
 
     // ### 4 ###
 
@@ -117,12 +116,12 @@ pub async fn run_package(
         remove_venv(venv_path).await?;
     }
 
-    return result;
+    result
 }
 
 impl Process for RunOptions {
     async fn process(self) -> Result<i32, String> {
-        return match run_package(
+        match run_package(
             &self.package_name,
             self.python.as_ref(),
             self.keep,
@@ -134,6 +133,6 @@ impl Process for RunOptions {
         {
             Ok(code) => Ok(code),
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

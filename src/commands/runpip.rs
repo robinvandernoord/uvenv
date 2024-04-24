@@ -12,14 +12,14 @@ pub async fn runpip(
 
     let script = venv_script(&env, "pip");
 
-    return run_print_output(script, pip_args).await;
+    run_print_output(script, pip_args).await
 }
 
 impl Process for RunpipOptions {
     async fn process(self) -> Result<i32, String> {
-        return match runpip(&self.venv, self.pip_args).await {
+        match runpip(&self.venv, self.pip_args).await {
             Ok(code) => Ok(code),
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

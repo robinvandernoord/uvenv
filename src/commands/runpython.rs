@@ -10,7 +10,7 @@ use crate::{
 
 pub fn process_subprocess<S: AsRef<OsStr>>(
     exec_path: &Path,
-    args: &Vec<S>,
+    args: &[S],
 ) -> Result<i32, String> {
     Ok(
         match Exec::cmd(exec_path).args(args).join().map_err_to_string()? {
@@ -31,14 +31,14 @@ pub async fn run_python(
     let py = environ.interpreter().sys_executable();
 
     // Launch Python in interactive mode
-    return process_subprocess(py, &python_args);
+    process_subprocess(py, &python_args)
 }
 
 impl Process for RunpythonOptions {
     async fn process(self) -> Result<i32, String> {
-        return match run_python(&self.venv, self.python_args).await {
+        match run_python(&self.venv, self.python_args).await {
             Ok(code) => Ok(code),
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

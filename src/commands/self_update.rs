@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 use owo_colors::OwoColorize;
 use regex::Regex;
@@ -17,36 +17,37 @@ fn extract_version(
         return None;
     };
 
-    for version in re.captures_iter(&freeze_output) {
+    // for version in re.captures_iter(freeze_output) {
+    if let Some(version) = re.captures_iter(freeze_output).next() {
         let (_, [_, version]) = version.extract();
         // group 1 is {package}==
         // group 2 is the version (or path/uri)
         return Some(version.to_string());
     }
 
-    return None;
+    None
 }
 
 #[allow(dead_code)]
 pub async fn get_package_version(
-    python: &PathBuf,
+    python: &Path,
     package: &str,
 ) -> Option<String> {
     let output = pip_freeze(python).await.unwrap_or_default();
 
-    return extract_version(&output, package);
+    extract_version(&output, package)
 }
 
 pub async fn get_package_versions<S: AsRef<str>>(
-    python: &PathBuf,
-    packages: &Vec<S>,
+    python: &Path,
+    packages: &[S],
 ) -> Vec<String> {
     let output = pip_freeze(python).await.unwrap_or_default();
 
-    return packages
-        .into_iter()
+    packages
+        .iter()
         .map(|k| extract_version(&output, k.as_ref()).unwrap_or_default())
-        .collect();
+        .collect()
 }
 
 pub async fn self_update(with_uv: bool) -> Result<i32, String> {
@@ -100,7 +101,7 @@ pub async fn self_update(with_uv: bool) -> Result<i32, String> {
         }
     }
 
-    return Ok(0);
+    Ok(0)
 }
 
 impl Process for SelfUpdateOptions {

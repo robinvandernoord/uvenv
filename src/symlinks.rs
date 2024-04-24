@@ -42,7 +42,7 @@ pub async fn find_symlinks(
     let entrypoints_path = entrypoints_ini.to_str().unwrap_or_default();
     let scripts = console_scripts(entrypoints_path).await.unwrap_or_default();
 
-    if scripts.len() > 0 {
+    if !scripts.is_empty() {
         scripts
     } else {
         // no scripts found, use requirement name as fallback (e.g. for `uv`)
@@ -88,24 +88,24 @@ pub async fn create_symlink(
         .await
         .map_err(|_| format!("Failed to create symlink {:?}", &target_path))?;
 
-    return Ok(true);
+    Ok(true)
 }
 
 pub fn is_symlink(symlink_path: &Path) -> bool {
-    return symlink_path
+    symlink_path
         .symlink_metadata()
         .map(|metadata| metadata.file_type().is_symlink())
-        .unwrap_or(false);
+        .unwrap_or(false)
 }
 
 pub fn points_to(
     symlink_path: &Path,
     target_path: &Path,
 ) -> bool {
-    return symlink_path
+    symlink_path
         .read_link()
         .ok()
-        .map_or(false, |link| link.starts_with(&target_path));
+        .map_or(false, |link| link.starts_with(target_path))
 }
 
 pub async fn check_symlink(
@@ -114,7 +114,7 @@ pub async fn check_symlink(
 ) -> bool {
     let symlink_path = get_bin_dir().join(symlink);
 
-    return is_symlink(&symlink_path) && points_to(&symlink_path, &target_path);
+    is_symlink(&symlink_path) && points_to(&symlink_path, target_path)
 }
 
 pub async fn remove_symlink(symlink: &str) -> Result<(), String> {

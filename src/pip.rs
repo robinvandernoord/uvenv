@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 use std::str::FromStr;
 
 use pep508_rs::Requirement;
@@ -63,7 +63,7 @@ struct PipData {
 pub async fn pip(args: Vec<&str>) -> Result<bool, String> {
     let err_prefix = format!("pip {}", &args[0]);
 
-    return run("pip", args, Some(err_prefix)).await;
+    run("pip", args, Some(err_prefix)).await
 }
 
 #[derive(Debug)]
@@ -74,7 +74,7 @@ pub struct FakeInstallResult {
 
 impl FakeInstallResult {
     pub fn to_spec(&self) -> String {
-        return format!("{} @ {}", self.name, self.file_url);
+        format!("{} @ {}", self.name, self.file_url)
     }
 }
 
@@ -103,7 +103,7 @@ pub async fn fake_install(install_spec: &str) -> Result<FakeInstallResult, Strin
 
     let pip_data: PipData = serde_json::from_reader(json_file).map_err_to_string()?;
 
-    let Some(install) = pip_data.install.get(0) else {
+    let Some(install) = pip_data.install.first() else {
         return Err(String::from(
             "Failed to find package name for local install.",
         ));
@@ -146,7 +146,7 @@ pub async fn try_parse_local_requirement(
     let new_install_spec = result.to_spec();
     let requirement = Requirement::from_str(&new_install_spec).map_err_to_string()?;
 
-    return Ok((requirement, new_install_spec));
+    Ok((requirement, new_install_spec))
 }
 
 pub async fn parse_requirement(install_spec: &str) -> Result<(Requirement, String), String> {
@@ -156,7 +156,7 @@ pub async fn parse_requirement(install_spec: &str) -> Result<(Requirement, Strin
     }
 }
 
-pub async fn pip_freeze(python: &PathBuf) -> Result<String, String> {
+pub async fn pip_freeze(python: &Path) -> Result<String, String> {
     // let py = python.to_str().unwrap_or_default(); // idk why python.to_string() doesn't work
-    return run_get_output(python, vec!["-m", "pip", "freeze"]).await;
+    run_get_output(python, vec!["-m", "pip", "freeze"]).await
 }

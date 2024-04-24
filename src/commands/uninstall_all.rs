@@ -18,20 +18,20 @@ pub async fn uninstall_all(force: bool) -> Result<(), String> {
         }
     }
 
-    return if all_ok {
+    if all_ok {
         Ok(())
     } else {
         Err(String::from(
             "⚠️ Not all packages were properly uninstalled!",
         ))
-    };
+    }
 }
 
 impl Process for UninstallAllOptions {
     async fn process(self) -> Result<i32, String> {
-        return match uninstall_all(self.force).await {
+        match uninstall_all(self.force).await {
             Ok(_) => Ok(0),
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

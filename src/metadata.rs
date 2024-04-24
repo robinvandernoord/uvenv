@@ -12,31 +12,31 @@ use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use uv_interpreter::PythonEnvironment;
 
-const BIN_DIR: &'static str = ".local/bin";
-const WORK_DIR: &'static str = ".local/uvx";
-const INDENT: &'static str = "    ";
+const BIN_DIR: &str = ".local/bin";
+const WORK_DIR: &str = ".local/uvx";
+const INDENT: &str = "    ";
 
 pub fn get_home_dir() -> PathBuf {
-    return home::home_dir().expect("Failed to get home directory");
+    home::home_dir().expect("Failed to get home directory")
 }
 
 pub fn get_bin_dir() -> PathBuf {
     let home_dir = get_home_dir();
-    return home_dir.join(BIN_DIR);
+    home_dir.join(BIN_DIR)
 }
 
 pub fn get_work_dir() -> PathBuf {
     let home_dir = get_home_dir();
-    return home_dir.join(WORK_DIR);
+    home_dir.join(WORK_DIR)
 }
 
 pub fn get_venv_dir() -> PathBuf {
     let work_dir = get_work_dir();
-    return work_dir.join("venvs");
+    work_dir.join("venvs")
 }
 
 pub fn venv_path(venv_name: &str) -> PathBuf {
-    return get_venv_dir().join(venv_name);
+    get_venv_dir().join(venv_name)
 }
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)] // dbg_pls::DebugPls
@@ -61,7 +61,7 @@ pub struct Metadata {
 
 impl Metadata {
     pub fn new(name: &str) -> Metadata {
-        return Metadata {
+        Metadata {
             name: name.to_string(),
             scripts: HashMap::new(),
             install_spec: name.to_string(),
@@ -72,16 +72,16 @@ impl Metadata {
             python_raw: String::new(),
             injected: HashSet::new(),
             editable: false,
-        };
+        }
     }
 
     pub fn find(req: &Requirement) -> Metadata {
-        let mut empty = Metadata::new(&req.name.to_string());
+        let mut empty = Metadata::new(req.name.as_ref());
 
         empty.installed_version = uv_get_installed_version(&req.name, None).unwrap_or_default();
 
         empty.fill(None);
-        return empty;
+        empty
     }
 
     /// try to guess/deduce some values
@@ -104,31 +104,31 @@ impl Metadata {
 
         let python_info = venv.interpreter().markers();
 
-        if self.install_spec == "" {
+        if self.install_spec.is_empty() {
             self.install_spec = String::from(&self.name);
         }
 
-        if self.python == "" {
+        if self.python.is_empty() {
             self.python = format!(
                 "{} {}",
                 python_info.platform_python_implementation, python_info.python_full_version
             )
         }
 
-        if self.python_raw == "" {
+        if self.python_raw.is_empty() {
             self.python_raw = venv.stdlib_as_string();
         }
 
-        return Some(());
+        Some(())
     }
 
     pub async fn for_dir(
-        dirname: &PathBuf,
+        dirname: &Path,
         recheck_scripts: bool,
     ) -> Option<Metadata> {
         let meta_path = dirname.join(".metadata");
 
-        return Metadata::for_file(&meta_path, recheck_scripts).await;
+        Metadata::for_file(&meta_path, recheck_scripts).await
     }
 
     pub async fn for_requirement(
@@ -140,24 +140,24 @@ impl Metadata {
 
         match Metadata::for_dir(&venv_dir, recheck_scripts).await {
             Some(m) => m,
-            None => Metadata::find(&requirement),
+            None => Metadata::find(requirement),
         }
     }
 
     pub async fn for_file(
-        filename: &PathBuf,
+        filename: &Path,
         recheck_scripts: bool,
     ) -> Option<Metadata> {
         let result = load_metadata(filename, recheck_scripts).await;
-        return result.ok();
+        result.ok()
     }
 
     pub async fn save(
         &self,
-        dirname: &PathBuf,
+        dirname: &Path,
     ) -> Result<(), String> {
         let meta_path = dirname.join(".metadata");
-        return store_metadata(&meta_path, &self).await;
+        store_metadata(&meta_path, self).await
     }
 
     pub async fn check_scripts(
@@ -170,7 +170,7 @@ impl Metadata {
     }
 
     pub fn format_short(&self) -> String {
-        return format!("- {} {}", self.name, self.installed_version.cyan());
+        format!("- {} {}", self.name, self.installed_version.cyan())
     }
 
     #[allow(dead_code)]
@@ -199,11 +199,11 @@ impl Metadata {
     pub fn format_human(&self) -> String {
         let mut result = format!("- {}", self.name);
 
-        if self.extras.len() > 0 {
+        if !self.extras.is_empty() {
             result.push_str(&format!("[{}]", self.format_extras()));
         }
 
-        if self.requested_version.len() > 0 {
+        if !self.requested_version.is_empty() {
             result.push_str(&format!(" {}", self.requested_version.cyan()));
         }
 
@@ -211,7 +211,7 @@ impl Metadata {
             result.push_str(&format!(" {}", "--editable".yellow()))
         }
 
-        result.push_str("\n");
+        result.push('\n');
 
         result.push_str(&format!(
             "{}Installed Version: {} on {}.\n",
@@ -239,7 +239,7 @@ impl Metadata {
             .join(" | ");
         result.push_str(&format!("{}Scripts: {}", INDENT, formatted_scripts));
 
-        return result;
+        result
     }
 }
 
@@ -257,7 +257,9 @@ pub async fn load_metadata(
     let mut metadata: Metadata = rmp_serde::decode::from_slice(&buf[..]).map_err_to_string()?;
 
     if recheck_scripts {
-        let _ = &metadata.check_scripts(&filename.parent().unwrap()).await;
+        if let Some(folder) = filename.parent() {
+            metadata.check_scripts(folder).await
+        }
     }
 
     Ok(metadata)

@@ -18,7 +18,7 @@ pub async fn update_metadata(
     environ: &PythonEnvironment,
     requested_version: String,
 ) -> Result<String, String> {
-    let new_version = uv_get_installed_version(&requirement.name, Some(&environ))?;
+    let new_version = uv_get_installed_version(&requirement.name, Some(environ))?;
 
     metadata.requested_version = requested_version;
     metadata.installed_version = new_version.clone();
@@ -39,7 +39,7 @@ fn build_msg(
             &metadata.name.green(),
             &new_version.cyan()
         ));
-        if metadata.requested_version != "" {
+        if !metadata.requested_version.is_empty() {
             msg.push_str(&format!("\n💡 This package was installed with a version constraint ({}). If you want to ignore this constraint, use `{}`.",
             &metadata.requested_version.cyan(),
 
@@ -85,11 +85,11 @@ pub async fn _upgrade_package(
     let mut extras = metadata.extras.clone();
     extras.extend(requirement.extras());
 
-    if extras.len() > 0 {
+    if !extras.is_empty() {
         upgrade_spec.push_str(&format!("[{}]", extras.iter().join(",")))
     }
 
-    if version != "" {
+    if !version.is_empty() {
         upgrade_spec.push_str(&version)
     }
 
@@ -108,7 +108,7 @@ pub async fn _upgrade_package(
     )
     .await?;
 
-    let new_version = update_metadata(metadata, &requirement, &environ, version).await?;
+    let new_version = update_metadata(metadata, requirement, environ, version).await?;
 
     build_msg(old_version, new_version, metadata)
 }
@@ -124,7 +124,7 @@ pub async fn upgrade_package(
 
     let mut metadata = Metadata::for_requirement(&requirement, true).await;
 
-    return _upgrade_package(
+    _upgrade_package(
         &requirement,
         &mut metadata,
         &environ,
@@ -132,12 +132,12 @@ pub async fn upgrade_package(
         no_cache,
         skip_injected,
     )
-    .await;
+    .await
 }
 
 impl Process for UpgradeOptions {
     async fn process(self) -> Result<i32, String> {
-        return match upgrade_package(
+        match upgrade_package(
             &self.package_name,
             self.force,
             self.no_cache,
@@ -150,6 +150,6 @@ impl Process for UpgradeOptions {
                 Ok(0)
             },
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

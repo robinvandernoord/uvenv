@@ -41,7 +41,7 @@ pub async fn uninstall_package(
 
     remove_venv(&venv.to_path_buf()).await?;
 
-    let version_msg = if metadata.installed_version != "" {
+    let version_msg = if !metadata.installed_version.is_empty() {
         format!(" ({})", metadata.installed_version.cyan())
     } else {
         String::new()
@@ -49,17 +49,17 @@ pub async fn uninstall_package(
 
     let msg = format!("🗑️  {}{} removed!", package_name, version_msg);
 
-    return Ok(msg);
+    Ok(msg)
 }
 
 impl Process for UninstallOptions {
     async fn process(self) -> Result<i32, String> {
-        return match uninstall_package(&self.package_name, self.force).await {
+        match uninstall_package(&self.package_name, self.force).await {
             Ok(msg) => {
                 println!("{}", msg);
                 Ok(0)
             },
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

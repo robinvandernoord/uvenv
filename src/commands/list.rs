@@ -7,17 +7,17 @@ use owo_colors::OwoColorize;
 
 async fn read_from_folder(metadata_dir: ReadDir) -> Vec<Metadata> {
     let mut result: Vec<Metadata> = vec![];
-    for _dir in metadata_dir {
-        if let Ok(dir) = _dir {
-            if let Some(metadata) = Metadata::for_dir(&dir.path(), true).await {
-                result.push(metadata)
-            } else {
-                let venv_name = dir.file_name().into_string().unwrap_or_default();
 
-                eprintln!("! metadata for '{}' could not be read!", venv_name.red());
-            }
+    for dir in metadata_dir.flatten() {
+        if let Some(metadata) = Metadata::for_dir(&dir.path(), true).await {
+            result.push(metadata)
+        } else {
+            let venv_name = dir.file_name().into_string().unwrap_or_default();
+
+            eprintln!("! metadata for '{}' could not be read!", venv_name.red());
         }
     }
+
     result
 }
 
@@ -51,14 +51,14 @@ pub async fn list_packages() -> Result<Vec<Metadata>, String> {
     };
 
     let result = read_from_folder(must_exist).await;
-    return Ok(result);
+    Ok(result)
 }
 
 impl Process for ListOptions {
     async fn process(self) -> Result<i32, String> {
         let all_items = list_packages().await?;
 
-        let filtered_items: Vec<&Metadata> = if self.venv_names.len() > 0 {
+        let filtered_items: Vec<&Metadata> = if !self.venv_names.is_empty() {
             // add filter
             all_items
                 .iter()
@@ -83,6 +83,6 @@ impl Process for ListOptions {
             }
         }
 
-        return Ok(0);
+        Ok(0)
     }
 }

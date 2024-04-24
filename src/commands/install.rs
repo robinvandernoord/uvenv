@@ -17,15 +17,15 @@ use uv_interpreter::PythonEnvironment;
 
 pub async fn _install_package(
     package_name: &str,
-    inject: &Vec<&str>,
+    inject: &[&str],
     no_cache: bool,
     force: bool,
     editable: bool,
 ) -> Result<bool, String> {
     let mut args: Vec<&str> = vec!["pip", "install"];
 
-    if inject.len() > 0 {
-        args.append(&mut inject.clone())
+    if !inject.is_empty() {
+        args.append(&mut inject.to_owned())
     }
 
     if no_cache || force {
@@ -40,12 +40,12 @@ pub async fn _install_package(
 
     let promise = uv(args);
 
-    return show_loading_indicator(
+    show_loading_indicator(
         promise,
         format!("installing {}", package_name),
         AnimationSettings::default(),
     )
-    .await;
+    .await
 }
 
 async fn ensure_venv(
@@ -72,13 +72,13 @@ async fn ensure_venv(
 async fn store_metadata(
     requirement_name: &str,
     requirement: &Requirement,
-    inject: &Vec<&str>,
+    inject: &[&str],
     editable: bool,
     install_spec: &str,
     venv: &PythonEnvironment,
 ) -> Result<Metadata, String> {
-    let mut metadata = Metadata::new(&requirement_name);
-    let _ = metadata.fill(Some(&venv));
+    let mut metadata = Metadata::new(requirement_name);
+    let _ = metadata.fill(Some(venv));
 
     let python_info = venv.interpreter().markers();
 
@@ -100,7 +100,7 @@ async fn store_metadata(
     }
 
     metadata.save(&venv.to_path_buf()).await?;
-    return Ok(metadata);
+    Ok(metadata)
 }
 
 pub async fn install_symlinks(
@@ -112,20 +112,20 @@ pub async fn install_symlinks(
 ) -> Result<(), String> {
     let venv_root = venv.root();
 
-    let symlinks = find_symlinks(&requirement, &meta.installed_version, venv).await;
+    let symlinks = find_symlinks(requirement, &meta.installed_version, venv).await;
 
     let mut results = HashMap::new();
     for symlink in symlinks {
         results.insert(
             symlink.clone(),
-            create_symlink(&symlink, &venv_root, force, binaries)
+            create_symlink(&symlink, venv_root, force, binaries)
                 .await
                 .unwrap_or(false),
         );
     }
 
     meta.scripts = results;
-    meta.save(&venv_root.to_path_buf()).await?;
+    meta.save(venv_root).await?;
 
     Ok(())
 }
@@ -172,7 +172,7 @@ pub async fn install_package(
 
 impl Process for InstallOptions {
     async fn process(self) -> Result<i32, String> {
-        return match install_package(
+        match install_package(
             &self.package_name,
             None,
             self.python.as_ref(),
@@ -188,6 +188,6 @@ impl Process for InstallOptions {
                 Ok(0)
             },
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

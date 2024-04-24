@@ -29,7 +29,7 @@ impl<S: Into<String>> StringExt for S {
         if s.is_empty() {
             s.push_str(dflt);
         }
-        return s;
+        s
     }
 }
 

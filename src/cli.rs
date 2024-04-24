@@ -280,7 +280,7 @@ pub enum Commands {
 
 impl Process for Commands {
     async fn process(self) -> Result<i32, String> {
-        return match self {
+        match self {
             Commands::List(opts) => opts.process().await,
             Commands::Install(opts) => opts.process().await,
             Commands::Upgrade(opts) => opts.process().await,
@@ -298,6 +298,6 @@ impl Process for Commands {
             Commands::Uninject(opts) => opts.process().await,
             Commands::Completions(opts) => opts.process().await,
             Commands::Run(opts) => opts.process().await,
-        };
+        }
     }
 }

@@ -9,7 +9,7 @@ use crate::uv::{uv, Helpers};
 
 pub async fn eject_package(
     from: &str,
-    to_eject_specs: &Vec<String>,
+    to_eject_specs: &[String],
 ) -> Result<String, String> {
     let (requirement, environ) = setup_environ_from_requirement(from).await?;
     let mut metadata = Metadata::for_requirement(&requirement, false).await;
@@ -47,12 +47,12 @@ pub async fn eject_package(
 
 impl Process for UnInjectOptions {
     async fn process(self) -> Result<i32, String> {
-        return match eject_package(&self.outof, &self.package_specs).await {
+        match eject_package(&self.outof, &self.package_specs).await {
             Ok(msg) => {
                 println!("{}", msg);
                 Ok(0)
             },
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

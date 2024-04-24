@@ -33,18 +33,18 @@ pub async fn reinstall_all(
         }
     }
 
-    return if all_ok {
+    if all_ok {
         Ok(())
     } else {
         Err(String::from(
             "⚠️ Not all packages were properly reinstalled!",
         ))
-    };
+    }
 }
 
 impl Process for ReinstallAllOptions {
     async fn process(self) -> Result<i32, String> {
-        return match reinstall_all(
+        match reinstall_all(
             self.python.as_ref(),
             self.force,
             self.without_injected,
@@ -55,6 +55,6 @@ impl Process for ReinstallAllOptions {
         {
             Ok(_) => Ok(0),
             Err(msg) => Err(msg),
-        };
+        }
     }
 }

@@ -4,7 +4,7 @@ use crate::pip::parse_requirement;
 use crate::uv::{uv, uv_venv};
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use uv_interpreter::PythonEnvironment;
 
@@ -16,7 +16,7 @@ pub async fn create_venv(
     custom_prefix: Option<String>,
 ) -> Result<PathBuf, String> {
     let venv_path = match custom_prefix {
-        None => venv_path(&package_name.to_string()),
+        None => venv_path(package_name.as_ref()),
         Some(prefix) => PathBuf::from(format!("{}{}", prefix, package_name)),
     };
 
@@ -40,15 +40,14 @@ pub async fn create_venv(
 
     uv(args).await?;
 
-    return Ok(venv_path);
+    Ok(venv_path)
 }
 
-pub async fn activate_venv(venv: &PathBuf) -> Result<PythonEnvironment, String> {
+pub async fn activate_venv(venv: &Path) -> Result<PythonEnvironment, String> {
     let venv_str = venv.to_str().unwrap_or_default();
     std::env::set_var("VIRTUAL_ENV", venv_str);
 
-    return uv_venv(None)
-        .ok_or_else(|| format!("Could not properly activate venv '{}'!", venv_str));
+    uv_venv(None).ok_or_else(|| format!("Could not properly activate venv '{}'!", venv_str))
 }
 
 pub async fn setup_environ_from_requirement(
@@ -74,5 +73,5 @@ pub fn venv_script(
     script: &str,
 ) -> String {
     let script_path = venv.scripts().join(script);
-    return script_path.to_string();
+    script_path.to_string()
 }

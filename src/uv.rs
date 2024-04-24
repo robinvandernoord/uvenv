@@ -24,7 +24,7 @@ pub async fn _get_uv_binary() -> Option<String> {
     //     return None;
     // };
 
-    return find_sibling("uv").await.map(|buf| buf.to_string());
+    find_sibling("uv").await.map(|buf| buf.to_string())
 }
 
 pub async fn get_uv_binary() -> String {
@@ -44,16 +44,12 @@ where
     let subcommand = &args[0].as_ref().to_str().unwrap_or_default(); // cursed but makes it work with both &str and String
     let err_prefix = format!("uv {}", subcommand);
 
-    return run(&script, args, Some(err_prefix)).await;
+    run(&script, args, Some(err_prefix)).await
 }
 
-pub async fn uv_with_output<S>(args: Vec<S>) -> Result<i32, String>
-where
-    S: AsRef<OsStr>,
-{
+pub async fn uv_with_output<S: AsRef<OsStr>>(args: Vec<S>) -> Result<i32, String> {
     let script = get_uv_binary().await;
-
-    return run_print_output(script, args).await;
+    run_print_output(script, args).await
 }
 
 pub fn uv_cache() -> Option<Cache> {
@@ -89,7 +85,8 @@ pub fn uv_get_installed_version(
     .ok();
 
     if let Some(pkgs) = site_packages {
-        for result in pkgs.get_packages(package_name) {
+        // for result in pkgs.get_packages(package_name) {
+        if let Some(result) = pkgs.get_packages(package_name).into_iter().next() {
             return Ok(result.version().to_string());
         }
     };
@@ -112,7 +109,7 @@ impl Helpers for PythonEnvironment {
 
     fn stdlib_as_string(&self) -> String {
         let stdlib = self.interpreter().stdlib().to_str();
-        return format!("{}", stdlib.unwrap_or_default());
+        stdlib.unwrap_or_default().to_string()
     }
 }
 
@@ -124,11 +121,8 @@ pub trait ExtractInfo {
 impl ExtractInfo for Requirement {
     fn version(&self) -> String {
         match self.version_or_url.clone() {
-            Some(version) => match version {
-                pep508_rs::VersionOrUrl::VersionSpecifier(v) => v.to_string(),
-                _ => String::new(),
-            },
-            None => String::new(),
+            Some(pep508_rs::VersionOrUrl::VersionSpecifier(v)) => v.to_string(),
+            _ => String::new(),
         }
     }
 
