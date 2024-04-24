@@ -36,13 +36,10 @@ async fn main() {
 
         code = 0
     } else {
-        code = match args.cmd.process().await {
-            Ok(code) => code,
-            Err(msg) => {
-                eprintln!("Something went wrong | {}", msg);
-                1
-            },
-        };
+        code = args.cmd.process().await.unwrap_or_else(|msg| {
+            eprintln!("Something went wrong | {}", msg);
+            1
+        });
     }
 
     // If bundled via an entrypoint, the first argument is 'python' so skip it:

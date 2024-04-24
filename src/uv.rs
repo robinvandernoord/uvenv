@@ -48,10 +48,10 @@ pub async fn _get_uv_binary() -> Option<String> {
 }
 
 pub async fn get_uv_binary() -> String {
-    match _get_uv_binary().await {
-        Some(bin) => bin,
-        None => String::from("uv"), // fallback, hope 'uv' is available in global scope
-    }
+    _get_uv_binary().await.unwrap_or_else(
+        // fallback, hope 'uv' is available in global scope:
+        || String::from("uv"),
+    )
 }
 
 pub async fn uv<S>(args: Vec<S>) -> Result<bool, String>

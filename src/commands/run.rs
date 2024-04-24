@@ -1,7 +1,7 @@
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
 use std::path::PathBuf;
-use subprocess::Exec;
+
 use uv_interpreter::PythonEnvironment;
 
 use crate::cli::{Process, RunOptions};
