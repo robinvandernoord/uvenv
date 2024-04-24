@@ -237,6 +237,8 @@ pub enum Commands {
     Reinstall(ReinstallOptions),
     ReinstallAll(ReinstallAllOptions),
     Inject(InjectOptions),
+
+    #[clap(aliases = &["eject"])]
     Uninject(UnInjectOptions),
     UpgradeAll(UpgradeAllOptions),
     Run(RunOptions),

@@ -5,6 +5,7 @@ use crate::{
     uv::{uv, Helpers},
     venv::setup_environ_from_requirement,
 };
+use owo_colors::OwoColorize;
 
 pub async fn inject_package(
     venv_spec: &str,
@@ -40,8 +41,9 @@ pub async fn inject_package(
     metadata.save(&environ.to_path_buf()).await?;
 
     Ok(format!(
-        "💉 Injected {} into {}.",
-        &to_inject_str, &metadata.name,
+        "💉 Injected [{}] into {}.",
+        &to_inject_str,
+        &metadata.name.green(),
     ))
 }
 
