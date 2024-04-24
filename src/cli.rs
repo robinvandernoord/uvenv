@@ -229,25 +229,44 @@ pub struct CompletionsOptions {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    List(ListOptions),
-    Install(InstallOptions),
-    Upgrade(UpgradeOptions),
-    Uninstall(UninstallOptions),
-    UninstallAll(UninstallAllOptions),
-    Reinstall(ReinstallOptions),
-    ReinstallAll(ReinstallAllOptions),
-    Inject(InjectOptions),
-
-    #[clap(aliases = &["eject"])]
-    Uninject(UnInjectOptions),
-    UpgradeAll(UpgradeAllOptions),
-    Run(RunOptions),
-    Runuv(RunuvOptions),
-    Runpip(RunpipOptions),
-    Runpython(RunpythonOptions),
-    Ensurepath(EnsurepathOptions),
-    SelfUpdate(SelfUpdateOptions),
+    #[clap(about = "Use --install to install the autocomplete script (bash).")]
     Completions(CompletionsOptions),
+    #[clap(about = "List packages and apps installed with uvx.")]
+    List(ListOptions),
+    #[clap(about = "Install a package (by pip name).")]
+    Install(InstallOptions),
+    #[clap(about = "Upgrade a package.")]
+    Upgrade(UpgradeOptions),
+    #[clap(about = "Upgrade all uvx-installed packages.")]
+    UpgradeAll(UpgradeAllOptions),
+    #[clap(about = "Uninstall a package (by pip name).")]
+    Uninstall(UninstallOptions),
+    #[clap(about = "Uninstall all uvx-installed packages.")]
+    UninstallAll(UninstallAllOptions),
+    #[clap(
+        about = "Uninstall a package (by pip name) and re-install from the original spec (unless a new spec is supplied)."
+    )]
+    Reinstall(ReinstallOptions),
+    #[clap(about = "Reinstall all uvx-installed packages.")]
+    ReinstallAll(ReinstallAllOptions),
+    #[clap(about = "Install additional packages to a virtual environment managed by uvx.")]
+    Inject(InjectOptions),
+    #[clap(aliases = &["eject"], about="Uninstall additional packages from a virtual environment managed by uvx. (alias: `eject`)")]
+    Uninject(UnInjectOptions),
+    #[clap(about = "Run a package in a temporary virtual environment.")]
+    Run(RunOptions),
+    #[clap(about = "Run 'uv' in the right venv.")]
+    Runuv(RunuvOptions),
+    #[clap(about = "Run 'pip' in the right venv.")]
+    Runpip(RunpipOptions),
+    #[clap(about = "Run 'python' in the right venv.")]
+    Runpython(RunpythonOptions),
+    #[clap(
+        about = "Update ~/.bashrc with a PATH that includes the local bin directory that uvx uses."
+    )]
+    Ensurepath(EnsurepathOptions),
+    #[clap(about = "Update the current installation of uvx (and optionally uv).")]
+    SelfUpdate(SelfUpdateOptions),
 }
 
 impl Process for Commands {

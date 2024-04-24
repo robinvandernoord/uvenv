@@ -51,7 +51,7 @@ async fn _install_package(
 async fn ensure_venv(
     maybe_venv: Option<&Path>,
     requirement: &Requirement,
-    python: Option<String>,
+    python: Option<&String>,
     force: bool,
 ) -> Result<PathBuf, String> {
     match maybe_venv {
@@ -133,7 +133,7 @@ pub async fn install_symlinks(
 pub async fn install_package(
     install_spec: &str,
     maybe_venv: Option<&Path>,
-    python: Option<String>,
+    python: Option<&String>,
     force: bool,
     inject: Vec<&str>,
     no_cache: bool,
@@ -175,7 +175,7 @@ impl Process for InstallOptions {
         match install_package(
             &self.package_name,
             None,
-            self.python,
+            self.python.as_ref(),
             self.force,
             vec![],
             self.no_cache,

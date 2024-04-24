@@ -10,7 +10,7 @@ use crate::{
 
 pub async fn reinstall(
     install_spec: &str,
-    python: Option<String>,
+    python: Option<&String>,
     force: bool,
     with_injected: bool,
     no_cache: bool,
@@ -69,9 +69,9 @@ pub async fn reinstall(
 
 impl Process for ReinstallOptions {
     async fn process(self) -> Result<i32, String> {
-        match reinstall(
+        return match reinstall(
             &self.package,
-            self.python,
+            self.python.as_ref(),
             self.force,
             !self.without_injected,
             self.no_cache,
@@ -81,9 +81,9 @@ impl Process for ReinstallOptions {
         {
             Ok(msg) => {
                 println!("{}", msg);
-                return Ok(0);
+                Ok(0)
             },
-            Err(msg) => return Err(msg),
-        }
+            Err(msg) => Err(msg),
+        };
     }
 }

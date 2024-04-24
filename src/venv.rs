@@ -10,7 +10,7 @@ use uv_interpreter::PythonEnvironment;
 
 pub async fn create_venv(
     package_name: &PackageName,
-    python: Option<String>,
+    python: Option<&String>,
     force: bool,
     with_pip: bool,
 ) -> Result<PathBuf, String> {
@@ -25,13 +25,10 @@ pub async fn create_venv(
 
     let mut args: Vec<&str> = vec!["venv", venv_path.to_str().unwrap_or_default()];
 
-    // extract because 'if let Some()' has a too short lifetime.
-    let py = python.unwrap_or_default();
-
     // if let Some(py) = python {
-    if py != "" {
+    if let Some(py) = python {
         args.push("--python");
-        args.push(&py);
+        args.push(py);
     }
     if with_pip {
         args.push("--seed");

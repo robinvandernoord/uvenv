@@ -38,20 +38,25 @@ impl ListOptions {
     }
 }
 
+pub async fn list_packages() -> Result<Vec<Metadata>, String> {
+    let venv_dir_path = get_venv_dir();
+    let possibly_missing = std::fs::read_dir(&venv_dir_path);
+
+    let must_exist = match possibly_missing {
+        Ok(dir) => dir,
+        Err(_) => {
+            std::fs::create_dir_all(&venv_dir_path).map_err_to_string()?;
+            std::fs::read_dir(&venv_dir_path).map_err_to_string()?
+        },
+    };
+
+    let result = read_from_folder(must_exist).await;
+    return Ok(result);
+}
+
 impl Process for ListOptions {
     async fn process(self) -> Result<i32, String> {
-        let venv_dir_path = get_venv_dir();
-        let possibly_missing = std::fs::read_dir(&venv_dir_path);
-
-        let must_exist = match possibly_missing {
-            Ok(dir) => dir,
-            Err(_) => {
-                std::fs::create_dir_all(&venv_dir_path).map_err_to_string()?;
-                std::fs::read_dir(&venv_dir_path).map_err_to_string()?
-            },
-        };
-
-        let all_items = read_from_folder(must_exist).await;
+        let all_items = list_packages().await?;
 
         let filtered_items: Vec<&Metadata> = if self.venv_names.len() > 0 {
             // add filter
