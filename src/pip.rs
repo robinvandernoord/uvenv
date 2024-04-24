@@ -1,14 +1,15 @@
+use std::path::PathBuf;
 use std::str::FromStr;
 
 use pep508_rs::Requirement;
+use serde::{Deserialize, Serialize};
 use tempfile::NamedTempFile;
-use tokio::process::Command;
 
+use crate::cmd::{run, run_get_output};
 use crate::{
     animate::{show_loading_indicator, AnimationSettings},
     helpers::ResultToString,
 };
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct PipDownloadInfo {
@@ -62,18 +63,7 @@ struct PipData {
 pub async fn pip(args: Vec<&str>) -> Result<bool, String> {
     let err_prefix = format!("pip {}", &args[0]);
 
-    let result = Command::new("pip").args(args).output().await;
-
-    match result {
-        Ok(result) => match result.status.code() {
-            Some(0) => Ok(true),
-            Some(_) | None => {
-                let err = String::from_utf8(result.stderr).unwrap_or_default();
-                Err(format!("{} | {}", err_prefix, err))
-            },
-        },
-        Err(result) => Err(format!("{} | {}", err_prefix, result.to_string())),
-    }
+    return run("pip", args, Some(err_prefix)).await;
 }
 
 #[derive(Debug)]
@@ -164,4 +154,9 @@ pub async fn parse_requirement(install_spec: &str) -> Result<(Requirement, Strin
         Ok(requirement) => Ok((requirement, String::from(install_spec))),
         Err(_) => try_parse_local_requirement(install_spec).await,
     }
+}
+
+pub async fn pip_freeze(python: &PathBuf) -> Result<String, String> {
+    // let py = python.to_str().unwrap_or_default(); // idk why python.to_string() doesn't work
+    return run_get_output(python, vec!["-m", "pip", "freeze"]).await;
 }

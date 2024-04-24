@@ -1,6 +1,6 @@
 use crate::{
     cli::{Process, RunpipOptions},
-    uv::run_with_output,
+    cmd::run_print_output,
     venv::{setup_environ_from_requirement, venv_script},
 };
 
@@ -12,7 +12,7 @@ pub async fn runpip(
 
     let script = venv_script(&env, "pip");
 
-    return run_with_output(script, pip_args).await;
+    return run_print_output(script, pip_args).await;
 }
 
 impl Process for RunpipOptions {

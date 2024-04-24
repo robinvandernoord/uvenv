@@ -1,39 +1,15 @@
+use std::ffi::OsStr;
+use std::{collections::HashSet, path::PathBuf};
+
+use crate::cmd::{find_sibling, run, run_print_output};
 use directories::ProjectDirs;
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
-use std::env::{self};
-
-use std::{ffi::OsStr, process::Stdio};
-use tokio::fs::canonicalize;
-
-use std::{collections::HashSet, path::PathBuf};
-use tokio::process::Command;
-
 use uv_cache::Cache;
 use uv_installer::SitePackages;
 use uv_interpreter::PythonEnvironment;
 
-use crate::helpers::{PathToString, ResultToString};
-
-pub async fn find_sibling(name: &str) -> Option<PathBuf> {
-    let Ok(binary_path) = &env::current_exe() else {
-        return None;
-    };
-
-    let Ok(real_path) = canonicalize(&binary_path).await else {
-        return None;
-    };
-
-    let Some(parent) = real_path.parent() else {
-        return None;
-    };
-
-    // resolve symlinks etc:
-
-    let binary = parent.join(name);
-
-    Some(binary)
-}
+use crate::helpers::PathToString;
 
 pub async fn _get_uv_binary() -> Option<String> {
     // if bundled with entrypoint:
@@ -68,35 +44,7 @@ where
     let subcommand = &args[0].as_ref().to_str().unwrap_or_default(); // cursed but makes it work with both &str and String
     let err_prefix = format!("uv {}", subcommand);
 
-    let result = Command::new(script).args(args).output().await;
-
-    match result {
-        Ok(result) => match result.status.code() {
-            Some(0) => Ok(true),
-            Some(_) | None => {
-                let err = String::from_utf8(result.stderr).unwrap_or_default();
-                Err(format!("{} | {}", err_prefix, err))
-            },
-        },
-        Err(result) => Err(format!("{} | {}", err_prefix, result.to_string())),
-    }
-}
-
-pub async fn run_with_output<S1, S2>(
-    command: S1,
-    args: Vec<S2>,
-) -> Result<i32, String>
-where
-    S1: AsRef<OsStr>,
-    S2: AsRef<OsStr>,
-{
-    let mut cmd = Command::new(command);
-    cmd.args(args);
-    cmd.stdout(Stdio::inherit());
-    cmd.stderr(Stdio::inherit());
-    let code = cmd.status().await.map_err_to_string()?;
-
-    Ok(code.code().unwrap_or(-1))
+    return run(&script, args, Some(err_prefix)).await;
 }
 
 pub async fn uv_with_output<S>(args: Vec<S>) -> Result<i32, String>
@@ -105,7 +53,7 @@ where
 {
     let script = get_uv_binary().await;
 
-    return run_with_output(script, args).await;
+    return run_print_output(script, args).await;
 }
 
 pub fn uv_cache() -> Option<Cache> {

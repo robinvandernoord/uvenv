@@ -1,5 +1,6 @@
 mod animate;
 mod cli;
+mod cmd;
 mod commands;
 mod helpers;
 mod metadata;

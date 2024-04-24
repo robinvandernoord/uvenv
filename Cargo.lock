@@ -3102,6 +3102,7 @@ dependencies = [
  "itertools",
  "owo-colors",
  "pep508_rs",
+ "regex",
  "rmp-serde",
  "serde",
  "serde_json",
