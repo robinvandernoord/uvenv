@@ -10,7 +10,7 @@ pub async fn reinstall_all(
     no_cache: bool,
     editable: bool,
 ) -> Result<(), String> {
-    let all_ok = true;
+    let mut all_ok = true;
 
     for meta in list_packages().await? {
         match reinstall(
@@ -27,7 +27,8 @@ pub async fn reinstall_all(
                 println!("{}", msg)
             },
             Err(msg) => {
-                eprintln!("{}", msg.red())
+                eprintln!("{}", msg.red());
+                all_ok = false;
             },
         }
     }

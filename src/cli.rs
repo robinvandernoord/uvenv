@@ -108,7 +108,17 @@ pub struct UninstallOptions {
     #[clap(
         short = 'f',
         long,
-        help = "Remove executable with the same name (in ~/.local/bin) even if related venv was not found"
+        help = "Remove executable with the same name (in ~/.local/bin) even if related venv was not found."
+    )]
+    pub force: bool,
+}
+
+#[derive(Debug, Parser)]
+pub struct UninstallAllOptions {
+    #[clap(
+        short = 'f',
+        long,
+        help = "Remove executable with the same name (in ~/.local/bin) even if related venv was not found."
     )]
     pub force: bool,
 }
@@ -157,9 +167,6 @@ pub struct UpgradeAllOptions {
     #[clap(long, help = "Run without `uv` cache")]
     no_cache: bool,
 }
-
-#[derive(Debug, Parser)]
-pub struct UninstallAllOptions {}
 
 #[derive(Debug, Parser)]
 pub struct RunOptions {

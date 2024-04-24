@@ -17,17 +17,17 @@ pub async fn uninstall_package(
     let venv_dir = venv_path(&requirement_name);
 
     if !venv_dir.exists() {
-        if !force {
-            return Err(format!("No virtualenv for '{}', stopping.\nUse '{}' to remove an executable with that name anyway.", 
-            &requirement_name.green(), "--force".green()));
+        return if !force {
+            Err(format!("No virtualenv for '{}', stopping.\nUse '{}' to remove an executable with that name anyway.",
+                        &requirement_name.green(), "--force".green()))
         } else {
             remove_symlink(&requirement_name).await?;
-            return Err(format!(
+            Err(format!(
                 "{}: No virtualenv for '{}'.",
                 "Warning".yellow(),
                 &requirement_name.green()
-            ));
-        }
+            ))
+        };
     }
 
     let venv = activate_venv(&venv_dir).await?;
