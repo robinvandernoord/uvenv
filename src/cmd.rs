@@ -20,7 +20,11 @@ pub async fn find_sibling(name: &str) -> Option<PathBuf> {
 
     let binary = parent.join(name);
 
-    Some(binary)
+    if binary.exists() {
+        Some(binary)
+    } else {
+        None
+    }
 }
 
 pub async fn run_print_output<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(

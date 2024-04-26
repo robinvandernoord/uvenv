@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use owo_colors::OwoColorize;
 use regex::Regex;
@@ -51,11 +51,19 @@ pub async fn get_package_versions<S: AsRef<str>>(
 }
 
 pub async fn self_update(with_uv: bool) -> Result<i32, String> {
-    let Some(exe) = find_sibling("python").await else {
-        return Err(format!(
-            "Python could not be found! Is `{}` installed globally (without a venv)?",
-            "uvx".green()
-        ));
+    let exe = match find_sibling("python").await {
+        Some(sibling) => sibling,
+        None => {
+            let fallback = PathBuf::from("/usr/bin/python3");
+            if fallback.exists() {
+                fallback
+            } else {
+                return Err(format!(
+                    "Python could not be found! Is `{}` installed globally (without a venv)?",
+                    "uvx".green()
+                ));
+            }
+        },
     };
 
     // todo: with 'uv' instead of pip later?
