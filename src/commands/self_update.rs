@@ -84,7 +84,7 @@ pub async fn self_update(with_uv: bool) -> Result<i32, String> {
     let new = get_package_versions(&exe, &to_track).await;
 
     for (versions, package) in new.iter().zip(old.iter()).zip(to_track.iter()) {
-        let (before, after) = versions;
+        let (after, before) = versions;
         if before == after {
             println!(
                 "🌟 '{}' not updated (version: {})",

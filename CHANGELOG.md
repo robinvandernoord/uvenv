@@ -2,11 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## v2.0.2 (2024-04-26)
+
+### Fix
+
+* **self-update**: swap `before` and `after` version
+
 ## v2.0.1 (2024-04-26)
 
 ### Fix
 
-* add magic header so `file` understands it's binary data
+* **.metadata**: add magic header so `file` understands it's binary data
 
 ## v2.0.0 (2024-04-26)
 
