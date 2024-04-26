@@ -1,5 +1,9 @@
 [build-system]
-requires = ["maturin>=1.5,<2.0"]
+requires = [
+    "maturin>=1.5,<2.0",
+    # Add a fake dependency for unsupported platforms
+    "please-use-uvx-v1-on-this-platform; sys_platform != 'linux' or (platform_machine != 'x86_64' and platform_machine != 'aarch64')",
+]
 build-backend = "maturin"
 
 [project]
@@ -10,11 +14,9 @@ classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
-
     "Operating System :: POSIX :: Linux",
-
-#    "Architecture :: x86_64",
-#    "Architecture :: aarch64",
+    #    "Architecture :: x86_64",
+    #    "Architecture :: aarch64",
 
     "Development Status :: 4 - Beta",
 ]
@@ -22,11 +24,9 @@ classifiers = [
 dynamic = ["version"]
 
 dependencies = [
-    "uv",
-    "patchelf",
-
-    # Add a fake dependency for unsupported platforms
-    "please-use-uvx-v1-on-this-platform; sys_platform != 'linux' or (platform_machine != 'x86_64' and platform_machine != 'aarch64')"
+    "uv", # obviously
+    "pip", # self-update
+    "patchelf", # idk, but required
 ]
 
 
