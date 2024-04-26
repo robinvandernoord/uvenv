@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.0.5 (2024-04-26)
+
+### Updates
+
+* **cargo**: bump dependencies
+
 ## v2.0.4 (2024-04-26)
 
 ### Fix
