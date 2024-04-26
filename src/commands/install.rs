@@ -119,15 +119,13 @@ pub async fn install_symlinks(
         let result = create_symlink(&symlink, venv_root, force, binaries).await;
 
         let success = match result {
-            Ok(_success) => {_success}
+            Ok(_success) => _success,
             Err(msg) => {
-                eprintln!("⚠️ {}", format!(
-                    "{}", msg,
-                ).yellow());
+                eprintln!("⚠️ {}", format!("{}", msg,).yellow());
                 false
-            }
+            },
         };
-        
+
         results.insert(symlink.clone(), success);
     }
 
