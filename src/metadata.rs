@@ -16,6 +16,10 @@ const BIN_DIR: &str = ".local/bin";
 const WORK_DIR: &str = ".local/uvx";
 const INDENT: &str = "    ";
 
+// tells 'file' that a .metadata file is 'data' (instead of making it guess)
+//                           U     V     X    SOH  version(2)  STX (padding):
+const MAGIC_HEADER: &[u8] = &[0x55, 0x56, 0x58, 0x01, 0x32, 0x04, 0x00]; // hex, 7 bytes
+
 pub fn get_home_dir() -> PathBuf {
     home::home_dir().expect("Failed to get home directory")
 }
@@ -243,6 +247,24 @@ impl Metadata {
     }
 }
 
+/// Drop the MAGIC_HEADER from a buffer (if present)
+pub fn strip_header(buf: &mut Vec<u8>) {
+    // postponed: the current header is 7 chars long.
+    //            the version should be ignored for starts_with,
+    //            and if the length should change, this must be 'match'ed based on the version
+    if buf.starts_with(MAGIC_HEADER) {
+        let _ = buf.drain(0..MAGIC_HEADER.len());
+    }
+}
+
+/// Prepend the MAGIC_HEADER to a buffer
+fn add_header(buf: &mut Vec<u8>) {
+    let mut new_buf = Vec::with_capacity(MAGIC_HEADER.len() + buf.len());
+    new_buf.extend_from_slice(MAGIC_HEADER);
+    new_buf.append(buf);
+    *buf = new_buf;
+}
+
 pub async fn load_metadata(
     filename: &Path,
     recheck_scripts: bool,
@@ -252,6 +274,8 @@ pub async fn load_metadata(
 
     let mut buf = Vec::new();
     file.read_to_end(&mut buf).await.map_err_to_string()?;
+
+    strip_header(&mut buf);
 
     // Read the contents of the file into a Metadata struct
     let mut metadata: Metadata = rmp_serde::decode::from_slice(&buf[..]).map_err_to_string()?;
@@ -273,7 +297,9 @@ pub async fn store_metadata(
     let mut file = File::create(filename).await.map_err_to_string()?;
 
     // Read the contents of the file into a Metadata struct
-    let bytes = rmp_serde::encode::to_vec(metadata).map_err_to_string()?;
+    let mut bytes = rmp_serde::encode::to_vec(metadata).map_err_to_string()?;
+
+    add_header(&mut bytes);
 
     file.write_all(&bytes).await.map_err_to_string()?;
 
