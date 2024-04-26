@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.0.4 (2024-04-26)
+
+### Fix
+
+* **install**: show warnings if creating symlinks fails
+
 ## v2.0.3 (2024-04-26)
 
 ### Fix

@@ -116,12 +116,19 @@ pub async fn install_symlinks(
 
     let mut results = HashMap::new();
     for symlink in symlinks {
-        results.insert(
-            symlink.clone(),
-            create_symlink(&symlink, venv_root, force, binaries)
-                .await
-                .unwrap_or(false),
-        );
+        let result = create_symlink(&symlink, venv_root, force, binaries).await;
+
+        let success = match result {
+            Ok(_success) => {_success}
+            Err(msg) => {
+                eprintln!("⚠️ {}", format!(
+                    "{}", msg,
+                ).yellow());
+                false
+            }
+        };
+        
+        results.insert(symlink.clone(), success);
     }
 
     meta.scripts = results;
