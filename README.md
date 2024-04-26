@@ -7,44 +7,20 @@ Inspired by:
 
 ## Installation
 
-```bash
-# one of these ways:
-pip install uvx # or `uv`, `pipx`
+1. Install via pip (or alternatives):
+    ```bash
+    pip install uvx  # or `uv`, `pipx`
+    ```
 
-# optional (in bash):
-uvx ensurepath # make sure ~/.local/bin is in PATH
-uvx completions --install # enable tab completion
-```
-
-### Platforms
-
-Since `uvx 2.0`, this tool uses Rust for performance and compatibility with `uv`.
-Currently, only prebuilt binaries are available for x86_64 (amd64) and aarch64 (ARM64) on Linux.
-Other platforms can use `uvx 1.x`, which is written in pure Python and can be found
-at [robinvandernoord/uvx](https://github.com/robinvandernoord/uvx).
-You can also compile `uvx` for your own platform:
-
-```bash
-# install the rust toolchain:
-curl https://sh.rustup.rs -sSf | sh
-# clone the repo and enter it:
-git clone https://github.com/robinvandernoord/uvx2.git; 
-cd uvx2;
-# install a virtualenv (choose python or uv)
-python -m venv venv  # or `uv venv venv --seed`
-source venv/bin/activate
-
-# install maturin
-pip install maturin # uv pip install maturin
-
-# compile and install the binary:
-maturin develop
-
-# uvx is now available:
-./venv/bin/uvx
-```
-
-For more info about building and distribution, see [maturin](https://www.maturin.rs/distribution).
+2. Optional (for bash users):
+    - Ensure that `~/.local/bin` is in your PATH:
+        ```bash
+        uvx ensurepath
+        ```
+    - Enable tab completion for `uvx`:
+        ```bash
+        uvx completions --install
+        ```
 
 ## Usage
 
@@ -53,6 +29,44 @@ uvx
 ```
 
 Run `uvx` without any arguments to see all possible subcommands.
+
+## Platform Considerations
+
+- **Rust-Powered Performance (uvx 2.0):** Starting from version 2.0, `uvx` leverages Rust for improved performance and
+  compatibility with `uv`.
+- **Prebuilt Binaries:** Currently, prebuilt binaries are available for x86_64 (amd64) and aarch64 (ARM64) on Linux.
+- **Other Platforms:** If you're on a different platform, you can still use `uvx 1.x`, which is written in pure Python.
+  Find it at [robinvandernoord/uvx](https://github.com/robinvandernoord/uvx).
+- Alternatively, you can **Compile for Your Platform**:
+    - Install the Rust toolchain:
+        ```bash
+        curl https://sh.rustup.rs -sSf | sh
+        ```
+    - Clone the `uvx2` repo and navigate to it:
+        ```bash
+        git clone https://github.com/robinvandernoord/uvx2.git
+        cd uvx2
+        ```
+    - Set up a virtual environment (choose Python or uv):
+        ```bash
+        python -m venv venv  # or `uv venv venv --seed`
+        source venv/bin/activate
+        ```
+    - Install Maturin (Python with Rust package builder):
+        ```bash
+        pip install maturin  # or `uv pip install maturin`
+        ```
+    - Compile and install the `uvx` binary:
+        ```bash
+        maturin develop
+        ```
+    - Now you can use `uvx`:
+        ```bash
+        ./venv/bin/uvx
+        ```
+
+For additional details on building and distribution, refer to [maturin](https://www.maturin.rs/distribution)
+documentation.
 
 ## License
 
