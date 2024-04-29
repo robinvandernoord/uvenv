@@ -7,7 +7,7 @@ use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
-use tokio::fs::File;
+use tokio::fs::{create_dir_all, File};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use uv_interpreter::PythonEnvironment;
@@ -27,6 +27,16 @@ pub fn get_home_dir() -> PathBuf {
 pub fn get_bin_dir() -> PathBuf {
     let home_dir = get_home_dir();
     home_dir.join(BIN_DIR)
+}
+
+pub async fn ensure_bin_dir() -> PathBuf {
+    let bin_dir = get_bin_dir();
+
+    if !bin_dir.exists() {
+        let _ = create_dir_all(&bin_dir).await;
+    }
+
+    bin_dir
 }
 
 pub fn get_work_dir() -> PathBuf {

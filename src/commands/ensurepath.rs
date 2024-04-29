@@ -7,7 +7,7 @@ use tokio::{fs::OpenOptions, io::AsyncWriteExt};
 use crate::{
     cli::{EnsurepathOptions, Process},
     helpers::ResultToString,
-    metadata::{get_bin_dir, get_home_dir},
+    metadata::{ensure_bin_dir, get_home_dir},
 };
 
 pub fn now() -> String {
@@ -60,7 +60,7 @@ pub async fn add_to_bashrc(
 }
 
 pub async fn ensure_path(force: bool) -> Result<(), String> {
-    let bin_path = get_bin_dir();
+    let bin_path = ensure_bin_dir().await;
     let bin_dir = bin_path.to_str().unwrap_or_default();
 
     let path = std::env::var("PATH").unwrap_or_default();

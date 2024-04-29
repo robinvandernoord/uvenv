@@ -3,7 +3,7 @@ use std::path::Path;
 use pep508_rs::Requirement;
 use uv_interpreter::PythonEnvironment;
 
-use crate::metadata::get_bin_dir;
+use crate::metadata::ensure_bin_dir;
 use configparser::ini::Ini;
 
 pub async fn console_scripts(entry_points_path: &str) -> Result<Vec<String>, String> {
@@ -56,7 +56,7 @@ pub async fn create_symlink(
     force: bool,
     binaries: &[&str],
 ) -> Result<bool, String> {
-    let bin_dir = get_bin_dir();
+    let bin_dir = ensure_bin_dir().await;
 
     if !binaries.is_empty() && !binaries.contains(&symlink) {
         return Ok(false);
@@ -112,13 +112,13 @@ pub async fn check_symlink(
     symlink: &str,
     target_path: &Path,
 ) -> bool {
-    let symlink_path = get_bin_dir().join(symlink);
+    let symlink_path = ensure_bin_dir().await.join(symlink);
 
     is_symlink(&symlink_path) && points_to(&symlink_path, target_path)
 }
 
 pub async fn remove_symlink(symlink: &str) -> Result<(), String> {
-    let bin_dir = get_bin_dir();
+    let bin_dir = ensure_bin_dir().await;
     let target_path = bin_dir.join(symlink);
 
     if is_symlink(&target_path) {

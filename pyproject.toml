@@ -32,3 +32,4 @@ dependencies = [
 
 [tool.maturin]
 bindings = "bin"
+stripped = true

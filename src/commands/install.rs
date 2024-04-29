@@ -118,13 +118,10 @@ pub async fn install_symlinks(
     for symlink in symlinks {
         let result = create_symlink(&symlink, venv_root, force, binaries).await;
 
-        let success = match result {
-            Ok(_success) => _success,
-            Err(msg) => {
-                eprintln!("⚠️ {}", format!("{}", msg,).yellow());
-                false
-            },
-        };
+        let success = result.unwrap_or_else(|msg| {
+            eprintln!("⚠️ {}", msg.yellow());
+            false
+        });
 
         results.insert(symlink.clone(), success);
     }
