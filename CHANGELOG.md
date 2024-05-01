@@ -2,11 +2,18 @@
 
 <!--next-version-placeholder-->
 
-## v2.0.7 (2024-04-26)
+
+## v2.0.7 (2024-05-01)
+
+### Docs
+
+* extended description
+
+## v2.0.7 (2024-05-01)
 
 ### Fix
 
-* fix: strip binary on release
+* strip binary on release
 
 ## v2.0.6 (2024-04-26)
 

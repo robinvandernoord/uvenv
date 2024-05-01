@@ -3325,7 +3325,7 @@ dependencies = [
 
 [[package]]
 name = "uvx"
-version = "2.0.7"
+version = "2.0.8"
 dependencies = [
  "anstyle",
  "chrono",
