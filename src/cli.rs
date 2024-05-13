@@ -92,6 +92,11 @@ pub struct InstallOptions {
 }
 
 #[derive(Debug, Parser)]
+pub struct ActivateOptions {
+    pub venv_name: String,
+}
+
+#[derive(Debug, Parser)]
 pub struct UpgradeOptions {
     pub package_name: String,
     #[clap(short = 'f', long, help = "Ignore previous version constraint")]
@@ -238,17 +243,21 @@ pub struct CompletionsOptions {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
+    // todo: `uvx setup` (with install completions, activate and ensurepath)
+    // todo: `uvx create` for new bare venv
     #[clap(about = "Use --install to install the autocomplete script (bash).")]
     Completions(CompletionsOptions),
     #[clap(about = "List packages and apps installed with uvx.")]
     List(ListOptions),
     #[clap(about = "Install a package (by pip name).")]
     Install(InstallOptions),
+    #[clap(about = "Start a new shell with an virtualenv activated")]
+    Activate(ActivateOptions),
     #[clap(about = "Upgrade a package.")]
     Upgrade(UpgradeOptions),
     #[clap(about = "Upgrade all uvx-installed packages.")]
     UpgradeAll(UpgradeAllOptions),
-    #[clap(about = "Uninstall a package (by pip name).")]
+    #[clap(aliases = &["delete", "remove"], about = "Uninstall a package (by pip name).")]
     Uninstall(UninstallOptions),
     #[clap(about = "Uninstall all uvx-installed packages.")]
     UninstallAll(UninstallAllOptions),
@@ -287,6 +296,7 @@ impl Process for Commands {
             Commands::Uninstall(opts) => opts.process().await,
             Commands::Reinstall(opts) => opts.process().await,
             Commands::Inject(opts) => opts.process().await,
+            Commands::Activate(opts) => opts.process().await,
             Commands::UpgradeAll(opts) => opts.process().await,
             Commands::Runuv(opts) => opts.process().await,
             Commands::Runpip(opts) => opts.process().await,

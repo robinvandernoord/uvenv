@@ -1,3 +1,4 @@
+pub mod activate;
 pub mod completions;
 pub mod ensurepath;
 pub mod inject;

@@ -50,6 +50,14 @@ pub async fn activate_venv(venv: &Path) -> Result<PythonEnvironment, String> {
     uv_venv(None).ok_or_else(|| format!("Could not properly activate venv '{}'!", venv_str))
 }
 
+#[allow(dead_code)]
+pub async fn find_venv(install_spec: &str) -> Option<PathBuf> {
+    let (requirement, _) = parse_requirement(install_spec).await.ok()?;
+    let requirement_name = requirement.name.to_string();
+
+    return Some(venv_path(&requirement_name));
+}
+
 pub async fn setup_environ_from_requirement(
     install_spec: &str
 ) -> Result<(Requirement, PythonEnvironment), String> {
