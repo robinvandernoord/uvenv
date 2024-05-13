@@ -55,7 +55,7 @@ pub async fn find_venv(install_spec: &str) -> Option<PathBuf> {
     let (requirement, _) = parse_requirement(install_spec).await.ok()?;
     let requirement_name = requirement.name.to_string();
 
-    return Some(venv_path(&requirement_name));
+    Some(venv_path(&requirement_name))
 }
 
 pub async fn setup_environ_from_requirement(
