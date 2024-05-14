@@ -1,11 +1,13 @@
-use crate::helpers::ResultToString;
-use owo_colors::OwoColorize;
 use std::env;
 use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::process::Stdio;
+
+use owo_colors::OwoColorize;
 use tokio::fs::canonicalize;
 use tokio::process::Command;
+
+use crate::helpers::ResultToString;
 
 pub async fn find_sibling(name: &str) -> Option<PathBuf> {
     let Ok(binary_path) = &env::current_exe() else {
@@ -90,7 +92,7 @@ pub fn run_if_shell<T, Y: Fn(String) -> Option<T>, N: Fn(String) -> Option<T>>(
     if_bash: Y,
     if_not_bash: N,
 ) -> Option<T> {
-    let shell = std::env::var("SHELL").ok().unwrap_or_default();
+    let shell = env::var("SHELL").ok().unwrap_or_default();
 
     match shell.ends_with(target) {
         true => if_bash(shell),
@@ -108,3 +110,5 @@ pub fn run_if_bash_else_warn<T, Y: Fn(String) -> Option<T>>(if_bash: Y) -> Optio
         None
     })
 }
+
+// todo: run_if_shell_async + run_if_bash_else_warn_async

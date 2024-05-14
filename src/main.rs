@@ -15,7 +15,7 @@ use clap::{Command, CommandFactory, Parser};
 use clap_complete::{generate, Generator, Shell};
 
 use crate::cli::{Args, Process};
-use crate::commands::activate::install_activate;
+use crate::commands::activate::generate_activate;
 use crate::commands::ensurepath::ensure_path_generate;
 
 pub async fn print_completions<G: Generator>(
@@ -32,11 +32,11 @@ pub async fn generate_bash(generator: Shell) {
     match args.subcommand_name() {
         Some("activate") => {
             // generate code for uvx activate
-            install_activate().await
+            println!("{}", generate_activate().await)
         },
         Some("ensurepath") => {
             // geneate code for uvx ensurepath
-            ensure_path_generate().await
+            println!("{}", ensure_path_generate().await)
         },
         _ => {
             // other cases: show regular completions

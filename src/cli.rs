@@ -63,6 +63,16 @@ const PYTHON_HELP_TEXT: &str =
     "Python version or executable to use, e.g. `3.12`, `python3.12`, `/usr/bin/python3.12`";
 
 #[derive(Debug, Parser)]
+pub struct SetupOptions {
+    #[clap(long, help = "Don't update $PATH in .bashrc")]
+    pub skip_ensurepath: bool,
+    #[clap(long, help = "Don't enable completions via .bashrc")]
+    pub skip_completions: bool,
+    #[clap(long, help = "Don't enable `uvx activate` via .bashrc")]
+    pub skip_activate: bool,
+}
+
+#[derive(Debug, Parser)]
 pub struct ListOptions {
     #[clap(short, long, help = "Short output", conflicts_with_all = ["verbose"])]
     pub short: bool,
@@ -245,13 +255,13 @@ pub struct CompletionsOptions {
 pub enum Commands {
     // todo: `uvx setup` (with install completions, activate and ensurepath)
     // todo: `uvx create` for new bare venv
-    #[clap(about = "Use --install to install the autocomplete script (bash).")]
-    Completions(CompletionsOptions),
+    #[clap(about = "Setup additional (bash-specific) functionality.")]
+    Setup(SetupOptions),
     #[clap(about = "List packages and apps installed with uvx.")]
     List(ListOptions),
     #[clap(about = "Install a package (by pip name).")]
     Install(InstallOptions),
-    #[clap(about = "Start a new shell with an virtualenv activated")]
+    #[clap(about = "Activate an uvx-managed virtualenv (bash only)")]
     Activate(ActivateOptions),
     #[clap(about = "Upgrade a package.")]
     Upgrade(UpgradeOptions),
@@ -283,6 +293,8 @@ pub enum Commands {
         about = "Update ~/.bashrc with a PATH that includes the local bin directory that uvx uses."
     )]
     Ensurepath(EnsurepathOptions),
+    #[clap(about = "Use --install to install the autocomplete script (bash).")]
+    Completions(CompletionsOptions),
     #[clap(about = "Update the current installation of uvx (and optionally uv).")]
     SelfUpdate(SelfUpdateOptions),
 }
@@ -308,6 +320,7 @@ impl Process for Commands {
             Commands::Uninject(opts) => opts.process().await,
             Commands::Completions(opts) => opts.process().await,
             Commands::Run(opts) => opts.process().await,
+            Commands::Setup(opts) => opts.process().await,
         }
     }
 }

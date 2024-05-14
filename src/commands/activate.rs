@@ -1,11 +1,19 @@
 use crate::cli::{ActivateOptions, Process};
 use crate::cmd::run_if_bash_else_warn;
+use crate::commands::ensurepath::add_to_bashrc;
 use owo_colors::OwoColorize;
 
-pub async fn install_activate() {
+pub async fn generate_activate() -> String {
     // Used by `uvx --generate bash activate _`
     // note: only bash is supported right now!
-    println!("{}", include_str!("../shell/activate.sh"));
+    String::from(include_str!("../shell/activate.sh"))
+}
+
+pub async fn install_activate() -> Result<(), String> {
+    let bash_code = r#"eval "$(uvx --generate=bash activate _)""#;
+    // call eval instead of actually adding the bash function() to bashrc
+    // so updates are available immediately
+    add_to_bashrc(&bash_code, true).await
 }
 
 impl Process for ActivateOptions {

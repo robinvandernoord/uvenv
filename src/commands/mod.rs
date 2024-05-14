@@ -16,3 +16,4 @@ pub mod uninstall;
 pub mod uninstall_all;
 pub mod upgrade;
 pub mod upgrade_all;
+pub mod setup;

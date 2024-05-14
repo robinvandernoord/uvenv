@@ -80,10 +80,10 @@ pub async fn ensure_path(force: bool) -> Result<(), String> {
     Ok(())
 }
 
-pub async fn ensure_path_generate() {
+pub async fn ensure_path_generate() -> String {
     let bin_path = ensure_bin_dir().await;
     let bin_dir = bin_path.to_str().unwrap_or_default();
-    println!("export PATH=\"$PATH:{}\"", bin_dir)
+    format!("export PATH=\"$PATH:{}\"", bin_dir)
 }
 
 impl Process for EnsurepathOptions {
