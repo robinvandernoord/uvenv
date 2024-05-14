@@ -275,21 +275,39 @@ fn add_header(buf: &mut Vec<u8>) {
     *buf = new_buf;
 }
 
-pub async fn load_metadata(
-    filename: &Path,
-    recheck_scripts: bool,
-) -> Result<Metadata, String> {
+/// 'buf' is required to hold the data internally, with the same lifetime as the unserialized object
+/// Mimimal example:
+///
+///
+///     pub async fn load_setup_metadata(filename: &Path) -> Result<SetupMetadata, String> {
+///       let mut buf = Vec::new(); // allocate memory for the object
+///
+///       // Open the msgpack file
+///       let metadata: SetupMetadata = load_generic_msgpack(filename, &mut buf).await?;
+///
+///       Ok(metadata)
+///     }
+pub async fn load_generic_msgpack<'a, T: serde::Deserialize<'a>>(filename: &Path, mut buf: &'a mut Vec<u8>) -> Result<T, String> {
     // Open the msgpack file
     let mut file = File::open(filename).await.map_err_to_string()?;
 
-    let mut buf = Vec::new();
     file.read_to_end(&mut buf).await.map_err_to_string()?;
 
     strip_header(&mut buf);
 
     // Read the contents of the file into a Metadata struct
-    let mut metadata: Metadata = rmp_serde::decode::from_slice(&buf[..]).map_err_to_string()?;
+    let metadata: T = rmp_serde::decode::from_slice(&buf[..]).map_err_to_string()?;
 
+    Ok(metadata)
+}
+
+pub async fn load_metadata(
+    filename: &Path,
+    recheck_scripts: bool,
+) -> Result<Metadata, String> {
+    let mut buf = Vec::new();
+
+    let mut metadata: Metadata = load_generic_msgpack(filename, &mut buf).await?;
     if recheck_scripts {
         if let Some(folder) = filename.parent() {
             metadata.check_scripts(folder).await
@@ -297,6 +315,25 @@ pub async fn load_metadata(
     }
 
     Ok(metadata)
+
+    // // Open the msgpack file
+    // let mut file = File::open(filename).await.map_err_to_string()?;
+    //
+    // let mut buf = Vec::new();
+    // file.read_to_end(&mut buf).await.map_err_to_string()?;
+    //
+    // strip_header(&mut buf);
+    //
+    // // Read the contents of the file into a Metadata struct
+    // let mut metadata: Metadata = rmp_serde::decode::from_slice(&buf[..]).map_err_to_string()?;
+    //
+    // if recheck_scripts {
+    //     if let Some(folder) = filename.parent() {
+    //         metadata.check_scripts(folder).await
+    //     }
+    // }
+    //
+    // Ok(metadata)
 }
 
 pub async fn store_metadata(
