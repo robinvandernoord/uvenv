@@ -1,5 +1,6 @@
 use crate::cli::{CompletionsOptions, Process};
 
+use crate::cmd::run_if_bash_else_warn;
 use owo_colors::OwoColorize;
 
 use super::ensurepath::add_to_bashrc;
@@ -9,15 +10,19 @@ impl Process for CompletionsOptions {
         let for_bash = r#"eval "$(uvx --generate=bash completions)""#;
 
         if self.install {
+            // you probably want `uvx setup` but keep this for legacy.
             add_to_bashrc(for_bash, true).await?;
+            Ok(0)
         } else {
-            eprintln!(
-                "Tip: place this line in your ~/.bashrc or run with '{}' to do this automatically!",
-                "--install".green()
-            );
-            println!("{}", for_bash);
+            Ok(run_if_bash_else_warn(|_shell| {
+                eprintln!(
+                    "Tip: place this line in your ~/.bashrc or run '{}' to do this automatically!",
+                    "uvx setup".green()
+                );
+                println!("{}", for_bash);
+                Some(0)
+            })
+            .unwrap_or(1))
         }
-
-        Ok(0)
     }
 }

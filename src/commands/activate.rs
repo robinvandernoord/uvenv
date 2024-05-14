@@ -1,4 +1,6 @@
 use crate::cli::{ActivateOptions, Process};
+use crate::cmd::run_if_bash_else_warn;
+use owo_colors::OwoColorize;
 
 pub async fn install_activate() {
     // Used by `uvx --generate bash activate _`
@@ -11,11 +13,15 @@ impl Process for ActivateOptions {
         // wait a minute, this is not a bash script!
         // show warning with setup info:
 
-        Ok(1)
+        Ok(
+            run_if_bash_else_warn(|shell| {
+                println!("Your shell ({}) is supported, but the shell extension is not set up.\n\
+                You can use `uvx setup` to do this automatically, or add `{}` to your bashrc file to enable it manually.",
+                         &shell.blue(),
+                         r#"eval "$(uvx --generate=bash activate _)""#.green()
+                );
+                Some(1)
+            }).unwrap_or(126) // = cannot execute, if not BASH
+        )
     }
 }
-
-/*
-declare -x VIRTUAL_ENV="/home/robin/rust/uvx/venv"
-declare -x VIRTUAL_ENV_PROMPT="venv"
- */

@@ -1,4 +1,5 @@
 use crate::helpers::ResultToString;
+use owo_colors::OwoColorize;
 use std::env;
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -81,4 +82,29 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
             }
         },
     }
+}
+
+/// Given a target shell (e.g. 'bash'), run a positive or negative callback function.
+pub fn run_if_shell<T, Y: Fn(String) -> Option<T>, N: Fn(String) -> Option<T>>(
+    target: &str,
+    if_bash: Y,
+    if_not_bash: N,
+) -> Option<T> {
+    let shell = std::env::var("SHELL").ok().unwrap_or_default();
+
+    match shell.ends_with(target) {
+        true => if_bash(shell),
+        false => if_not_bash(shell),
+    }
+}
+
+/// Run a callback function if bash, or show a message saying the user's shell is unsupported.
+pub fn run_if_bash_else_warn<T, Y: Fn(String) -> Option<T>>(if_bash: Y) -> Option<T> {
+    run_if_shell("bash", if_bash, |shell| {
+        eprintln!(
+            "Unsupported shell '{}'. Currently, only bash is supported.",
+            shell.blue()
+        );
+        None
+    })
 }
