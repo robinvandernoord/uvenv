@@ -13,14 +13,16 @@ Inspired by:
     ```
 
 2. Optional (for bash users):
-    - Ensure that `~/.local/bin` is in your PATH:
-        ```bash
-        uvx ensurepath
-        ```
-    - Enable tab completion for `uvx`:
-        ```bash
-        uvx completions --install
-        ```
+      ```bash
+      uvx setup
+      ```
+
+   This installs the following features:
+
+- Ensures `~/.local/bin/` is added to your PATH, so commands can be found (unless `--skip-ensurepath`). Can also be
+  activated via `uvx ensurepath`
+- Enables tab completion for `uvx` (unless `--skip-completions`). Can also be enabled via `uvx completions --install`.
+- Enables `uvx activate` (unless `--skip-activate`) to activate uvx-managed virtualenvs from your shell
 
 ## Usage
 
