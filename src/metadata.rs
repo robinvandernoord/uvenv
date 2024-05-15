@@ -98,29 +98,11 @@ impl Metadata {
         empty
     }
 
-    /// try to guess/deduce some values
-    pub fn fill(
+    pub fn fill_python(
         &mut self,
-        maybe_venv: Option<&PythonEnvironment>,
-    ) -> Option<()> {
-        let _v: PythonEnvironment;
-
-        let venv = match maybe_venv {
-            Some(v) => v,
-            None => match uv_venv(None) {
-                Some(v) => {
-                    _v = v;
-                    &_v
-                },
-                None => return None,
-            },
-        };
-
+        venv: &PythonEnvironment,
+    ) {
         let python_info = venv.interpreter().markers();
-
-        if self.install_spec.is_empty() {
-            self.install_spec = String::from(&self.name);
-        }
 
         if self.python.is_empty() {
             self.python = format!(
@@ -132,6 +114,33 @@ impl Metadata {
         if self.python_raw.is_empty() {
             self.python_raw = venv.stdlib_as_string();
         }
+    }
+
+    /// try to guess/deduce some values
+    pub fn fill(
+        &mut self,
+        maybe_venv: Option<&PythonEnvironment>,
+    ) -> Option<()> {
+        let _v: PythonEnvironment;
+
+        if self.install_spec.is_empty() {
+            self.install_spec = String::from(&self.name);
+        }
+
+        let venv = match maybe_venv {
+            Some(v) => v,
+            None => match uv_venv(None) {
+                Some(v) => {
+                    // black magic fuckery to
+                    // get a reference to the currently active venv
+                    _v = v;
+                    &_v
+                },
+                None => return None,
+            },
+        };
+
+        self.fill_python(venv);
 
         Some(())
     }

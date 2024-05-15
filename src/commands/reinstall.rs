@@ -1,5 +1,6 @@
 use owo_colors::OwoColorize;
 
+use crate::commands::create::create;
 use crate::{
     cli::{Process, ReinstallOptions},
     commands::{install::install_package, uninstall::uninstall_package},
@@ -55,16 +56,26 @@ pub async fn reinstall(
         Vec::new()
     };
 
-    install_package(
-        new_install_spec,
-        None,
-        python,
-        force,
-        inject,
-        no_cache,
-        editable,
-    )
-    .await
+    if new_install_spec.is_empty() {
+        create(
+            &current_metadata.name,
+            python,
+            true, // force seed for now
+            force,
+        )
+        .await
+    } else {
+        install_package(
+            new_install_spec,
+            None,
+            python,
+            force,
+            inject,
+            no_cache,
+            editable,
+        )
+        .await
+    }
 }
 
 impl Process for ReinstallOptions {
