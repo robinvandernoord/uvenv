@@ -6,10 +6,9 @@
 
 ### Features
 
-* Introduced the `uvx activate` command, enabling activation via bash function.
-* Added `uvx setup`, allowing setup configurations and handling of metadata to prevent unnecessary re-setups unless
-  forced.
-* Added `uvx create` to facilitate custom creation processes with support for metadata handling.
+* Introduced the `uvx activate` command, enabling venv activation via bash function.
+* Added `uvx setup`, allowing which handles installation of bash integration features (like `uvx activate` and tab completion).
+* Added `uvx create` to create new (empty) virtualenvs without installing from a package.
 
 ### Fixes
 
