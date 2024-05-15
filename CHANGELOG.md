@@ -2,6 +2,23 @@
 
 <!--next-version-placeholder-->
 
+## v2.1.0 (2024-05-15)
+
+### Features
+
+* Introduced the `uvx activate` command, enabling activation via bash function.
+* Added `uvx setup`, allowing setup configurations and handling of metadata to prevent unnecessary re-setups unless
+  forced.
+* Added `uvx create` to facilitate custom creation processes with support for metadata handling.
+
+### Fixes
+
+* Enhanced shell compatibility by displaying a warning for unsupported shells during activation and hinting at the
+  necessity of running `uvx setup` (and others).
+
+### Documentation
+
+* Provided detailed documentation for `uvx setup` to assist users in understanding its usage and configurations.
 
 ## v2.0.8 (2024-05-01)
 
