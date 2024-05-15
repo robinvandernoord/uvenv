@@ -70,7 +70,11 @@ pub struct SetupOptions {
     pub skip_completions: bool,
     #[clap(long, help = "Don't enable `uvx activate` via .bashrc")]
     pub skip_activate: bool,
-    #[clap(long, help = "Setup features without checking previous installation.")]
+    #[clap(
+        short,
+        long,
+        help = "Setup features without checking previous installation."
+    )]
     pub force: bool,
 }
 

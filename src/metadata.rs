@@ -287,13 +287,16 @@ fn add_header(buf: &mut Vec<u8>) {
 ///
 ///       Ok(metadata)
 ///     }
-pub async fn load_generic_msgpack<'a, T: serde::Deserialize<'a>>(filename: &Path, mut buf: &'a mut Vec<u8>) -> Result<T, String> {
+pub async fn load_generic_msgpack<'a, T: serde::Deserialize<'a>>(
+    filename: &Path,
+    buf: &'a mut Vec<u8>,
+) -> Result<T, String> {
     // Open the msgpack file
     let mut file = File::open(filename).await.map_err_to_string()?;
 
-    file.read_to_end(&mut buf).await.map_err_to_string()?;
-
-    strip_header(&mut buf);
+    // for some reason (I guess the lifetime), buf can just be passed around now?
+    file.read_to_end(buf).await.map_err_to_string()?;
+    strip_header(buf);
 
     // Read the contents of the file into a Metadata struct
     let metadata: T = rmp_serde::decode::from_slice(&buf[..]).map_err_to_string()?;
@@ -315,30 +318,11 @@ pub async fn load_metadata(
     }
 
     Ok(metadata)
-
-    // // Open the msgpack file
-    // let mut file = File::open(filename).await.map_err_to_string()?;
-    //
-    // let mut buf = Vec::new();
-    // file.read_to_end(&mut buf).await.map_err_to_string()?;
-    //
-    // strip_header(&mut buf);
-    //
-    // // Read the contents of the file into a Metadata struct
-    // let mut metadata: Metadata = rmp_serde::decode::from_slice(&buf[..]).map_err_to_string()?;
-    //
-    // if recheck_scripts {
-    //     if let Some(folder) = filename.parent() {
-    //         metadata.check_scripts(folder).await
-    //     }
-    // }
-    //
-    // Ok(metadata)
 }
 
-pub async fn store_metadata(
+pub async fn store_generic_msgpack<T: serde::Serialize>(
     filename: &Path,
-    metadata: &Metadata,
+    metadata: &T,
 ) -> Result<(), String> {
     // Open the msgpack file
     let mut file = File::create(filename).await.map_err_to_string()?;
@@ -351,4 +335,11 @@ pub async fn store_metadata(
     file.write_all(&bytes).await.map_err_to_string()?;
 
     Ok(())
+}
+
+pub async fn store_metadata(
+    filename: &Path,
+    metadata: &Metadata,
+) -> Result<(), String> {
+    store_generic_msgpack(filename, metadata).await
 }

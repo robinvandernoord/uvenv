@@ -1,12 +1,13 @@
 use owo_colors::OwoColorize;
 use serde::{Deserialize, Serialize};
+use std::path::PathBuf;
 
 use crate::cli::{Process, SetupOptions};
 use crate::cmd::run_if_bash_else_warn;
 use crate::commands::activate::install_activate;
 use crate::commands::completions::completions;
 use crate::commands::ensurepath::ensure_path;
-use crate::metadata::{get_work_dir, load_generic_msgpack};
+use crate::metadata::{get_work_dir, load_generic_msgpack, store_generic_msgpack};
 
 // todo: ~/.local/uvx/setup.metadata file to track which features were already installed
 //     --force to ignore
@@ -24,7 +25,7 @@ pub struct SetupMetadata {
 
 impl SetupMetadata {
     pub fn new() -> Self {
-        return SetupMetadata {
+        SetupMetadata {
             feature_ensurepath: false,
             feature_completions: false,
             feature_activate: false,
@@ -32,10 +33,14 @@ impl SetupMetadata {
     }
 }
 
-async fn _load_setup_metadata() -> Result<SetupMetadata, String>{
+fn setup_metadata_filename() -> PathBuf {
     let workdir = get_work_dir();
 
-    let filename = workdir.join("setup.metadata");
+    workdir.join("setup.metadata")
+}
+
+async fn _load_setup_metadata() -> Result<SetupMetadata, String> {
+    let filename = setup_metadata_filename();
 
     let mut buf = Vec::new(); // allocate memory for the object
 
@@ -49,6 +54,12 @@ pub async fn load_setup_metadata() -> SetupMetadata {
     _load_setup_metadata().await.unwrap_or(SetupMetadata::new())
 }
 
+pub async fn store_setup_metadata(metadata: &SetupMetadata) -> Result<(), String> {
+    let filename = setup_metadata_filename();
+
+    store_generic_msgpack(&filename, metadata).await
+}
+
 pub async fn setup_for_bash(
     do_ensurepath: bool,
     do_completions: bool,
@@ -57,29 +68,35 @@ pub async fn setup_for_bash(
 ) -> Result<i32, String> {
     let mut any_warnings: bool = false;
 
-    let metadata = load_setup_metadata().await;
+    let mut metadata = load_setup_metadata().await;
 
-    let _  = dbg!(metadata);
-
-    if do_ensurepath {
+    if do_ensurepath && (!metadata.feature_ensurepath || force) {
         if let Err(msg) = ensure_path(force).await {
             any_warnings = true;
             eprintln!("{}", msg);
         }
+        metadata.feature_ensurepath = true;
     }
 
-    if do_completions {
+    if do_completions && (!metadata.feature_completions || force) {
         if let Err(msg) = completions(true).await {
             any_warnings = true;
             eprintln!("{}", msg);
         }
+        metadata.feature_completions = true;
     }
 
-    if do_activate {
+    if do_activate && (!metadata.feature_activate || force) {
         if let Err(msg) = install_activate().await {
             any_warnings = true;
             eprintln!("{}", msg);
         }
+        metadata.feature_activate = true;
+    }
+
+    if let Err(msg) = store_setup_metadata(&metadata).await {
+        any_warnings = true;
+        eprintln!("{}", msg);
     }
 
     Ok(if any_warnings {

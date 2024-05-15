@@ -13,7 +13,7 @@ pub async fn install_activate() -> Result<(), String> {
     let bash_code = r#"eval "$(uvx --generate=bash activate _)""#;
     // call eval instead of actually adding the bash function() to bashrc
     // so updates are available immediately
-    add_to_bashrc(&bash_code, true).await
+    add_to_bashrc(bash_code, true).await
 }
 
 impl Process for ActivateOptions {
