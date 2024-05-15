@@ -9,9 +9,6 @@ use crate::commands::completions::completions;
 use crate::commands::ensurepath::ensure_path;
 use crate::metadata::{get_work_dir, load_generic_msgpack, store_generic_msgpack};
 
-// todo: ~/.local/uvx/setup.metadata file to track which features were already installed
-//     --force to ignore
-
 #[derive(Debug, PartialEq, Deserialize, Serialize)] // dbg_pls::DebugPls
 pub struct SetupMetadata {
     // order is important, new features should go last!!
@@ -99,12 +96,8 @@ pub async fn setup_for_bash(
         eprintln!("{}", msg);
     }
 
-    Ok(if any_warnings {
-        1
-    } else {
-        println!("{}", "Setup complete!".green());
-        0
-    })
+    println!("Setup finished, you may want to run `{}` now in order to apply these changes to your shell.", "exec bash".green());
+    Ok(if any_warnings { 1 } else { 0 })
 }
 
 impl Process for SetupOptions {

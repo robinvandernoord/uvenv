@@ -1,5 +1,7 @@
 pub mod activate;
 pub mod completions;
+pub mod create;
+
 pub mod ensurepath;
 pub mod inject;
 pub mod install;

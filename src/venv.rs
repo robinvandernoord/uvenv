@@ -8,6 +8,34 @@ use std::path::{Path, PathBuf};
 
 use uv_interpreter::PythonEnvironment;
 
+pub async fn create_venv_raw(
+    venv_path: &Path,
+    python: Option<&String>,
+    force: bool,
+    with_pip: bool,
+) -> Result<(), String> {
+    if !force && venv_path.exists() {
+        return Err(
+            format!("'{}' is already installed.\nUse '{}' to update existing tools or pass '{}' to this command to ignore this message.",
+                    &venv_path.to_str().unwrap_or_default().green(), "uvx upgrade".green(), "--force".green())
+        );
+    }
+
+    let mut args: Vec<&str> = vec!["venv", venv_path.to_str().unwrap_or_default()];
+
+    if let Some(py) = python {
+        args.push("--python");
+        args.push(py);
+    }
+    if with_pip {
+        args.push("--seed");
+    }
+
+    uv(args).await?;
+
+    Ok(())
+}
+
 pub async fn create_venv(
     package_name: &PackageName,
     python: Option<&String>,
@@ -20,25 +48,7 @@ pub async fn create_venv(
         Some(prefix) => PathBuf::from(format!("{}{}", prefix, package_name)),
     };
 
-    if !force && venv_path.exists() {
-        return Err(
-            format!("'{}' is already installed.\nUse '{}' to update existing tools or pass '{}' to this command to ignore this message.", 
-            &package_name.to_string().green(), "uvx upgrade".green(), "--force".green())
-        );
-    }
-
-    let mut args: Vec<&str> = vec!["venv", venv_path.to_str().unwrap_or_default()];
-
-    // if let Some(py) = python {
-    if let Some(py) = python {
-        args.push("--python");
-        args.push(py);
-    }
-    if with_pip {
-        args.push("--seed");
-    }
-
-    uv(args).await?;
+    create_venv_raw(&venv_path, python, force, with_pip).await?;
 
     Ok(venv_path)
 }

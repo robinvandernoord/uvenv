@@ -108,6 +108,17 @@ pub struct InstallOptions {
 }
 
 #[derive(Debug, Parser)]
+pub struct CreateOptions {
+    pub venv_name: String,
+    #[clap(long, help = PYTHON_HELP_TEXT)]
+    pub python: Option<String>,
+    #[clap(long, help = "Skip installing basic packages like 'pip'")]
+    pub no_seed: bool,
+    #[clap(short, long, help = "Overwrite existing venv with conflicting name")]
+    pub force: bool,
+}
+
+#[derive(Debug, Parser)]
 pub struct ActivateOptions {
     pub venv_name: String,
 }
@@ -259,14 +270,14 @@ pub struct CompletionsOptions {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    // todo: `uvx setup` (with install completions, activate and ensurepath)
-    // todo: `uvx create` for new bare venv
     #[clap(about = "Setup additional (bash-specific) functionality.")]
     Setup(SetupOptions),
     #[clap(about = "List packages and apps installed with uvx.")]
     List(ListOptions),
     #[clap(about = "Install a package (by pip name).")]
     Install(InstallOptions),
+    #[clap(about = "Create a new (empty) virtualenv")]
+    Create(CreateOptions),
     #[clap(about = "Activate an uvx-managed virtualenv (bash only)")]
     Activate(ActivateOptions),
     #[clap(about = "Upgrade a package.")]
@@ -327,6 +338,7 @@ impl Process for Commands {
             Commands::Completions(opts) => opts.process().await,
             Commands::Run(opts) => opts.process().await,
             Commands::Setup(opts) => opts.process().await,
+            Commands::Create(opts) => opts.process().await,
         }
     }
 }
