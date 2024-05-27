@@ -1,13 +1,15 @@
 use crate::helpers::ResultToString;
-use crate::pypi::{get_latest_version, get_pypi_data};
+use crate::pypi::get_latest_version;
 use crate::symlinks::check_symlink;
 use crate::uv::{uv_get_installed_version, uv_venv, Helpers};
 use itertools::Itertools;
 use owo_colors::OwoColorize;
+use pep440_rs::Version;
 use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
+use std::str::FromStr;
 use tokio::fs::{create_dir_all, File};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
@@ -54,6 +56,10 @@ pub fn venv_path(venv_name: &str) -> PathBuf {
     get_venv_dir().join(venv_name)
 }
 
+pub fn version_0() -> Version {
+    Version::from_str("0.0.0").unwrap()
+}
+
 #[derive(Debug, PartialEq, Deserialize, Serialize)] // dbg_pls::DebugPls
 pub struct Metadata {
     // order is important!!
@@ -88,6 +94,14 @@ impl Metadata {
             injected: HashSet::new(),
             editable: false,
         }
+    }
+
+    #[allow(dead_code)]
+    pub fn requested_version_parsed(&self) -> Version {
+        Version::from_str(&self.requested_version).unwrap_or(version_0())
+    }
+    pub fn installed_version_parsed(&self) -> Version {
+        Version::from_str(&self.installed_version).unwrap_or(version_0())
     }
 
     pub fn find(req: &Requirement) -> Metadata {
@@ -189,9 +203,22 @@ impl Metadata {
     }
 
     pub async fn check_for_update(&mut self) {
-        dbg!(get_pypi_data(&self.name).await);
+        // todo: keep requested version spec in mind?
+        //  (e.g. python-semantic-release<8 should not show 9.8.0 as new update)
 
-        dbg!(get_latest_version(&self.name).await);
+        if let Some(latest_version) = get_latest_version(&self.name).await {
+            let installed_version = self.installed_version_parsed();
+            let outdated = latest_version > installed_version;
+            let txt = format!(
+                "{} - latest: {}; installed: {}; outdated: {}",
+                &self.name, latest_version, installed_version, outdated
+            );
+            if outdated {
+                println!("{}", txt.red())
+            } else {
+                println!("{}", txt.green())
+            }
+        }
     }
 
     pub async fn check_scripts(
