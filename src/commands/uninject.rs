@@ -12,7 +12,7 @@ pub async fn eject_package(
     to_eject_specs: &[String],
 ) -> Result<String, String> {
     let (requirement, environ) = setup_environ_from_requirement(from).await?;
-    let mut metadata = Metadata::for_requirement(&requirement, false).await;
+    let mut metadata = Metadata::for_requirement(&requirement, false, false).await;
 
     let mut args = vec!["pip", "uninstall"];
 

@@ -31,7 +31,7 @@ pub async fn reinstall(
         );
     }
 
-    let current_metadata = Metadata::for_requirement(&requirement, false).await;
+    let current_metadata = Metadata::for_requirement(&requirement, false, false).await;
 
     let install_spec_changed =
         editable || !requirement.version().is_empty() || !requirement.extras().is_empty();

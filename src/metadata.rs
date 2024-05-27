@@ -1,4 +1,5 @@
 use crate::helpers::ResultToString;
+use crate::pypi::{get_latest_version, get_pypi_data};
 use crate::symlinks::check_symlink;
 use crate::uv::{uv_get_installed_version, uv_venv, Helpers};
 use itertools::Itertools;
@@ -107,7 +108,8 @@ impl Metadata {
         if self.python.is_empty() {
             self.python = format!(
                 "{} {}",
-                python_info.platform_python_implementation(), python_info.python_full_version()
+                python_info.platform_python_implementation(),
+                python_info.python_full_version()
             )
         }
 
@@ -148,20 +150,22 @@ impl Metadata {
     pub async fn for_dir(
         dirname: &Path,
         recheck_scripts: bool,
+        check_updates: bool,
     ) -> Option<Metadata> {
         let meta_path = dirname.join(".metadata");
 
-        Metadata::for_file(&meta_path, recheck_scripts).await
+        Metadata::for_file(&meta_path, recheck_scripts, check_updates).await
     }
 
     pub async fn for_requirement(
         requirement: &Requirement,
         recheck_scripts: bool,
+        check_updates: bool,
     ) -> Metadata {
         let requirement_name = requirement.name.to_string();
         let venv_dir = venv_path(&requirement_name);
 
-        match Metadata::for_dir(&venv_dir, recheck_scripts).await {
+        match Metadata::for_dir(&venv_dir, recheck_scripts, check_updates).await {
             Some(m) => m,
             None => Metadata::find(requirement),
         }
@@ -170,8 +174,9 @@ impl Metadata {
     pub async fn for_file(
         filename: &Path,
         recheck_scripts: bool,
+        check_updates: bool,
     ) -> Option<Metadata> {
-        let result = load_metadata(filename, recheck_scripts).await;
+        let result = load_metadata(filename, recheck_scripts, check_updates).await;
         result.ok()
     }
 
@@ -181,6 +186,12 @@ impl Metadata {
     ) -> Result<(), String> {
         let meta_path = dirname.join(".metadata");
         store_metadata(&meta_path, self).await
+    }
+
+    pub async fn check_for_update(&mut self) {
+        dbg!(get_pypi_data(&self.name).await);
+
+        dbg!(get_latest_version(&self.name).await);
     }
 
     pub async fn check_scripts(
@@ -316,13 +327,21 @@ pub async fn load_generic_msgpack<'a, T: serde::Deserialize<'a>>(
 pub async fn load_metadata(
     filename: &Path,
     recheck_scripts: bool,
+    check_updates: bool,
 ) -> Result<Metadata, String> {
     let mut buf = Vec::new();
 
     let mut metadata: Metadata = load_generic_msgpack(filename, &mut buf).await?;
-    if recheck_scripts {
-        if let Some(folder) = filename.parent() {
+
+    if let Some(folder) = filename.parent() {
+        // filename.parent should always be Some
+
+        if recheck_scripts {
             metadata.check_scripts(folder).await
+        }
+
+        if check_updates {
+            metadata.check_for_update().await;
         }
     }
 

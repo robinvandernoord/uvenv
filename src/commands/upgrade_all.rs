@@ -11,7 +11,7 @@ pub async fn upgrade_all(
 ) -> Result<(), String> {
     let mut all_ok = true;
 
-    for meta in list_packages().await? {
+    for meta in list_packages(false).await? {
         match upgrade_package(&meta.name, force, no_cache, skip_injected).await {
             Ok(msg) => {
                 println!("{}", msg)

@@ -88,7 +88,8 @@ async fn store_metadata(
 
     metadata.python = format!(
         "{} {}",
-        python_info.platform_python_implementation(), python_info.python_full_version()
+        python_info.platform_python_implementation(),
+        python_info.python_full_version()
     );
     metadata.python_raw = venv.stdlib_as_string();
 

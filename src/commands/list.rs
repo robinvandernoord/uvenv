@@ -5,11 +5,14 @@ use crate::helpers::ResultToString;
 use crate::metadata::{get_venv_dir, Metadata};
 use owo_colors::OwoColorize;
 
-async fn read_from_folder(metadata_dir: ReadDir) -> Vec<Metadata> {
+async fn read_from_folder(
+    metadata_dir: ReadDir,
+    check_updates: bool,
+) -> Vec<Metadata> {
     let mut result: Vec<Metadata> = vec![];
 
     for dir in metadata_dir.flatten() {
-        if let Some(metadata) = Metadata::for_dir(&dir.path(), true).await {
+        if let Some(metadata) = Metadata::for_dir(&dir.path(), true, check_updates).await {
             result.push(metadata)
         } else {
             let venv_name = dir.file_name().into_string().unwrap_or_default();
@@ -38,7 +41,7 @@ impl ListOptions {
     }
 }
 
-pub async fn list_packages() -> Result<Vec<Metadata>, String> {
+pub async fn list_packages(check_updates: bool) -> Result<Vec<Metadata>, String> {
     let venv_dir_path = get_venv_dir();
     let possibly_missing = std::fs::read_dir(&venv_dir_path);
 
@@ -51,13 +54,13 @@ pub async fn list_packages() -> Result<Vec<Metadata>, String> {
         },
     };
 
-    let result = read_from_folder(must_exist).await;
-    Ok(result)
+    Ok(read_from_folder(must_exist, check_updates).await)
 }
 
 impl Process for ListOptions {
     async fn process(self) -> Result<i32, String> {
-        let all_items = list_packages().await?;
+        let check_updates = true; // todo
+        let all_items = list_packages(check_updates).await?;
 
         let filtered_items: Vec<&Metadata> = if !self.venv_names.is_empty() {
             // add filter

@@ -21,7 +21,8 @@ pub async fn update_metadata(
     let new_version = uv_get_installed_version(&requirement.name, Some(environ))?;
 
     metadata.requested_version = requested_version;
-    metadata.installed_version = new_version.clone();
+    // metadata.installed_version = new_version.clone();
+    metadata.requested_version.clone_from(&new_version);
     metadata.save(&environ.to_path_buf()).await?;
 
     Ok(new_version)
@@ -122,7 +123,7 @@ pub async fn upgrade_package(
     // No virtualenv for '{package_name}', stopping. Use 'uvx install' instead.
     let (requirement, environ) = setup_environ_from_requirement(install_spec).await?;
 
-    let mut metadata = Metadata::for_requirement(&requirement, true).await;
+    let mut metadata = Metadata::for_requirement(&requirement, true, false).await;
 
     _upgrade_package(
         &requirement,
