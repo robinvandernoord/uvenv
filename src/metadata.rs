@@ -107,7 +107,7 @@ impl Metadata {
         if self.python.is_empty() {
             self.python = format!(
                 "{} {}",
-                python_info.platform_python_implementation, python_info.python_full_version
+                python_info.platform_python_implementation(), python_info.python_full_version()
             )
         }
 

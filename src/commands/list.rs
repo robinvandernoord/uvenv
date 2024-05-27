@@ -42,6 +42,7 @@ pub async fn list_packages() -> Result<Vec<Metadata>, String> {
     let venv_dir_path = get_venv_dir();
     let possibly_missing = std::fs::read_dir(&venv_dir_path);
 
+    // no tokio::fs because ReadDir.flatten doesn't exist then.
     let must_exist = match possibly_missing {
         Ok(dir) => dir,
         Err(_) => {
