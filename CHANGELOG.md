@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## v2.2.0 (2024-05-28)
+
+### Features
+* Added the `self` subcommand namespace
+  * `uvx self update` to self-update
+  * `uvx self changelog` to see the changelog of uvx
+* Look for available updates on `uvx list`
+  * Includes `--skip-updates`, `--show-prereleases`, `--ignore-constraints` as options
+
+### BREAKING CHANGE
+* `uvx self-update` is now `uvx self update`
+
 ## v2.1.0 (2024-05-15)
 
 ### Features
