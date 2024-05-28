@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v2.2.2 (2024-05-28)
+
+### Fix
+
+* `uvx upgrade` stored version metadata wrong
+
+
 ## v2.2.1 (2024-05-28)
 
 ### Fix
