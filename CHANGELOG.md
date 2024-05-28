@@ -2,12 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## v2.3.0 (2024-05-28)
+
+### Feature
+
+* `uvx check` to perform checks (like uvx list does) and report any problems.
+
+### Refactoring
+
+* improved Rust-esque codestyle (according to Clippy)
+
 ## v2.2.2 (2024-05-28)
 
 ### Fix
 
 * `uvx upgrade` stored version metadata wrong
-
 
 ## v2.2.1 (2024-05-28)
 
@@ -18,13 +27,15 @@
 ## v2.2.0 (2024-05-28)
 
 ### Features
+
 * Added the `self` subcommand namespace
-  * `uvx self update` to self-update
-  * `uvx self changelog` to see the changelog of uvx
+    * `uvx self update` to self-update
+    * `uvx self changelog` to see the changelog of uvx
 * Look for available updates on `uvx list`
-  * Includes `--skip-updates`, `--show-prereleases`, `--ignore-constraints` as options
+    * Includes `--skip-updates`, `--show-prereleases`, `--ignore-constraints` as options
 
 ### BREAKING CHANGE
+
 * `uvx self-update` is now `uvx self update`
 
 ## v2.1.0 (2024-05-15)
@@ -32,7 +43,8 @@
 ### Features
 
 * Introduced the `uvx activate` command, enabling venv activation via bash function.
-* Added `uvx setup`, allowing which handles installation of bash integration features (like `uvx activate` and tab completion).
+* Added `uvx setup`, allowing which handles installation of bash integration features (like `uvx activate` and tab
+  completion).
 * Added `uvx create` to create new (empty) virtualenvs without installing from a package.
 
 ### Fixes
