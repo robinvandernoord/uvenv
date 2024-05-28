@@ -60,7 +60,7 @@ impl Issues {
                 println!("  - {}", issue.red());
             }
 
-            println!("{}", "💡 Tip: you can use `uvx upgrade <package>` to update all outdated dependencies in a specific environment.".blue());
+            println!("{}", "💡 Tip: you can use `uvx upgrade <package>` to update a specific environment.".blue());
         }
 
         // Display script issues
