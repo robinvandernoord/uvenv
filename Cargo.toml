@@ -30,7 +30,7 @@ configparser = "3.0.4"
 tempfile = "3.10.1"
 chrono = "0.4.38"
 subprocess = "0.2.9"
-reqwest = "0.12.4"
+reqwest = { version = "0.12.4", default-features = false, features = ["json", "gzip", "brotli", "stream", "rustls-tls", "rustls-tls-native-roots"] }
 regex = "1.10.4"
 
 # fancy

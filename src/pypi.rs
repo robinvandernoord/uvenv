@@ -1,7 +1,9 @@
 use pep440_rs::{Version, VersionSpecifier};
 use pep508_rs::{PackageName, Requirement};
 use rkyv::{de::deserializers::SharedDeserializeMap, Deserialize};
-use uv_client::{RegistryClient, RegistryClientBuilder, SimpleMetadatum};
+use uv_client::{
+    RegistryClient, RegistryClientBuilder, SimpleMetadatum,
+};
 
 use crate::pip::parse_requirement;
 use crate::uv::uv_cache;
@@ -36,8 +38,12 @@ pub async fn get_versions_for_packagename(
         return versions;
     };
 
-    let Ok(data) = client.simple(package_name).await else {
-        return versions;
+    let data = match client.simple(package_name).await {
+        Err(err) => {
+            eprintln!("Something went wrong: {}", err);
+            return versions;
+        },
+        Ok(data) => data,
     };
 
     if let Some((_, metadata)) = data.iter().next_back() {
