@@ -3,7 +3,7 @@ use crate::uv::Helpers;
 use owo_colors::OwoColorize;
 
 use crate::cli::{Process, UninstallOptions};
-use crate::metadata::{venv_path, Metadata};
+use crate::metadata::{venv_path, LoadMetadataConfig, Metadata};
 use crate::symlinks::{find_symlinks, remove_symlink, remove_symlinks};
 use crate::venv::{activate_venv, remove_venv};
 
@@ -32,7 +32,7 @@ pub async fn uninstall_package(
 
     let venv = activate_venv(&venv_dir).await?;
 
-    let metadata = Metadata::for_requirement(&requirement, false, false).await;
+    let metadata = Metadata::for_requirement(&requirement, &LoadMetadataConfig::none()).await;
 
     // symlinks = find_symlinks(package_name, venv_path) or [package_name]
     let symlinks = find_symlinks(&requirement, &metadata.installed_version, &venv).await;

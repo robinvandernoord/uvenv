@@ -1,12 +1,13 @@
 use crate::cli::{Process, UninstallAllOptions};
 use crate::commands::list::list_packages;
 use crate::commands::uninstall::uninstall_package;
+use crate::metadata::LoadMetadataConfig;
 use owo_colors::OwoColorize;
 
 pub async fn uninstall_all(force: bool) -> Result<(), String> {
     let mut all_ok = true;
 
-    for meta in list_packages(false).await? {
+    for meta in list_packages(&LoadMetadataConfig::none()).await? {
         match uninstall_package(&meta.name, force).await {
             Ok(msg) => {
                 println!("{}", msg)

@@ -3,6 +3,7 @@ use owo_colors::OwoColorize;
 use crate::cli::{Process, UpgradeAllOptions};
 use crate::commands::list::list_packages;
 use crate::commands::upgrade::upgrade_package;
+use crate::metadata::LoadMetadataConfig;
 
 pub async fn upgrade_all(
     force: bool,
@@ -11,7 +12,7 @@ pub async fn upgrade_all(
 ) -> Result<(), String> {
     let mut all_ok = true;
 
-    for meta in list_packages(false).await? {
+    for meta in list_packages(&LoadMetadataConfig::none()).await? {
         match upgrade_package(&meta.name, force, no_cache, skip_injected).await {
             Ok(msg) => {
                 println!("{}", msg)

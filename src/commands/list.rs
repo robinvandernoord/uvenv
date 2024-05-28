@@ -2,17 +2,17 @@ use std::fs::ReadDir;
 
 use crate::cli::{ListOptions, Process};
 use crate::helpers::ResultToString;
-use crate::metadata::{get_venv_dir, Metadata};
+use crate::metadata::{get_venv_dir, LoadMetadataConfig, Metadata};
 use owo_colors::OwoColorize;
 
 async fn read_from_folder(
     metadata_dir: ReadDir,
-    check_updates: bool,
+    config: &LoadMetadataConfig,
 ) -> Vec<Metadata> {
     let mut result: Vec<Metadata> = vec![];
 
     for dir in metadata_dir.flatten() {
-        if let Some(metadata) = Metadata::for_dir(&dir.path(), true, check_updates).await {
+        if let Some(metadata) = Metadata::for_dir(&dir.path(), config).await {
             result.push(metadata)
         } else {
             let venv_name = dir.file_name().into_string().unwrap_or_default();
@@ -39,9 +39,18 @@ impl ListOptions {
 
         Ok(0)
     }
+
+    pub fn to_metadataconfig(&self) -> LoadMetadataConfig {
+        LoadMetadataConfig {
+            recheck_scripts: true, // always done
+            updates_check: !self.skip_updates,
+            updates_prereleases: self.show_prereleases,
+            updates_ignore_constraints: self.ignore_constraints,
+        }
+    }
 }
 
-pub async fn list_packages(check_updates: bool) -> Result<Vec<Metadata>, String> {
+pub async fn list_packages(config: &LoadMetadataConfig) -> Result<Vec<Metadata>, String> {
     let venv_dir_path = get_venv_dir();
     let possibly_missing = std::fs::read_dir(&venv_dir_path);
 
@@ -54,13 +63,14 @@ pub async fn list_packages(check_updates: bool) -> Result<Vec<Metadata>, String>
         },
     };
 
-    Ok(read_from_folder(must_exist, check_updates).await)
+    Ok(read_from_folder(must_exist, config).await)
 }
 
 impl Process for ListOptions {
     async fn process(self) -> Result<i32, String> {
-        let check_updates = true; // todo
-        let all_items = list_packages(check_updates).await?;
+        let config = self.to_metadataconfig();
+
+        let all_items = list_packages(&config).await?;
 
         let filtered_items: Vec<&Metadata> = if !self.venv_names.is_empty() {
             // add filter

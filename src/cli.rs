@@ -87,6 +87,13 @@ pub struct ListOptions {
     #[clap(short, long, help = "Output in JSON format", conflicts_with_all = ["verbose"])]
     pub json: bool,
 
+    #[clap(long, help = "Don't check for updates", conflicts_with_all = ["show_prereleases", "ignore_constraints"])]
+    pub skip_updates: bool,
+    #[clap(long, help = "Show prerelease updates", conflicts_with_all = ["skip_updates"])]
+    pub show_prereleases: bool,
+    #[clap(long, help="Ignore version constraints when checking updates", conflicts_with_all = ["skip_updates"])]
+    pub ignore_constraints: bool,
+
     pub venv_names: Vec<String>,
 }
 

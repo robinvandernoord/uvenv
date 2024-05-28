@@ -1,6 +1,6 @@
 use crate::animate::{show_loading_indicator, AnimationSettings};
 use crate::cli::{Process, UnInjectOptions};
-use crate::metadata::Metadata;
+use crate::metadata::{LoadMetadataConfig, Metadata};
 use crate::venv::setup_environ_from_requirement;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
@@ -12,7 +12,7 @@ pub async fn eject_package(
     to_eject_specs: &[String],
 ) -> Result<String, String> {
     let (requirement, environ) = setup_environ_from_requirement(from).await?;
-    let mut metadata = Metadata::for_requirement(&requirement, false, false).await;
+    let mut metadata = Metadata::for_requirement(&requirement, &LoadMetadataConfig::none()).await;
 
     let mut args = vec!["pip", "uninstall"];
 

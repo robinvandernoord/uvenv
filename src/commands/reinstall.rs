@@ -1,6 +1,7 @@
 use owo_colors::OwoColorize;
 
 use crate::commands::create::create;
+use crate::metadata::LoadMetadataConfig;
 use crate::{
     cli::{Process, ReinstallOptions},
     commands::{install::install_package, uninstall::uninstall_package},
@@ -31,7 +32,8 @@ pub async fn reinstall(
         );
     }
 
-    let current_metadata = Metadata::for_requirement(&requirement, false, false).await;
+    let current_metadata =
+        Metadata::for_requirement(&requirement, &LoadMetadataConfig::none()).await;
 
     let install_spec_changed =
         editable || !requirement.version().is_empty() || !requirement.extras().is_empty();

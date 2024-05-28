@@ -1,4 +1,4 @@
-use pep440_rs::Version;
+use pep440_rs::{Version, VersionSpecifier};
 use pep508_rs::{PackageName, Requirement};
 use rkyv::{de::deserializers::SharedDeserializeMap, Deserialize};
 use uv_client::{RegistryClient, RegistryClientBuilder, SimpleMetadatum};
@@ -25,18 +25,47 @@ pub fn deserialize_metadata(datum: &rkyv::Archived<SimpleMetadatum>) -> Option<S
     full
 }
 
-pub async fn get_latest_version_for_packagename(package_name: &PackageName) -> Option<Version> {
-    let client = get_client().await?;
+pub async fn get_versions_for_packagename(
+    package_name: &PackageName,
+    stable: bool,
+    constraint: Option<VersionSpecifier>,
+) -> Vec<Version> {
+    let mut versions: Vec<Version> = vec![];
 
-    let data = client.simple(package_name).await.ok()?;
+    let Some(client) = get_client().await else {
+        return versions;
+    };
+
+    let Ok(data) = client.simple(package_name).await else {
+        return versions;
+    };
 
     if let Some((_, metadata)) = data.iter().next_back() {
-        if let Some(latest) = metadata.iter().next_back() {
-            return deserialize_version(&latest.version);
-        }
+        versions = metadata
+            .iter()
+            .filter_map(|metadatum| deserialize_version(&metadatum.version))
+            .collect();
     }
 
-    None
+    if stable {
+        versions.retain(|version| !version.any_prerelease());
+    }
+
+    if let Some(specifier) = constraint {
+        versions.retain(|version| specifier.contains(version))
+    }
+
+    versions
+}
+
+pub async fn get_latest_version_for_packagename(
+    package_name: &PackageName,
+    stable: bool,
+    constraint: Option<VersionSpecifier>,
+) -> Option<Version> {
+    let versions = get_versions_for_packagename(package_name, stable, constraint).await;
+
+    versions.last().cloned()
 }
 #[allow(dead_code)]
 pub async fn get_pypi_data_for_packagename(package_name: &PackageName) -> Option<SimpleMetadatum> {
@@ -53,23 +82,19 @@ pub async fn get_pypi_data_for_packagename(package_name: &PackageName) -> Option
     None
 }
 
-pub async fn get_latest_version_for_requirement(req: &Requirement) -> Option<Version> {
-    get_latest_version_for_packagename(&req.name).await
-}
-#[allow(dead_code)]
-pub async fn get_pypi_data_for_requirement(req: &Requirement) -> Option<SimpleMetadatum> {
-    get_pypi_data_for_packagename(&req.name).await
+pub async fn get_latest_version_for_requirement(
+    req: &Requirement,
+    stable: bool,
+    constraint: Option<VersionSpecifier>,
+) -> Option<Version> {
+    get_latest_version_for_packagename(&req.name, stable, constraint).await
 }
 
-pub async fn get_latest_version(package_spec: &str) -> Option<Version> {
+pub async fn get_latest_version(
+    package_spec: &str,
+    stable: bool,
+    constraint: Option<VersionSpecifier>,
+) -> Option<Version> {
     let (requirement, _) = parse_requirement(package_spec).await.ok()?;
-
-    get_latest_version_for_requirement(&requirement).await
-}
-
-#[allow(dead_code)]
-pub async fn get_pypi_data(package_spec: &str) -> Option<SimpleMetadatum> {
-    let (requirement, _) = parse_requirement(package_spec).await.ok()?;
-
-    get_pypi_data_for_requirement(&requirement).await
+    get_latest_version_for_requirement(&requirement, stable, constraint).await
 }

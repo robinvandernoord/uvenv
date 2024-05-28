@@ -4,6 +4,7 @@ use pep508_rs::Requirement;
 use uv_interpreter::PythonEnvironment;
 
 use crate::helpers::StringExt;
+use crate::metadata::LoadMetadataConfig;
 use crate::venv::setup_environ_from_requirement;
 use crate::{
     animate::{show_loading_indicator, AnimationSettings},
@@ -123,7 +124,10 @@ pub async fn upgrade_package(
     // No virtualenv for '{package_name}', stopping. Use 'uvx install' instead.
     let (requirement, environ) = setup_environ_from_requirement(install_spec).await?;
 
-    let mut metadata = Metadata::for_requirement(&requirement, true, false).await;
+    let mut config = LoadMetadataConfig::default();
+    config.updates_check = false;
+
+    let mut metadata = Metadata::for_requirement(&requirement, &config).await;
 
     _upgrade_package(
         &requirement,

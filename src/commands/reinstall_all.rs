@@ -1,6 +1,7 @@
 use crate::cli::{Process, ReinstallAllOptions};
 use crate::commands::list::list_packages;
 use crate::commands::reinstall::reinstall;
+use crate::metadata::LoadMetadataConfig;
 use owo_colors::OwoColorize;
 
 pub async fn reinstall_all(
@@ -12,7 +13,7 @@ pub async fn reinstall_all(
 ) -> Result<(), String> {
     let mut all_ok = true;
 
-    for meta in list_packages(false).await? {
+    for meta in list_packages(&LoadMetadataConfig::none()).await? {
         match reinstall(
             &meta.name,
             python,

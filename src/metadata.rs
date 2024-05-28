@@ -4,7 +4,7 @@ use crate::symlinks::check_symlink;
 use crate::uv::{uv_get_installed_version, uv_venv, Helpers};
 use itertools::Itertools;
 use owo_colors::OwoColorize;
-use pep440_rs::Version;
+use pep440_rs::{Version, VersionSpecifier};
 use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -78,6 +78,10 @@ pub struct Metadata {
     pub injected: HashSet<String>,
     #[serde(default)]
     pub editable: bool,
+    #[serde(default)]
+    pub available_version: String,
+    #[serde(default)]
+    pub outdated: bool,
 }
 
 impl Metadata {
@@ -93,6 +97,8 @@ impl Metadata {
             python_raw: String::new(),
             injected: HashSet::new(),
             editable: false,
+            available_version: String::new(),
+            outdated: false,
         }
     }
 
@@ -163,23 +169,21 @@ impl Metadata {
 
     pub async fn for_dir(
         dirname: &Path,
-        recheck_scripts: bool,
-        check_updates: bool,
+        config: &LoadMetadataConfig,
     ) -> Option<Metadata> {
         let meta_path = dirname.join(".metadata");
 
-        Metadata::for_file(&meta_path, recheck_scripts, check_updates).await
+        Metadata::for_file(&meta_path, config).await
     }
 
     pub async fn for_requirement(
         requirement: &Requirement,
-        recheck_scripts: bool,
-        check_updates: bool,
+        config: &LoadMetadataConfig,
     ) -> Metadata {
         let requirement_name = requirement.name.to_string();
         let venv_dir = venv_path(&requirement_name);
 
-        match Metadata::for_dir(&venv_dir, recheck_scripts, check_updates).await {
+        match Metadata::for_dir(&venv_dir, config).await {
             Some(m) => m,
             None => Metadata::find(requirement),
         }
@@ -187,10 +191,9 @@ impl Metadata {
 
     pub async fn for_file(
         filename: &Path,
-        recheck_scripts: bool,
-        check_updates: bool,
+        config: &LoadMetadataConfig,
     ) -> Option<Metadata> {
-        let result = load_metadata(filename, recheck_scripts, check_updates).await;
+        let result = load_metadata(filename, config).await;
         result.ok()
     }
 
@@ -202,22 +205,22 @@ impl Metadata {
         store_metadata(&meta_path, self).await
     }
 
-    pub async fn check_for_update(&mut self) {
-        // todo: keep requested version spec in mind?
-        //  (e.g. python-semantic-release<8 should not show 9.8.0 as new update)
+    pub async fn check_for_update(
+        &mut self,
+        prereleases: bool,
+        ignore_constraints: bool,
+    ) {
+        let constraint = if ignore_constraints || self.requested_version.is_empty() {
+            None
+        } else {
+            VersionSpecifier::from_str(&self.requested_version).ok()
+        };
 
-        if let Some(latest_version) = get_latest_version(&self.name).await {
+        if let Some(latest_version) = get_latest_version(&self.name, !prereleases, constraint).await
+        {
             let installed_version = self.installed_version_parsed();
-            let outdated = latest_version > installed_version;
-            let txt = format!(
-                "{} - latest: {}; installed: {}; outdated: {}",
-                &self.name, latest_version, installed_version, outdated
-            );
-            if outdated {
-                println!("{}", txt.red())
-            } else {
-                println!("{}", txt.green())
-            }
+            self.available_version = latest_version.to_string();
+            self.outdated = latest_version > installed_version;
         }
     }
 
@@ -230,8 +233,16 @@ impl Metadata {
         }
     }
 
+    pub fn format_installed_version(&self) -> String {
+        if self.outdated {
+            self.installed_version.red().to_string()
+        } else {
+            self.installed_version.cyan().to_string()
+        }
+    }
+
     pub fn format_short(&self) -> String {
-        format!("- {} {}", self.name, self.installed_version.cyan())
+        format!("- {} {}", self.name, self.format_installed_version())
     }
 
     #[allow(dead_code)]
@@ -277,15 +288,25 @@ impl Metadata {
         result.push_str(&format!(
             "{}Installed Version: {} on {}.\n",
             INDENT,
-            self.installed_version.cyan(),
+            self.format_installed_version(),
             self.python.bright_blue()
         ));
 
-        let formatted_injects = self.format_injected();
-        result.push_str(&format!(
-            "{}Injected Packages: {}\n",
-            INDENT, formatted_injects
-        ));
+        if self.outdated && !self.available_version.is_empty() {
+            result.push_str(&format!(
+                "{}Available Version: {}.\n",
+                INDENT,
+                self.available_version.green(),
+            ));
+        }
+
+        if !self.injected.is_empty() {
+            let formatted_injects = self.format_injected();
+            result.push_str(&format!(
+                "{}Injected Packages: {}\n",
+                INDENT, formatted_injects
+            ));
+        }
 
         let formatted_scripts = self
             .scripts
@@ -351,10 +372,46 @@ pub async fn load_generic_msgpack<'a, T: serde::Deserialize<'a>>(
     Ok(metadata)
 }
 
+pub struct LoadMetadataConfig {
+    pub recheck_scripts: bool,
+    pub updates_check: bool,
+    pub updates_prereleases: bool,
+    pub updates_ignore_constraints: bool,
+}
+
+impl LoadMetadataConfig {
+    #[allow(dead_code)]
+    pub fn all() -> Self {
+        LoadMetadataConfig {
+            recheck_scripts: true,
+            updates_check: true,
+            updates_prereleases: true,
+            updates_ignore_constraints: true,
+        }
+    }
+
+    pub fn none() -> Self {
+        LoadMetadataConfig {
+            recheck_scripts: false,
+            updates_check: false,
+            updates_prereleases: false,
+            updates_ignore_constraints: false,
+        }
+    }
+
+    pub fn default() -> Self {
+        LoadMetadataConfig {
+            recheck_scripts: true,
+            updates_check: true,
+            updates_prereleases: false,
+            updates_ignore_constraints: false,
+        }
+    }
+}
+
 pub async fn load_metadata(
     filename: &Path,
-    recheck_scripts: bool,
-    check_updates: bool,
+    config: &LoadMetadataConfig,
 ) -> Result<Metadata, String> {
     let mut buf = Vec::new();
 
@@ -363,12 +420,17 @@ pub async fn load_metadata(
     if let Some(folder) = filename.parent() {
         // filename.parent should always be Some
 
-        if recheck_scripts {
+        if config.recheck_scripts {
             metadata.check_scripts(folder).await
         }
 
-        if check_updates {
-            metadata.check_for_update().await;
+        if config.updates_check {
+            metadata
+                .check_for_update(
+                    config.updates_prereleases,
+                    config.updates_ignore_constraints,
+                )
+                .await;
         }
     }
 
