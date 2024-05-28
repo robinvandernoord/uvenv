@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## v2.2.1 (2024-05-28)
+
+### Fix
+
+* `uvx list` was slow due to incorrect SSL behavior.
+
 ## v2.2.0 (2024-05-28)
 
 ### Features
