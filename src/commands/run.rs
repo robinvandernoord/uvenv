@@ -12,6 +12,40 @@ use crate::symlinks::find_symlinks;
 use crate::uv::uv_get_installed_version;
 use crate::venv::{activate_venv, create_venv, remove_venv};
 
+async fn _find_executable(
+    requirement: &Requirement,
+    package_spec: &str,
+    venv: &PythonEnvironment,
+) -> Result<String, String> {
+    let installed_version = uv_get_installed_version(&requirement.name, Some(venv))?;
+    let symlinks = find_symlinks(requirement, &installed_version, venv).await;
+
+    match symlinks.len() {
+        0 => {
+            // just return the original name just as a last hope:
+            Ok(requirement.name.to_string())
+        },
+        1 => Ok(symlinks[0].clone()),
+        _ => {
+            // too many choices, user should provide --binary <something>
+            let mut related = String::new();
+
+            for option in symlinks {
+                let code = format!("uvx run {package_spec} --binary {option} ...");
+                related.push_str(&format!("\t- {} | `{}` \n", option.green(), code.blue()));
+            }
+
+            Err(
+                format!("'{}' executable not found for install spec '{}'.\nMultiple related scripts were found:\n{}",
+                        requirement.name.to_string().green(),
+                        package_spec.green(),
+                        related,
+                )
+            )
+        },
+    }
+}
+
 pub async fn find_executable(
     requirement: &Requirement,
     binary: Option<&String>,
@@ -21,35 +55,7 @@ pub async fn find_executable(
 ) -> Result<PathBuf, String> {
     let executable = match binary {
         Some(executable) => executable.to_owned(),
-        None => {
-            let installed_version = uv_get_installed_version(&requirement.name, Some(venv))?;
-            let symlinks = find_symlinks(requirement, &installed_version, venv).await;
-
-            match symlinks.len() {
-                0 => {
-                    // just return the original name just as a last hope:
-                    requirement.name.to_string()
-                },
-                1 => symlinks[0].to_owned(),
-                _ => {
-                    // too many choices, user should provide --binary <something>
-                    let mut related = String::new();
-
-                    for option in symlinks {
-                        let code = format!("uvx run {} --binary {} ...", package_spec, option);
-                        related.push_str(&format!("\t- {} | `{}` \n", option.green(), code.blue()));
-                    }
-
-                    return Err(
-                        format!("'{}' executable not found for install spec '{}'.\nMultiple related scripts were found:\n{}",
-                                requirement.name.to_string().green(),
-                                package_spec.green(),
-                                related,
-                        )
-                    );
-                },
-            }
-        },
+        None => _find_executable(requirement, package_spec, venv).await?,
     };
 
     let full_exec_path = venv_path.join("bin").join(executable);
@@ -98,7 +104,7 @@ pub async fn run_package(
     let venv_name = &venv_path.to_str().unwrap_or_default();
 
     if keep {
-        eprintln!("ℹ️ Using virtualenv {}", venv_name.blue())
+        eprintln!("ℹ️ Using virtualenv {}", venv_name.blue());
     }
 
     // ### 2 ###

@@ -18,7 +18,7 @@ pub async fn completions(install: bool) -> Result<i32, String> {
                 "Tip: place this line in your ~/.bashrc or run '{}' to do this automatically!",
                 "uvx setup".green()
             );
-            println!("{}", for_bash);
+            println!("{for_bash}");
             Some(0)
         })
         .unwrap_or(1))

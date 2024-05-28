@@ -21,8 +21,8 @@ pub struct AnimationSettings {
 }
 
 impl AnimationSettings {
-    pub fn default() -> AnimationSettings {
-        AnimationSettings {
+    pub const fn default() -> Self {
+        Self {
             style: AnimationStyle::Modern,
             order: AnimationOrder::Before,
         }
@@ -43,10 +43,10 @@ pub async fn animation(
     style: AnimationSettings,
 ) {
     let spinner_chars = get_spinner_chars(&style.style);
-    let _order = &style.order;
+    let ordering = &style.order;
     let mut idx = 0;
     loop {
-        match &_order {
+        match &ordering {
             AnimationOrder::Before => {
                 eprint!("\r{} {} ", &spinner_chars[idx], &message);
             },

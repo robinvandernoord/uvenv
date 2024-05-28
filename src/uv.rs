@@ -24,7 +24,7 @@ pub async fn _get_uv_binary() -> Option<String> {
     //     return None;
     // };
 
-    find_sibling("uv").await.map(|buf| buf.to_string())
+    find_sibling("uv").await.map(PathToString::to_string)
 }
 
 pub async fn get_uv_binary() -> String {
@@ -42,7 +42,7 @@ where
     let script = get_uv_binary().await;
 
     let subcommand = &args[0].as_ref().to_str().unwrap_or_default(); // cursed but makes it work with both &str and String
-    let err_prefix = format!("uv {}", subcommand);
+    let err_prefix = format!("uv {subcommand}");
 
     run(&script, args, Some(err_prefix)).await
 }
@@ -53,34 +53,31 @@ pub async fn uv_with_output<S: AsRef<OsStr>>(args: Vec<S>) -> Result<i32, String
 }
 
 pub fn uv_cache() -> Option<Cache> {
-    if let Some(project_dirs) = ProjectDirs::from("", "", "uv") {
-        Cache::from_path(project_dirs.cache_dir())
-    } else {
-        Cache::from_path(".uv_cache")
-    }
-    .ok()
+    ProjectDirs::from("", "", "uv")
+        .map_or_else(
+            || Cache::from_path(".uv_cache"),
+            |project_dirs| Cache::from_path(project_dirs.cache_dir()),
+        )
+        .ok()
 }
 
 pub fn uv_venv(maybe_cache: Option<Cache>) -> Option<PythonEnvironment> {
-    if let Some(cache) = maybe_cache.or_else(uv_cache) {
-        PythonEnvironment::from_virtualenv(&cache).ok()
-    } else {
-        None
-    }
+    maybe_cache
+        .or_else(uv_cache)
+        .and_then(|cache| PythonEnvironment::from_virtualenv(&cache).ok())
 }
 
 pub fn uv_get_installed_version(
     package_name: &PackageName,
     maybe_venv: Option<&PythonEnvironment>,
 ) -> Result<String, String> {
-    let _venv: PythonEnvironment; // lifetime for if maybe_venv is None
+    let environment: PythonEnvironment; // lifetime for if maybe_venv is None
 
-    let site_packages = match maybe_venv {
-        Some(venv) => SitePackages::from_executable(venv),
-        None => {
-            _venv = uv_venv(None).ok_or_else(|| format!("{}", "Failed to set up venv!".red()))?;
-            SitePackages::from_executable(&_venv)
-        },
+    let site_packages = if let Some(venv) = maybe_venv {
+        SitePackages::from_executable(venv)
+    } else {
+        environment = uv_venv(None).ok_or_else(|| format!("{}", "Failed to set up venv!".red()))?;
+        SitePackages::from_executable(&environment)
     }
     .ok();
 
@@ -104,7 +101,7 @@ pub trait Helpers {
 
 impl Helpers for PythonEnvironment {
     fn to_path_buf(&self) -> PathBuf {
-        return self.root().to_path_buf();
+        self.root().to_path_buf()
     }
 
     fn stdlib_as_string(&self) -> String {
@@ -127,6 +124,6 @@ impl ExtractInfo for Requirement {
     }
 
     fn extras(&self) -> HashSet<String> {
-        self.extras.iter().map(|extra| extra.to_string()).collect()
+        self.extras.iter().map(ToString::to_string).collect()
     }
 }

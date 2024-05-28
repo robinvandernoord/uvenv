@@ -8,6 +8,7 @@ use crate::{
     venv::setup_environ_from_requirement,
 };
 
+#[allow(clippy::cast_lossless)]
 pub fn process_subprocess<S: AsRef<OsStr>>(
     exec_path: &Path,
     args: &[S],

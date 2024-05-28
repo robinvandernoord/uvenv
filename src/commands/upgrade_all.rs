@@ -15,7 +15,7 @@ pub async fn upgrade_all(
     for meta in list_packages(&LoadMetadataConfig::none()).await? {
         match upgrade_package(&meta.name, force, no_cache, skip_injected).await {
             Ok(msg) => {
-                println!("{}", msg)
+                println!("{msg}");
             },
             Err(msg) => {
                 eprintln!("{}", msg.red());
@@ -34,7 +34,7 @@ pub async fn upgrade_all(
 impl Process for UpgradeAllOptions {
     async fn process(self) -> Result<i32, String> {
         match upgrade_all(self.force, self.no_cache, self.skip_injected).await {
-            Ok(_) => Ok(0),
+            Ok(()) => Ok(0),
             Err(msg) => Err(msg),
         }
     }

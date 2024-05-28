@@ -16,7 +16,7 @@ pub async fn eject_package(
 
     let mut args = vec!["pip", "uninstall"];
 
-    let eject_args: Vec<&str> = to_eject_specs.iter().map(|k| k.as_ref()).collect();
+    let eject_args: Vec<&str> = to_eject_specs.iter().map(AsRef::as_ref).collect();
     args.extend(eject_args);
 
     let promise = uv(args);
@@ -33,7 +33,7 @@ pub async fn eject_package(
         .injected
         .iter()
         .filter(|i| !to_eject_specs.contains(i))
-        .map(|i| i.to_string())
+        .map(ToString::to_string)
         .collect();
 
     metadata.save(&environ.to_path_buf()).await?;
@@ -49,7 +49,7 @@ impl Process for UnInjectOptions {
     async fn process(self) -> Result<i32, String> {
         match eject_package(&self.outof, &self.package_specs).await {
             Ok(msg) => {
-                println!("{}", msg);
+                println!("{msg}");
                 Ok(0)
             },
             Err(msg) => Err(msg),

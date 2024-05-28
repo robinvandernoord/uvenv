@@ -93,7 +93,7 @@ impl Process for ReinstallOptions {
         .await
         {
             Ok(msg) => {
-                println!("{}", msg);
+                println!("{msg}");
                 Ok(0)
             },
             Err(msg) => Err(msg),

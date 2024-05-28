@@ -50,21 +50,26 @@ pub async fn get_package_versions<S: AsRef<str>>(
         .collect()
 }
 
+pub fn find_global_python() -> Result<PathBuf, String> {
+    let fallback = PathBuf::from("/usr/bin/python3");
+    if fallback.exists() {
+        Ok(fallback)
+    } else {
+        Err(format!(
+            "Python could not be found! Is `{}` installed globally (without a venv)?",
+            "uvx".green()
+        ))
+    }
+}
+
+pub async fn find_python() -> Result<PathBuf, String> {
+    find_sibling("python")
+        .await
+        .map_or_else(find_global_python, Ok)
+}
+
 pub async fn self_update(with_uv: bool) -> Result<i32, String> {
-    let exe = match find_sibling("python").await {
-        Some(sibling) => sibling,
-        None => {
-            let fallback = PathBuf::from("/usr/bin/python3");
-            if fallback.exists() {
-                fallback
-            } else {
-                return Err(format!(
-                    "Python could not be found! Is `{}` installed globally (without a venv)?",
-                    "uvx".green()
-                ));
-            }
-        },
-    };
+    let exe = find_python().await?;
 
     // todo: with 'uv' instead of pip later?
     let mut args = vec!["-m", "pip", "install", "--no-cache-dir", "--upgrade", "uvx"];
@@ -74,7 +79,7 @@ pub async fn self_update(with_uv: bool) -> Result<i32, String> {
     if with_uv {
         args.push("uv");
         to_track.push("uv");
-        msg.push_str(" and uv")
+        msg.push_str(" and uv");
     }
 
     let old = get_package_versions(&exe, &to_track).await;
@@ -84,7 +89,7 @@ pub async fn self_update(with_uv: bool) -> Result<i32, String> {
 
     show_loading_indicator(
         promise,
-        format!("updating {}", msg),
+        format!("updating {msg}"),
         AnimationSettings::default(),
     )
     .await?;
@@ -98,14 +103,14 @@ pub async fn self_update(with_uv: bool) -> Result<i32, String> {
                 "🌟 '{}' not updated (version: {})",
                 package.blue(),
                 before.green()
-            )
+            );
         } else {
             println!(
                 "🚀 '{}' updated from {} to {}",
                 package.blue(),
                 before.red(),
                 after.green(),
-            )
+            );
         }
     }
 

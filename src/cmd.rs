@@ -71,7 +71,7 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
             Some(_) | None => {
                 let err = String::from_utf8(result.stderr).unwrap_or_default();
                 match err_prefix {
-                    Some(prefix) => Err(format!("{} | {}", prefix, err)),
+                    Some(prefix) => Err(format!("{prefix} | {err}")),
                     None => Err(err),
                 }
             },
@@ -79,7 +79,7 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
         Err(result) => {
             let err = result.to_string();
             match err_prefix {
-                Some(prefix) => Err(format!("{} | {}", prefix, err)),
+                Some(prefix) => Err(format!("{prefix} | {err}")),
                 None => Err(err),
             }
         },
@@ -94,9 +94,10 @@ pub fn run_if_shell<T, Y: Fn(String) -> Option<T>, N: Fn(String) -> Option<T>>(
 ) -> Option<T> {
     let shell = env::var("SHELL").ok().unwrap_or_default();
 
-    match shell.ends_with(target) {
-        true => if_bash(shell),
-        false => if_not_bash(shell),
+    if shell.ends_with(target) {
+        if_bash(shell)
+    } else {
+        if_not_bash(shell)
     }
 }
 

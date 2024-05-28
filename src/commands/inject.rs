@@ -19,11 +19,11 @@ pub async fn inject_package(
     let mut args = vec!["pip", "install"];
 
     if no_cache {
-        args.push("--no-cache")
+        args.push("--no-cache");
     }
 
     // vec<string> -> vec<str>
-    let inject_args: Vec<&str> = to_inject_specs.iter().map(|k| k.as_ref()).collect();
+    let inject_args: Vec<&str> = to_inject_specs.iter().map(AsRef::as_ref).collect();
     args.extend(inject_args);
 
     let promise = uv(args);
@@ -38,7 +38,8 @@ pub async fn inject_package(
 
     metadata
         .injected
-        .extend(to_inject_specs.iter().map(|k| k.to_string()));
+        .extend(to_inject_specs.iter().map(ToString::to_string));
+
     metadata.save(&environ.to_path_buf()).await?;
 
     Ok(format!(
@@ -52,7 +53,7 @@ impl Process for InjectOptions {
     async fn process(self) -> Result<i32, String> {
         match inject_package(&self.into, &self.package_specs, self.no_cache).await {
             Ok(msg) => {
-                println!("{}", msg);
+                println!("{msg}");
                 Ok(0)
             },
             Err(msg) => Err(msg),

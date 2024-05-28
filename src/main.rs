@@ -19,7 +19,7 @@ use crate::cli::{Args, Process};
 use crate::commands::activate::generate_activate;
 use crate::commands::ensurepath::ensure_path_generate;
 
-pub async fn print_completions<G: Generator>(
+pub fn print_completions<G: Generator>(
     gen: G,
     cmd: &mut Command,
 ) {
@@ -33,30 +33,27 @@ pub async fn generate_bash(generator: Shell) {
     match args.subcommand_name() {
         Some("activate") => {
             // generate code for uvx activate
-            println!("{}", generate_activate().await)
+            println!("{}", generate_activate().await);
         },
         Some("ensurepath") => {
             // geneate code for uvx ensurepath
-            println!("{}", ensure_path_generate().await)
+            println!("{}", ensure_path_generate().await);
         },
         _ => {
             // other cases: show regular completions
-            print_completions(generator, &mut cmd).await;
+            print_completions(generator, &mut cmd);
             // todo: dynamic completions for e.g. `uvx upgrade <venv>`
         },
     }
 }
 
 pub async fn generate_code(target: Shell) -> i32 {
-    match target {
-        Shell::Bash => {
-            generate_bash(target).await;
-            0
-        },
-        _ => {
-            eprintln!("Error: only 'bash' is supported at this moment.");
-            126
-        },
+    if target == Shell::Bash {
+        generate_bash(target).await;
+        0
+    } else {
+        eprintln!("Error: only 'bash' is supported at this moment.");
+        126
     }
 }
 
@@ -69,7 +66,7 @@ async fn main() {
     } else {
         let result = args.cmd.process().await;
         result.unwrap_or_else(|msg| {
-            eprintln!("Something went wrong | {}", msg);
+            eprintln!("Something went wrong | {msg}");
             1
         })
     };

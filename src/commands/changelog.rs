@@ -40,7 +40,7 @@ fn parse_changelog(markdown: &str) -> Changelogs {
             let category = category_caps[1].to_string();
             if let Some(map) = changelog.get_mut(&current_version) {
                 map.insert(category.clone(), Vec::new());
-                current_category = category
+                current_category = category;
             }
             continue;
         }
@@ -50,7 +50,7 @@ fn parse_changelog(markdown: &str) -> Changelogs {
 
             if let Some(map) = changelog.get_mut(&current_version) {
                 if let Some(vec) = map.get_mut(&current_category) {
-                    vec.push(features)
+                    vec.push(features);
                 }
             }
             continue;
@@ -98,7 +98,7 @@ pub fn display_changelog(changelog: &Changelogs) {
         for (category, descriptions) in changes {
             println!("-- {}", color(category));
             for change in descriptions {
-                println!("---- {}", colored_markdown(change))
+                println!("---- {}", colored_markdown(change));
             }
         }
     }
@@ -116,8 +116,8 @@ pub async fn changelog() -> Option<i32> {
 
 impl Process for ChangelogOptions {
     async fn process(self) -> Result<i32, String> {
-        changelog().await.ok_or(String::from(
-            "Something went wrong while loading the changelog.",
-        ))
+        changelog()
+            .await
+            .ok_or_else(|| String::from("Something went wrong while loading the changelog."))
     }
 }

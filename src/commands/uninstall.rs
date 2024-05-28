@@ -17,16 +17,16 @@ pub async fn uninstall_package(
     let venv_dir = venv_path(&requirement_name);
 
     if !venv_dir.exists() {
-        return if !force {
-            Err(format!("No virtualenv for '{}', stopping.\nUse '{}' to remove an executable with that name anyway.",
-                        &requirement_name.green(), "--force".green()))
-        } else {
+        return if force {
             remove_symlink(&requirement_name).await?;
             Err(format!(
                 "{}: No virtualenv for '{}'.",
                 "Warning".yellow(),
                 &requirement_name.green()
             ))
+        } else {
+            Err(format!("No virtualenv for '{}', stopping.\nUse '{}' to remove an executable with that name anyway.",
+                                        &requirement_name.green(), "--force".green()))
         };
     }
 
@@ -41,13 +41,13 @@ pub async fn uninstall_package(
 
     remove_venv(&venv.to_path_buf()).await?;
 
-    let version_msg = if !metadata.installed_version.is_empty() {
-        format!(" ({})", metadata.installed_version.cyan())
-    } else {
+    let version_msg = if metadata.installed_version.is_empty() {
         String::new()
+    } else {
+        format!(" ({})", metadata.installed_version.cyan())
     };
 
-    let msg = format!("🗑️  {}{} removed!", package_name, version_msg);
+    let msg = format!("🗑️  {package_name}{version_msg} removed!");
 
     Ok(msg)
 }
@@ -56,7 +56,7 @@ impl Process for UninstallOptions {
     async fn process(self) -> Result<i32, String> {
         match uninstall_package(&self.package_name, self.force).await {
             Ok(msg) => {
-                println!("{}", msg);
+                println!("{msg}");
                 Ok(0)
             },
             Err(msg) => Err(msg),

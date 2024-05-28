@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use clap_complete::Shell;
 
-pub fn get_styles() -> clap::builder::Styles {
+pub const fn get_styles() -> clap::builder::Styles {
     clap::builder::Styles::styled()
         .usage(
             anstyle::Style::new()
@@ -346,27 +346,27 @@ pub enum Commands {
 impl Process for Commands {
     async fn process(self) -> Result<i32, String> {
         match self {
-            Commands::List(opts) => opts.process().await,
-            Commands::Install(opts) => opts.process().await,
-            Commands::Upgrade(opts) => opts.process().await,
-            Commands::Uninstall(opts) => opts.process().await,
-            Commands::Reinstall(opts) => opts.process().await,
-            Commands::Inject(opts) => opts.process().await,
-            Commands::Activate(opts) => opts.process().await,
-            Commands::UpgradeAll(opts) => opts.process().await,
-            Commands::Runuv(opts) => opts.process().await,
-            Commands::Runpip(opts) => opts.process().await,
-            Commands::Runpython(opts) => opts.process().await,
-            Commands::Ensurepath(opts) => opts.process().await,
-            Commands::UninstallAll(opts) => opts.process().await,
-            Commands::ReinstallAll(opts) => opts.process().await,
-            Commands::Uninject(opts) => opts.process().await,
-            Commands::Completions(opts) => opts.process().await,
-            Commands::Run(opts) => opts.process().await,
-            Commands::Setup(opts) => opts.process().await,
-            Commands::Create(opts) => opts.process().await,
-            Commands::Self_(opts) => opts.process().await,
-            Commands::Check(opts) => opts.process().await,
+            Self::List(opts) => opts.process().await,
+            Self::Install(opts) => opts.process().await,
+            Self::Upgrade(opts) => opts.process().await,
+            Self::Uninstall(opts) => opts.process().await,
+            Self::Reinstall(opts) => opts.process().await,
+            Self::Inject(opts) => opts.process().await,
+            Self::Activate(opts) => opts.process().await,
+            Self::UpgradeAll(opts) => opts.process().await,
+            Self::Runuv(opts) => opts.process().await,
+            Self::Runpip(opts) => opts.process().await,
+            Self::Runpython(opts) => opts.process().await,
+            Self::Ensurepath(opts) => opts.process().await,
+            Self::UninstallAll(opts) => opts.process().await,
+            Self::ReinstallAll(opts) => opts.process().await,
+            Self::Uninject(opts) => opts.process().await,
+            Self::Completions(opts) => opts.process().await,
+            Self::Run(opts) => opts.process().await,
+            Self::Setup(opts) => opts.process().await,
+            Self::Create(opts) => opts.process().await,
+            Self::Self_(opts) => opts.process().await,
+            Self::Check(opts) => opts.process().await,
         }
     }
 }
@@ -392,8 +392,8 @@ pub enum SelfCommands {
 impl Process for SelfCommands {
     async fn process(self) -> Result<i32, String> {
         match self {
-            SelfCommands::Update(opts) => opts.process().await,
-            SelfCommands::Changelog(opts) => opts.process().await,
+            Self::Update(opts) => opts.process().await,
+            Self::Changelog(opts) => opts.process().await,
         }
     }
 }

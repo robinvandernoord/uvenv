@@ -10,7 +10,7 @@ pub async fn uninstall_all(force: bool) -> Result<(), String> {
     for meta in list_packages(&LoadMetadataConfig::none()).await? {
         match uninstall_package(&meta.name, force).await {
             Ok(msg) => {
-                println!("{}", msg)
+                println!("{msg}");
             },
             Err(msg) => {
                 eprintln!("{}", msg.red());
@@ -31,7 +31,7 @@ pub async fn uninstall_all(force: bool) -> Result<(), String> {
 impl Process for UninstallAllOptions {
     async fn process(self) -> Result<i32, String> {
         match uninstall_all(self.force).await {
-            Ok(_) => Ok(0),
+            Ok(()) => Ok(0),
             Err(msg) => Err(msg),
         }
     }

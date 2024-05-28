@@ -20,7 +20,7 @@ pub async fn console_scripts(entry_points_path: &str) -> Result<Vec<String>, Str
     };
 
     // extract script keys
-    return Ok(console_scripts.keys().map(|k| k.to_string()).collect());
+    return Ok(console_scripts.keys().map(ToString::to_string).collect());
 }
 
 pub async fn find_symlinks(
@@ -42,11 +42,11 @@ pub async fn find_symlinks(
     let entrypoints_path = entrypoints_ini.to_str().unwrap_or_default();
     let scripts = console_scripts(entrypoints_path).await.unwrap_or_default();
 
-    if !scripts.is_empty() {
-        scripts
-    } else {
+    if scripts.is_empty() {
         // no scripts found, use requirement name as fallback (e.g. for `uv`)
         vec![requirement.name.to_string()]
+    } else {
+        scripts
     }
 }
 
@@ -67,8 +67,7 @@ pub async fn create_symlink(
     if target_path.exists() {
         if !force {
             return Err(format!(
-                "Script {} already exists in {:?}. Use --force to ignore this warning.",
-                symlink, bin_dir
+                "Script {symlink} already exists in {bin_dir:?}. Use --force to ignore this warning.",
             ));
         }
         tokio::fs::remove_file(&target_path)
@@ -79,8 +78,7 @@ pub async fn create_symlink(
     let symlink_path = venv.join("bin").join(symlink);
     if !symlink_path.exists() {
         return Err(format!(
-            "Could not symlink {:?} because the script didn't exist.",
-            symlink_path
+            "Could not symlink {symlink_path:?} because the script didn't exist.",
         ));
     }
 

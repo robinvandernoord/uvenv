@@ -1,12 +1,14 @@
 [package]
 name = "uvx"
+description = "uvx: pipx for uv (🦀)"
 version = "2.2.2"
 edition = "2021"
+categories = ["development-tools", "development-tools::build-utils", "virtualization", "external-ffi-bindings"]
+keywords = ["Python", "uv", "pip", "packaging"]
+repository = "https://github.com/robinvandernoord/uvx2"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-# [lib]
-# name = "uvx"
-# crate-type = ["cdylib"]
 
 [dependencies]
 # cli
@@ -51,3 +53,17 @@ pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.4" }
 
 # security bumps/pins:
 rustls = "0.23.8"
+
+[lints.clippy]
+# categories:
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+# specific ones:
+module_name_repetitions = "allow"
+future_not_send = "allow"
+struct_excessive_bools = "allow"
+fn_params_excessive_bools = "allow"
+cast_possible_wrap = "allow"
+cast_possible_truncation = "allow"
+multiple_crate_versions = "allow"

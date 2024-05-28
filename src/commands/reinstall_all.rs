@@ -25,7 +25,7 @@ pub async fn reinstall_all(
         .await
         {
             Ok(msg) => {
-                println!("{}", msg)
+                println!("{msg}");
             },
             Err(msg) => {
                 eprintln!("{}", msg.red());
@@ -54,7 +54,7 @@ impl Process for ReinstallAllOptions {
         )
         .await
         {
-            Ok(_) => Ok(0),
+            Ok(()) => Ok(0),
             Err(msg) => Err(msg),
         }
     }

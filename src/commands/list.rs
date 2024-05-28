@@ -13,7 +13,7 @@ async fn read_from_folder(
 
     for dir in metadata_dir.flatten() {
         if let Some(metadata) = Metadata::for_dir(&dir.path(), config).await {
-            result.push(metadata)
+            result.push(metadata);
         } else {
             let venv_name = dir.file_name().into_string().unwrap_or_default();
 
@@ -25,7 +25,7 @@ async fn read_from_folder(
 }
 
 impl ListOptions {
-    pub async fn process_json(
+    pub fn process_json(
         self,
         items: &Vec<Metadata>,
     ) -> Result<i32, String> {
@@ -35,12 +35,12 @@ impl ListOptions {
             serde_json::to_string_pretty(items).map_err_to_string()?
         };
 
-        println!("{}", json);
+        println!("{json}");
 
         Ok(0)
     }
 
-    pub fn to_metadataconfig(&self) -> LoadMetadataConfig {
+    pub const fn to_metadataconfig(&self) -> LoadMetadataConfig {
         LoadMetadataConfig {
             recheck_scripts: true, // always done
             updates_check: !self.skip_updates,
@@ -52,15 +52,13 @@ impl ListOptions {
 
 pub async fn list_packages(config: &LoadMetadataConfig) -> Result<Vec<Metadata>, String> {
     let venv_dir_path = get_venv_dir();
-    let possibly_missing = std::fs::read_dir(&venv_dir_path);
 
     // no tokio::fs because ReadDir.flatten doesn't exist then.
-    let must_exist = match possibly_missing {
-        Ok(dir) => dir,
-        Err(_) => {
-            std::fs::create_dir_all(&venv_dir_path).map_err_to_string()?;
-            std::fs::read_dir(&venv_dir_path).map_err_to_string()?
-        },
+    let must_exist = if let Ok(dir) = std::fs::read_dir(&venv_dir_path) {
+        dir
+    } else {
+        std::fs::create_dir_all(&venv_dir_path).map_err_to_string()?;
+        std::fs::read_dir(&venv_dir_path).map_err_to_string()?
     };
 
     Ok(read_from_folder(must_exist, config).await)
@@ -73,11 +71,11 @@ impl Process for ListOptions {
         let mut items = list_packages(&config).await?;
 
         if !self.venv_names.is_empty() {
-            items.retain(|k| self.venv_names.contains(&k.name))
+            items.retain(|k| self.venv_names.contains(&k.name));
         }
 
         if self.json {
-            return self.process_json(&items).await;
+            return self.process_json(&items);
         }
 
         for metadata in items {

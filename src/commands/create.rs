@@ -35,7 +35,7 @@ impl Process for CreateOptions {
         .await
         {
             Ok(msg) => {
-                println!("{}", msg);
+                println!("{msg}");
                 Ok(0)
             },
             Err(msg) => Err(msg),

@@ -9,7 +9,7 @@ use crate::commands::completions::completions;
 use crate::commands::ensurepath::ensure_path;
 use crate::metadata::{get_work_dir, load_generic_msgpack, store_generic_msgpack};
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)] // dbg_pls::DebugPls
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)] // dbg_pls::DebugPls
 pub struct SetupMetadata {
     // order is important, new features should go last!!
     #[serde(default)]
@@ -21,8 +21,8 @@ pub struct SetupMetadata {
 }
 
 impl SetupMetadata {
-    pub fn new() -> Self {
-        SetupMetadata {
+    pub const fn new() -> Self {
+        Self {
             feature_ensurepath: false,
             feature_completions: false,
             feature_activate: false,
@@ -48,7 +48,9 @@ async fn _load_setup_metadata() -> Result<SetupMetadata, String> {
 }
 
 pub async fn load_setup_metadata() -> SetupMetadata {
-    _load_setup_metadata().await.unwrap_or(SetupMetadata::new())
+    _load_setup_metadata()
+        .await
+        .unwrap_or_else(|_| SetupMetadata::new())
 }
 
 pub async fn store_setup_metadata(metadata: &SetupMetadata) -> Result<(), String> {
@@ -70,7 +72,7 @@ pub async fn setup_for_bash(
     if do_ensurepath && (!metadata.feature_ensurepath || force) {
         if let Err(msg) = ensure_path(force).await {
             any_warnings = true;
-            eprintln!("{}", msg);
+            eprintln!("{msg}");
         }
         metadata.feature_ensurepath = true;
     }
@@ -78,7 +80,7 @@ pub async fn setup_for_bash(
     if do_completions && (!metadata.feature_completions || force) {
         if let Err(msg) = completions(true).await {
             any_warnings = true;
-            eprintln!("{}", msg);
+            eprintln!("{msg}");
         }
         metadata.feature_completions = true;
     }
@@ -86,18 +88,19 @@ pub async fn setup_for_bash(
     if do_activate && (!metadata.feature_activate || force) {
         if let Err(msg) = install_activate().await {
             any_warnings = true;
-            eprintln!("{}", msg);
+            eprintln!("{msg}");
         }
         metadata.feature_activate = true;
     }
 
     if let Err(msg) = store_setup_metadata(&metadata).await {
         any_warnings = true;
-        eprintln!("{}", msg);
+        eprintln!("{msg}");
     }
 
     println!("Setup finished, you may want to run `{}` now in order to apply these changes to your shell.", "exec bash".green());
-    Ok(if any_warnings { 1 } else { 0 })
+    // bool to int
+    Ok(i32::from(any_warnings))
 }
 
 impl Process for SetupOptions {

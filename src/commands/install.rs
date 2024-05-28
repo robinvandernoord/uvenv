@@ -25,16 +25,16 @@ pub async fn _install_package(
     let mut args: Vec<&str> = vec!["pip", "install"];
 
     if !inject.is_empty() {
-        args.append(&mut inject.to_owned())
+        args.append(&mut inject.to_owned());
     }
 
     if no_cache || force {
-        args.push("--no-cache")
+        args.push("--no-cache");
     }
 
     if editable {
         // -e should go right before package name!
-        args.push("--editable")
+        args.push("--editable");
     }
     args.push(package_name);
 
@@ -42,7 +42,7 @@ pub async fn _install_package(
 
     show_loading_indicator(
         promise,
-        format!("installing {}", package_name),
+        format!("installing {package_name}"),
         AnimationSettings::default(),
     )
     .await
@@ -57,12 +57,12 @@ async fn ensure_venv(
     match maybe_venv {
         Some(venv) => {
             let buf = venv.to_path_buf();
-            if !buf.exists() {
+            if buf.exists() {
+                Ok(buf)
+            } else {
                 Err(String::from(
                     "Package could not be installed because supplied venv was misssing.",
                 ))
-            } else {
-                Ok(buf)
             }
         },
         None => create_venv(&requirement.name, python, force, true, None).await,
@@ -94,7 +94,7 @@ async fn store_metadata(
     metadata.python_raw = venv.stdlib_as_string();
 
     metadata.extras = requirement.extras();
-    metadata.injected = inject.iter().map(|inj| inj.to_string()).collect();
+    metadata.injected = inject.iter().map(ToString::to_string).collect();
 
     if let Ok(version) = uv_get_installed_version(&requirement.name, Some(venv)) {
         metadata.installed_version = version;
@@ -187,7 +187,7 @@ impl Process for InstallOptions {
         .await
         {
             Ok(msg) => {
-                println!("{}", msg);
+                println!("{msg}");
                 Ok(0)
             },
             Err(msg) => Err(msg),

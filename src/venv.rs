@@ -43,10 +43,10 @@ pub async fn create_venv(
     with_pip: bool,
     custom_prefix: Option<String>,
 ) -> Result<PathBuf, String> {
-    let venv_path = match custom_prefix {
-        None => venv_path(package_name.as_ref()),
-        Some(prefix) => PathBuf::from(format!("{}{}", prefix, package_name)),
-    };
+    let venv_path = custom_prefix.map_or_else(
+        || venv_path(package_name.as_ref()),
+        |prefix| PathBuf::from(format!("{prefix}{package_name}")),
+    );
 
     create_venv_raw(&venv_path, python, force, with_pip).await?;
 
@@ -57,7 +57,7 @@ pub async fn activate_venv(venv: &Path) -> Result<PythonEnvironment, String> {
     let venv_str = venv.to_str().unwrap_or_default();
     std::env::set_var("VIRTUAL_ENV", venv_str);
 
-    uv_venv(None).ok_or_else(|| format!("Could not properly activate venv '{}'!", venv_str))
+    uv_venv(None).ok_or_else(|| format!("Could not properly activate venv '{venv_str}'!"))
 }
 
 #[allow(dead_code)]

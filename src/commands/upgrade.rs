@@ -29,10 +29,10 @@ pub async fn update_metadata(
 }
 
 fn build_msg(
-    old_version: String,
-    new_version: String,
-    metadata: &mut Metadata,
-) -> Result<String, String> {
+    old_version: &str,
+    new_version: &str,
+    metadata: &Metadata,
+) -> String {
     let mut msg = String::new();
     if old_version == new_version {
         msg.push_str(&format!(
@@ -56,7 +56,7 @@ fn build_msg(
         ));
     }
 
-    Ok(msg)
+    msg
 }
 
 pub async fn _upgrade_package(
@@ -72,7 +72,7 @@ pub async fn _upgrade_package(
     let mut args = vec!["pip", "install", "--upgrade"];
 
     if force || no_cache {
-        args.push("--no-cache")
+        args.push("--no-cache");
     }
 
     let version = requirement.version().or(if force {
@@ -87,11 +87,11 @@ pub async fn _upgrade_package(
     extras.extend(requirement.extras());
 
     if !extras.is_empty() {
-        upgrade_spec.push_str(&format!("[{}]", extras.iter().join(",")))
+        upgrade_spec.push_str(&format!("[{}]", extras.iter().join(",")));
     }
 
     if !version.is_empty() {
-        upgrade_spec.push_str(&version)
+        upgrade_spec.push_str(&version);
     }
 
     args.push(&upgrade_spec);
@@ -111,7 +111,7 @@ pub async fn _upgrade_package(
 
     let new_version = update_metadata(metadata, requirement, environ, version).await?;
 
-    build_msg(old_version, new_version, metadata)
+    Ok(build_msg(&old_version, &new_version, metadata))
 }
 
 pub async fn upgrade_package(
@@ -150,7 +150,7 @@ impl Process for UpgradeOptions {
         .await
         {
             Ok(msg) => {
-                println!("{}", msg);
+                println!("{msg}");
                 Ok(0)
             },
             Err(msg) => Err(msg),

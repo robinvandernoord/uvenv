@@ -60,7 +60,7 @@ pub fn version_0() -> Version {
     Version::from_str("0.0.0").unwrap()
 }
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)] // dbg_pls::DebugPls
+#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)] // dbg_pls::DebugPls
 pub struct Metadata {
     // order is important!!
     pub name: String,
@@ -85,8 +85,8 @@ pub struct Metadata {
 }
 
 impl Metadata {
-    pub fn new(name: &str) -> Metadata {
-        Metadata {
+    pub fn new(name: &str) -> Self {
+        Self {
             name: name.to_string(),
             scripts: HashMap::new(),
             install_spec: name.to_string(),
@@ -104,14 +104,14 @@ impl Metadata {
 
     #[allow(dead_code)]
     pub fn requested_version_parsed(&self) -> Version {
-        Version::from_str(&self.requested_version).unwrap_or(version_0())
+        Version::from_str(&self.requested_version).unwrap_or_else(|_| version_0())
     }
     pub fn installed_version_parsed(&self) -> Version {
-        Version::from_str(&self.installed_version).unwrap_or(version_0())
+        Version::from_str(&self.installed_version).unwrap_or_else(|_| version_0())
     }
 
-    pub fn find(req: &Requirement) -> Metadata {
-        let mut empty = Metadata::new(req.name.as_ref());
+    pub fn find(req: &Requirement) -> Self {
+        let mut empty = Self::new(req.name.as_ref());
 
         empty.installed_version = uv_get_installed_version(&req.name, None).unwrap_or_default();
 
@@ -130,7 +130,7 @@ impl Metadata {
                 "{} {}",
                 python_info.platform_python_implementation(),
                 python_info.python_full_version()
-            )
+            );
         }
 
         if self.python_raw.is_empty() {
@@ -143,7 +143,7 @@ impl Metadata {
         &mut self,
         maybe_venv: Option<&PythonEnvironment>,
     ) -> Option<()> {
-        let _v: PythonEnvironment;
+        let environment: PythonEnvironment;
 
         if self.install_spec.is_empty() {
             self.install_spec = String::from(&self.name);
@@ -152,11 +152,11 @@ impl Metadata {
         let venv = match maybe_venv {
             Some(v) => v,
             None => match uv_venv(None) {
-                Some(v) => {
+                Some(venv) => {
                     // black magic fuckery to
                     // get a reference to the currently active venv
-                    _v = v;
-                    &_v
+                    environment = venv;
+                    &environment
                 },
                 None => return None,
             },
@@ -170,29 +170,27 @@ impl Metadata {
     pub async fn for_dir(
         dirname: &Path,
         config: &LoadMetadataConfig,
-    ) -> Option<Metadata> {
+    ) -> Option<Self> {
         let meta_path = dirname.join(".metadata");
 
-        Metadata::for_file(&meta_path, config).await
+        Self::for_file(&meta_path, config).await
     }
 
     pub async fn for_requirement(
         requirement: &Requirement,
         config: &LoadMetadataConfig,
-    ) -> Metadata {
+    ) -> Self {
         let requirement_name = requirement.name.to_string();
         let venv_dir = venv_path(&requirement_name);
 
-        match Metadata::for_dir(&venv_dir, config).await {
-            Some(m) => m,
-            None => Metadata::find(requirement),
-        }
+        (Self::for_dir(&venv_dir, config).await)
+            .map_or_else(|| Self::find(requirement), |meta| meta)
     }
 
     pub async fn for_file(
         filename: &Path,
         config: &LoadMetadataConfig,
-    ) -> Option<Metadata> {
+    ) -> Option<Self> {
         let result = load_metadata(filename, config).await;
         result.ok()
     }
@@ -228,7 +226,7 @@ impl Metadata {
         &mut self,
         venv_path: &Path,
     ) {
-        for (key, value) in self.scripts.iter_mut() {
+        for (key, value) in &mut self.scripts {
             *value = check_symlink(key, venv_path).await;
         }
     }
@@ -237,7 +235,8 @@ impl Metadata {
         let list: Vec<String> = self
             .scripts
             .iter()
-            .filter_map(|(k, v)| if !v { Some(k.to_owned()) } else { None })
+            //                                if True, the script is valid -> skip from filter_map
+            .filter_map(|(k, v)| if *v { None } else { Some(k.to_owned()) })
             .collect();
 
         list
@@ -257,11 +256,11 @@ impl Metadata {
 
     #[allow(dead_code)]
     pub fn vec_extras(&self) -> Vec<&str> {
-        self.extras.iter().map(|k| k.as_ref()).collect()
+        self.extras.iter().map(AsRef::as_ref).collect()
     }
 
     pub fn vec_injected(&self) -> Vec<&str> {
-        self.injected.iter().map(|k| k.as_ref()).collect()
+        self.injected.iter().map(AsRef::as_ref).collect()
     }
 
     pub fn format_extras(&self) -> String {
@@ -290,7 +289,7 @@ impl Metadata {
         }
 
         if self.editable {
-            result.push_str(&format!(" {}", "--editable".yellow()))
+            result.push_str(&format!(" {}", "--editable".yellow()));
         }
 
         result.push('\n');
@@ -312,10 +311,7 @@ impl Metadata {
 
         if !self.injected.is_empty() {
             let formatted_injects = self.format_injected();
-            result.push_str(&format!(
-                "{}Injected Packages: {}\n",
-                INDENT, formatted_injects
-            ));
+            result.push_str(&format!("{INDENT}Injected Packages: {formatted_injects}\n"));
         }
 
         let formatted_scripts = self
@@ -329,13 +325,13 @@ impl Metadata {
                 }
             })
             .join(" | ");
-        result.push_str(&format!("{}Scripts: {}", INDENT, formatted_scripts));
+        result.push_str(&format!("{INDENT}Scripts: {formatted_scripts}"));
 
         result
     }
 }
 
-/// Drop the MAGIC_HEADER from a buffer (if present)
+/// Drop the `MAGIC_HEADER` from a buffer (if present)
 pub fn strip_header(buf: &mut Vec<u8>) {
     // postponed: the current header is 7 chars long.
     //            the version should be ignored for starts_with,
@@ -345,7 +341,7 @@ pub fn strip_header(buf: &mut Vec<u8>) {
     }
 }
 
-/// Prepend the MAGIC_HEADER to a buffer
+/// Prepend the `MAGIC_HEADER` to a buffer
 fn add_header(buf: &mut Vec<u8>) {
     let mut new_buf = Vec::with_capacity(MAGIC_HEADER.len() + buf.len());
     new_buf.extend_from_slice(MAGIC_HEADER);
@@ -382,6 +378,7 @@ pub async fn load_generic_msgpack<'a, T: serde::Deserialize<'a>>(
     Ok(metadata)
 }
 
+#[allow(clippy::struct_excessive_bools)]
 pub struct LoadMetadataConfig {
     pub recheck_scripts: bool,
     pub updates_check: bool,
@@ -391,8 +388,8 @@ pub struct LoadMetadataConfig {
 
 impl LoadMetadataConfig {
     #[allow(dead_code)]
-    pub fn all() -> Self {
-        LoadMetadataConfig {
+    pub const fn all() -> Self {
+        Self {
             recheck_scripts: true,
             updates_check: true,
             updates_prereleases: true,
@@ -400,8 +397,8 @@ impl LoadMetadataConfig {
         }
     }
 
-    pub fn none() -> Self {
-        LoadMetadataConfig {
+    pub const fn none() -> Self {
+        Self {
             recheck_scripts: false,
             updates_check: false,
             updates_prereleases: false,
@@ -409,8 +406,8 @@ impl LoadMetadataConfig {
         }
     }
 
-    pub fn default() -> Self {
-        LoadMetadataConfig {
+    pub const fn default() -> Self {
+        Self {
             recheck_scripts: true,
             updates_check: true,
             updates_prereleases: false,
@@ -431,7 +428,7 @@ pub async fn load_metadata(
         // filename.parent should always be Some
 
         if config.recheck_scripts {
-            metadata.check_scripts(folder).await
+            metadata.check_scripts(folder).await;
         }
 
         if config.updates_check {

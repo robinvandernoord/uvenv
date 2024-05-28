@@ -50,7 +50,7 @@ pub async fn add_to_bashrc(
     let now = now();
     let mut final_text = String::from("\n");
     if with_comment {
-        final_text.push_str(&format!("# Added by `uvx` at {now}\n"))
+        final_text.push_str(&format!("# Added by `uvx` at {now}\n"));
     }
 
     final_text.push_str(text);
@@ -65,16 +65,16 @@ pub async fn ensure_path(force: bool) -> Result<(), String> {
 
     let path = std::env::var("PATH").unwrap_or_default();
 
-    let parts: Vec<&str> = path.split(':').collect();
-
-    if parts.contains(&bin_dir) && !force {
+    // let parts: Vec<&str> = path.split(':').collect();
+    // if parts.contains(&bin_dir) && !force {
+    if !force && path.split(':').any(|x| x == bin_dir) {
         return Err(format!("{}: {} is already added to your path. Use '--force' to add it to your .bashrc file anyway.",
             "Warning".yellow(),
             bin_dir.green()
-    ))  ;
+    ));
     }
 
-    add_to_bashrc(&format!("export PATH=\"$PATH:{}\"", bin_dir), true).await?;
+    add_to_bashrc(&format!("export PATH=\"$PATH:{bin_dir}\""), true).await?;
 
     println!("Added '{}' to ~/.bashrc", bin_dir.green());
     Ok(())
@@ -83,7 +83,7 @@ pub async fn ensure_path(force: bool) -> Result<(), String> {
 pub async fn ensure_path_generate() -> String {
     let bin_path = ensure_bin_dir().await;
     let bin_dir = bin_path.to_str().unwrap_or_default();
-    format!("export PATH=\"$PATH:{}\"", bin_dir)
+    format!("export PATH=\"$PATH:{bin_dir}\"")
 }
 
 impl Process for EnsurepathOptions {

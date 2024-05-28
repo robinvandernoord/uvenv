@@ -109,18 +109,11 @@ pub async fn fake_install(install_spec: &str) -> Result<FakeInstallResult, Strin
         ));
     };
 
-    // let empty_vec = Vec::new();
-    // let extras = match &install.requested_extras {
-    //     Some(extras) => extras,
-    //     None => &empty_vec,
-    // };
-
-    let full_name = match &install.requested_extras {
-        Some(extras) => {
-            format!("{}[{}]", &install.metadata.name, extras.join(","))
-        },
-        None => String::from(&install.metadata.name),
-    };
+    // if extras exist, the full name is name[extras]. Otherwise, it's just the name.
+    let full_name = install.requested_extras.as_ref().map_or_else(
+        || String::from(&install.metadata.name),
+        |extras| format!("{}[{}]", &install.metadata.name, extras.join(",")),
+    );
 
     let file_url = &install.download_info.url;
 
@@ -138,7 +131,7 @@ pub async fn try_parse_local_requirement(
 
     let result = show_loading_indicator(
         promise,
-        format!("Trying to install local package {}", install_spec),
+        format!("Trying to install local package {install_spec}"),
         AnimationSettings::default(),
     )
     .await?;
