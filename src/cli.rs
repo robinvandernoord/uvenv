@@ -249,12 +249,6 @@ pub struct EnsurepathOptions {
 }
 
 #[derive(Debug, Parser)]
-pub struct SelfUpdateOptions {
-    #[clap(long, help = "Update without also updating uv")]
-    pub without_uv: bool,
-}
-
-#[derive(Debug, Parser)]
 pub struct InjectOptions {
     pub into: String,
     pub package_specs: Vec<String>,
@@ -319,8 +313,9 @@ pub enum Commands {
     Ensurepath(EnsurepathOptions),
     #[clap(about = "Use --install to install the autocomplete script (bash).")]
     Completions(CompletionsOptions),
-    #[clap(about = "Update the current installation of uvx (and optionally uv).")]
-    SelfUpdate(SelfUpdateOptions),
+
+    #[clap(subcommand, about = "Manage uvx itself.")]
+    Self_(SelfCommands),
 }
 
 impl Process for Commands {
@@ -338,7 +333,6 @@ impl Process for Commands {
             Commands::Runpip(opts) => opts.process().await,
             Commands::Runpython(opts) => opts.process().await,
             Commands::Ensurepath(opts) => opts.process().await,
-            Commands::SelfUpdate(opts) => opts.process().await,
             Commands::UninstallAll(opts) => opts.process().await,
             Commands::ReinstallAll(opts) => opts.process().await,
             Commands::Uninject(opts) => opts.process().await,
@@ -346,6 +340,34 @@ impl Process for Commands {
             Commands::Run(opts) => opts.process().await,
             Commands::Setup(opts) => opts.process().await,
             Commands::Create(opts) => opts.process().await,
+            Commands::Self_(opts) => opts.process().await,
+        }
+    }
+}
+
+#[derive(Debug, Parser)]
+pub struct SelfUpdateOptions {
+    #[clap(long, help = "Update without also updating uv")]
+    pub without_uv: bool,
+}
+
+#[derive(Debug, Parser)]
+pub struct ChangelogOptions {}
+
+#[derive(Subcommand, Debug)]
+pub enum SelfCommands {
+    #[clap(about = "Update the current installation of uvx (and optionally uv).")]
+    Update(SelfUpdateOptions),
+
+    #[clap(about = "Show the uvx changelog")]
+    Changelog(ChangelogOptions),
+}
+
+impl Process for SelfCommands {
+    async fn process(self) -> Result<i32, String> {
+        match self {
+            SelfCommands::Update(opts) => opts.process().await,
+            SelfCommands::Changelog(opts) => opts.process().await,
         }
     }
 }
