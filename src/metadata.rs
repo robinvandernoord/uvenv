@@ -233,6 +233,16 @@ impl Metadata {
         }
     }
 
+    pub fn invalid_scripts(&self) -> Vec<String> {
+        let list: Vec<String> = self
+            .scripts
+            .iter()
+            .filter_map(|(k, v)| if !v { Some(k.to_owned()) } else { None })
+            .collect();
+
+        list
+    }
+
     pub fn format_installed_version(&self) -> String {
         if self.outdated {
             self.installed_version.red().to_string()

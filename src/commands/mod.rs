@@ -3,6 +3,7 @@ pub mod completions;
 pub mod create;
 
 mod changelog;
+mod check;
 pub mod ensurepath;
 pub mod inject;
 pub mod install;

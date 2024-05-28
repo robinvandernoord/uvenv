@@ -1,9 +1,7 @@
 use pep440_rs::{Version, VersionSpecifier};
 use pep508_rs::{PackageName, Requirement};
 use rkyv::{de::deserializers::SharedDeserializeMap, Deserialize};
-use uv_client::{
-    RegistryClient, RegistryClientBuilder, SimpleMetadatum,
-};
+use uv_client::{RegistryClient, RegistryClientBuilder, SimpleMetadatum};
 
 use crate::pip::parse_requirement;
 use crate::uv::uv_cache;

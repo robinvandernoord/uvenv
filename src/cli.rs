@@ -263,6 +263,23 @@ pub struct UnInjectOptions {
 }
 
 #[derive(Debug, Parser)]
+pub struct CheckOptions {
+    #[clap(long, help = "Don't check if scripts are installed correctly.")]
+    pub skip_scripts: bool,
+    #[clap(long, help = "Don't check for updates", conflicts_with_all = ["show_prereleases", "ignore_constraints"])]
+    pub skip_updates: bool,
+    #[clap(long, help = "Show prerelease updates", conflicts_with_all = ["skip_updates"])]
+    pub show_prereleases: bool,
+    #[clap(long, help="Ignore version constraints when checking updates", conflicts_with_all = ["skip_updates"])]
+    pub ignore_constraints: bool,
+
+    #[clap(long, short, help = "Output as JSON")]
+    pub json: bool,
+
+    pub venv_names: Vec<String>,
+}
+
+#[derive(Debug, Parser)]
 pub struct CompletionsOptions {
     #[clap(long, short, help = "Add to ~/.bashrc")]
     pub install: bool,
@@ -299,6 +316,9 @@ pub enum Commands {
     Inject(InjectOptions),
     #[clap(aliases = &["eject"], about="Uninstall additional packages from a virtual environment managed by uvx. (alias: `eject`)")]
     Uninject(UnInjectOptions),
+    #[clap(about = "Check for possible issues and updates.")]
+    Check(CheckOptions),
+
     #[clap(about = "Run a package in a temporary virtual environment.")]
     Run(RunOptions),
     #[clap(about = "Run 'uv' in the right venv.")]
@@ -317,6 +337,11 @@ pub enum Commands {
     #[clap(subcommand, about = "Manage uvx itself.")]
     Self_(SelfCommands),
 }
+
+// todo `uvx check`:
+//   - show missing metadata
+//   - show packages with updates
+//   - show packages with script issues
 
 impl Process for Commands {
     async fn process(self) -> Result<i32, String> {
@@ -341,6 +366,7 @@ impl Process for Commands {
             Commands::Setup(opts) => opts.process().await,
             Commands::Create(opts) => opts.process().await,
             Commands::Self_(opts) => opts.process().await,
+            Commands::Check(opts) => opts.process().await,
         }
     }
 }
