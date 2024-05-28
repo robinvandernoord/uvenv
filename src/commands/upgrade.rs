@@ -22,8 +22,7 @@ pub async fn update_metadata(
     let new_version = uv_get_installed_version(&requirement.name, Some(environ))?;
 
     metadata.requested_version = requested_version;
-    // metadata.installed_version = new_version.clone();
-    metadata.requested_version.clone_from(&new_version);
+    metadata.installed_version.clone_from(&new_version);
     metadata.save(&environ.to_path_buf()).await?;
 
     Ok(new_version)
