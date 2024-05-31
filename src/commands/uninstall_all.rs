@@ -18,15 +18,10 @@ pub async fn uninstall_all(
     let results = handle_promises(promises).await;
     let all_ok = promise_len == results.len();
 
+    for msg in results {
+        eprintln!("{msg}");
+    }
     if all_ok {
-        if venv_names.is_empty() {
-            eprintln!("🗑️ All packages uninstalled.");
-        } else {
-            for msg in results {
-                eprintln!("{msg}");
-            }
-        }
-
         Ok(())
     } else {
         Err(String::from(

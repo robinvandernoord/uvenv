@@ -1,29 +1,33 @@
-use owo_colors::OwoColorize;
-
 use crate::cli::{Process, UpgradeAllOptions};
 use crate::commands::list::list_packages;
-use crate::commands::upgrade::upgrade_package;
+use crate::commands::upgrade::upgrade_package_owned;
 use crate::metadata::LoadMetadataConfig;
+use crate::promises::handle_promises;
 
 pub async fn upgrade_all(
     force: bool,
     no_cache: bool,
     skip_injected: bool,
+    venv_names: &[String],
 ) -> Result<(), String> {
-    let mut all_ok = true;
+    let mut promises = vec![];
 
-    for meta in list_packages(&LoadMetadataConfig::none(), None).await? {
-        match upgrade_package(&meta.name, force, no_cache, skip_injected).await {
-            Ok(msg) => {
-                println!("{msg}");
-            },
-            Err(msg) => {
-                eprintln!("{}", msg.red());
-                all_ok = false;
-            },
-        }
+    for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names)).await? {
+        promises.push(upgrade_package_owned(
+            meta.name,
+            force,
+            no_cache,
+            skip_injected,
+        ));
     }
 
+    let promise_len = promises.len();
+    let results = handle_promises(promises).await;
+    let all_ok = promise_len == results.len();
+
+    for msg in results {
+        eprintln!("{msg}");
+    }
     if all_ok {
         Ok(())
     } else {
@@ -33,7 +37,14 @@ pub async fn upgrade_all(
 
 impl Process for UpgradeAllOptions {
     async fn process(self) -> Result<i32, String> {
-        match upgrade_all(self.force, self.no_cache, self.skip_injected).await {
+        match upgrade_all(
+            self.force,
+            self.no_cache,
+            self.skip_injected,
+            &self.venv_names,
+        )
+        .await
+        {
             Ok(()) => Ok(0),
             Err(msg) => Err(msg),
         }

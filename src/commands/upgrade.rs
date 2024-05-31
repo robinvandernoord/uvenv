@@ -114,6 +114,16 @@ pub async fn _upgrade_package(
     Ok(build_msg(&old_version, &new_version, metadata))
 }
 
+/// Version of `upgrade_package` that can be used with Futures
+pub async fn upgrade_package_owned(
+    install_spec: String,
+    force: bool,
+    no_cache: bool,
+    skip_injected: bool,
+) -> Result<String, String> {
+    upgrade_package(&install_spec, force, no_cache, skip_injected).await
+}
+
 pub async fn upgrade_package(
     install_spec: &str,
     force: bool,

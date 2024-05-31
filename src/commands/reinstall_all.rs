@@ -33,15 +33,10 @@ pub async fn reinstall_all(
 
     let all_ok = results.len() == promise_len;
 
+    for msg in results {
+        eprintln!("{msg}");
+    }
     if all_ok {
-        if venv_names.is_empty() {
-            eprintln!("📦 All packages reinstalled.");
-        } else {
-            for msg in results {
-                eprintln!("{msg}");
-            }
-        }
-
         Ok(())
     } else {
         Err(String::from(

@@ -209,6 +209,8 @@ pub struct UpgradeAllOptions {
     pub skip_injected: bool,
     #[clap(long, help = "Run without `uv` cache")]
     pub no_cache: bool,
+
+    pub venv_names: Vec<String>,
 }
 
 #[derive(Debug, Parser)]
