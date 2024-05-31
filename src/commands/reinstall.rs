@@ -10,6 +10,26 @@ use crate::{
     uv::ExtractInfo,
 };
 
+/// Version of `reinstall` that can be used with Futures
+pub async fn reinstall_owned(
+    install_spec: String,
+    python: Option<&String>,
+    force: bool,
+    with_injected: bool,
+    no_cache: bool,
+    editable: bool,
+) -> Result<String, String> {
+    reinstall(
+        &install_spec,
+        python,
+        force,
+        with_injected,
+        no_cache,
+        editable,
+    )
+    .await
+}
+
 pub async fn reinstall(
     install_spec: &str,
     python: Option<&String>,

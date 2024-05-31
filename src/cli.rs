@@ -197,6 +197,8 @@ pub struct ReinstallAllOptions {
     pub no_cache: bool,
     #[clap(long, short, help = "(Re)install as editable")]
     pub editable: bool,
+
+    pub venv_names: Vec<String>,
 }
 
 #[derive(Debug, Parser)]
