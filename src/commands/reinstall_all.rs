@@ -1,8 +1,8 @@
 use crate::cli::{Process, ReinstallAllOptions};
 use crate::commands::list::list_packages;
-use crate::commands::reinstall::reinstall_owned;
+use crate::commands::reinstall::reinstall;
 use crate::metadata::LoadMetadataConfig;
-use crate::promises::handle_promises;
+use owo_colors::OwoColorize;
 
 pub async fn reinstall_all(
     python: Option<&String>,
@@ -12,29 +12,27 @@ pub async fn reinstall_all(
     editable: bool,
     venv_names: &[String],
 ) -> Result<(), String> {
-    // pre: 158 ms
-
-    let mut promises = vec![];
+    let mut all_ok = true;
 
     for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names)).await? {
-        promises.push(reinstall_owned(
-            meta.name,
+        match reinstall(
+            &meta.name,
             python,
             force,
             !without_injected,
             no_cache,
             editable,
-        ));
-    }
-
-    let promise_len = promises.len();
-
-    let results = handle_promises(promises).await;
-
-    let all_ok = results.len() == promise_len;
-
-    for msg in results {
-        eprintln!("{msg}");
+        )
+        .await
+        {
+            Ok(msg) => {
+                println!("{msg}");
+            },
+            Err(msg) => {
+                eprintln!("{}", msg.red());
+                all_ok = false;
+            },
+        }
     }
     if all_ok {
         Ok(())

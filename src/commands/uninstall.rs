@@ -7,14 +7,6 @@ use crate::metadata::{venv_path, LoadMetadataConfig, Metadata};
 use crate::symlinks::{find_symlinks, remove_symlink, remove_symlinks};
 use crate::venv::{activate_venv, remove_venv};
 
-/// Version of `uninstall_package` that can be used with Futures
-pub async fn uninstall_package_owned(
-    package_name: String,
-    force: bool,
-) -> Result<String, String> {
-    uninstall_package(&package_name, force).await
-}
-
 pub async fn uninstall_package(
     package_name: &str,
     force: bool,

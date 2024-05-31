@@ -1,8 +1,8 @@
 use crate::cli::{Process, UpgradeAllOptions};
 use crate::commands::list::list_packages;
-use crate::commands::upgrade::upgrade_package_owned;
+use crate::commands::upgrade::upgrade_package;
 use crate::metadata::LoadMetadataConfig;
-use crate::promises::handle_promises;
+use owo_colors::OwoColorize;
 
 pub async fn upgrade_all(
     force: bool,
@@ -10,24 +10,19 @@ pub async fn upgrade_all(
     skip_injected: bool,
     venv_names: &[String],
 ) -> Result<(), String> {
-    let mut promises = vec![];
-
+    let mut all_ok = true;
     for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names)).await? {
-        promises.push(upgrade_package_owned(
-            meta.name,
-            force,
-            no_cache,
-            skip_injected,
-        ));
+        match upgrade_package(&meta.name, force, no_cache, skip_injected).await {
+            Ok(msg) => {
+                println!("{msg}");
+            },
+            Err(msg) => {
+                eprintln!("{}", msg.red());
+                all_ok = false;
+            },
+        }
     }
 
-    let promise_len = promises.len();
-    let results = handle_promises(promises).await;
-    let all_ok = promise_len == results.len();
-
-    for msg in results {
-        eprintln!("{msg}");
-    }
     if all_ok {
         Ok(())
     } else {

@@ -1,26 +1,27 @@
 use crate::cli::{Process, UninstallAllOptions};
 use crate::commands::list::list_packages;
-use crate::commands::uninstall::uninstall_package_owned;
+use crate::commands::uninstall::uninstall_package;
 use crate::metadata::LoadMetadataConfig;
-use crate::promises::handle_promises;
+use owo_colors::OwoColorize;
 
 pub async fn uninstall_all(
     force: bool,
     venv_names: &[String],
 ) -> Result<(), String> {
-    let mut promises = vec![];
+    let mut all_ok = true;
 
     for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names)).await? {
-        promises.push(uninstall_package_owned(meta.name, force));
+        match uninstall_package(&meta.name, force).await {
+            Ok(msg) => {
+                println!("{msg}");
+            },
+            Err(msg) => {
+                eprintln!("{}", msg.red());
+                all_ok = false;
+            },
+        }
     }
 
-    let promise_len = promises.len();
-    let results = handle_promises(promises).await;
-    let all_ok = promise_len == results.len();
-
-    for msg in results {
-        eprintln!("{msg}");
-    }
     if all_ok {
         Ok(())
     } else {
