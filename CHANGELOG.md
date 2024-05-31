@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## v2.4.0 (2024-05-31)
+
+### Features
+
+* speed up `uvx list` (+ `uvx check`) with Futures and filtering before running checks (instead of after)
+* speed up `upgrade-all`, `reinstall-all`, `upgrade-all` and allow filtering venv names
+
 ## v2.3.0 (2024-05-28)
 
 ### Feature
