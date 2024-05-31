@@ -1,16 +1,17 @@
 use std::fs::ReadDir;
 
+use futures::future;
+
 use crate::cli::{ListOptions, Process};
 use crate::helpers::ResultToString;
 use crate::metadata::{get_venv_dir, LoadMetadataConfig, Metadata};
-use owo_colors::OwoColorize;
 
 async fn read_from_folder_filtered(
     metadata_dir: ReadDir,
     config: &LoadMetadataConfig,
-    filter_names: &Vec<String>,
+    filter_names: &[String],
 ) -> Vec<Metadata> {
-    let mut result: Vec<Metadata> = vec![];
+    let mut promises = vec![];
 
     for dir in metadata_dir.flatten() {
         let venv_name = dir.file_name().into_string().unwrap_or_default();
@@ -19,14 +20,22 @@ async fn read_from_folder_filtered(
             continue;
         }
 
-        if let Some(metadata) = Metadata::for_dir(&dir.path(), config).await {
-            result.push(metadata);
-        } else {
-            eprintln!("! metadata for '{}' could not be read!", venv_name.red());
-        }
+        promises.push(
+            Metadata::for_owned_dir(dir.path(), config), // no .await so its a future (requires ownership of dir_path)
+        );
     }
 
-    result
+    future::join_all(promises)
+        .await
+        .into_iter()
+        .filter_map(|res| match res {
+            Ok(data) => Some(data),
+            Err(msg) => {
+                eprintln!("{msg}");
+                None
+            },
+        })
+        .collect()
 }
 
 impl ListOptions {

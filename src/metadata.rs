@@ -167,6 +167,30 @@ impl Metadata {
         Some(())
     }
 
+    /// like `for_dir` but with an owned dirname Pathbuf instead of &Path
+    /// (required to work with Futures) -> also returns a Result which is more useful with a future
+    pub async fn for_owned_dir(
+        dirname: PathBuf,
+        config: &LoadMetadataConfig,
+    ) -> Result<Self, String> {
+        let meta_path = dirname.join(".metadata");
+
+        Self::for_file(&meta_path, config).await.map_or_else(
+            || {
+                let venv_name = dirname
+                    .file_name()
+                    .and_then(|fname| fname.to_str())
+                    .unwrap_or_default();
+
+                Err(format!(
+                    "Metadata for '{}' could not be loaded.",
+                    venv_name.red()
+                ))
+            },
+            Ok,
+        )
+    }
+
     pub async fn for_dir(
         dirname: &Path,
         config: &LoadMetadataConfig,
@@ -183,7 +207,8 @@ impl Metadata {
         let requirement_name = requirement.name.to_string();
         let venv_dir = venv_path(&requirement_name);
 
-        (Self::for_dir(&venv_dir, config).await)
+        Self::for_dir(&venv_dir, config)
+            .await
             .map_or_else(|| Self::find(requirement), |meta| meta)
     }
 

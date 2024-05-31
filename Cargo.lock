@@ -3321,6 +3321,7 @@ dependencies = [
  "clap_complete",
  "configparser",
  "directories",
+ "futures",
  "home",
  "itertools 0.13.0",
  "owo-colors",
