@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## 2.4.1 (2024-05-31)
+
+### Fix
+
+* Rollback some of the speedup (it was a bit too async and stuff broke)
+
 ## v2.4.0 (2024-05-31)
 
 ### Features
