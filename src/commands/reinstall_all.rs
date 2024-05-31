@@ -13,7 +13,7 @@ pub async fn reinstall_all(
 ) -> Result<(), String> {
     let mut all_ok = true;
 
-    for meta in list_packages(&LoadMetadataConfig::none()).await? {
+    for meta in list_packages(&LoadMetadataConfig::none(), None).await? {
         match reinstall(
             &meta.name,
             python,

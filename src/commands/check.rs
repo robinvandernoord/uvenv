@@ -95,11 +95,7 @@ impl Process for CheckOptions {
     async fn process(self) -> Result<i32, String> {
         let config = self.to_metadataconfig();
 
-        let mut items = list_packages(&config).await?;
-
-        if !self.venv_names.is_empty() {
-            items.retain(|k| self.venv_names.contains(&k.name));
-        }
+        let items = list_packages(&config, Some(&self.venv_names)).await?;
 
         let mut issues = Issues::new();
 

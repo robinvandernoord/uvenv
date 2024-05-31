@@ -12,7 +12,7 @@ pub async fn upgrade_all(
 ) -> Result<(), String> {
     let mut all_ok = true;
 
-    for meta in list_packages(&LoadMetadataConfig::none()).await? {
+    for meta in list_packages(&LoadMetadataConfig::none(), None).await? {
         match upgrade_package(&meta.name, force, no_cache, skip_injected).await {
             Ok(msg) => {
                 println!("{msg}");

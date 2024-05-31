@@ -5,18 +5,23 @@ use crate::helpers::ResultToString;
 use crate::metadata::{get_venv_dir, LoadMetadataConfig, Metadata};
 use owo_colors::OwoColorize;
 
-async fn read_from_folder(
+async fn read_from_folder_filtered(
     metadata_dir: ReadDir,
     config: &LoadMetadataConfig,
+    filter_names: &Vec<String>,
 ) -> Vec<Metadata> {
     let mut result: Vec<Metadata> = vec![];
 
     for dir in metadata_dir.flatten() {
+        let venv_name = dir.file_name().into_string().unwrap_or_default();
+
+        if !filter_names.is_empty() && !filter_names.contains(&venv_name) {
+            continue;
+        }
+
         if let Some(metadata) = Metadata::for_dir(&dir.path(), config).await {
             result.push(metadata);
         } else {
-            let venv_name = dir.file_name().into_string().unwrap_or_default();
-
             eprintln!("! metadata for '{}' could not be read!", venv_name.red());
         }
     }
@@ -50,7 +55,10 @@ impl ListOptions {
     }
 }
 
-pub async fn list_packages(config: &LoadMetadataConfig) -> Result<Vec<Metadata>, String> {
+pub async fn list_packages(
+    config: &LoadMetadataConfig,
+    filter_names: Option<&Vec<String>>,
+) -> Result<Vec<Metadata>, String> {
     let venv_dir_path = get_venv_dir();
 
     // no tokio::fs because ReadDir.flatten doesn't exist then.
@@ -61,18 +69,14 @@ pub async fn list_packages(config: &LoadMetadataConfig) -> Result<Vec<Metadata>,
         std::fs::read_dir(&venv_dir_path).map_err_to_string()?
     };
 
-    Ok(read_from_folder(must_exist, config).await)
+    Ok(read_from_folder_filtered(must_exist, config, filter_names.unwrap_or(&vec![])).await)
 }
 
 impl Process for ListOptions {
     async fn process(self) -> Result<i32, String> {
         let config = self.to_metadataconfig();
 
-        let mut items = list_packages(&config).await?;
-
-        if !self.venv_names.is_empty() {
-            items.retain(|k| self.venv_names.contains(&k.name));
-        }
+        let items = list_packages(&config, Some(&self.venv_names)).await?;
 
         if self.json {
             return self.process_json(&items);
