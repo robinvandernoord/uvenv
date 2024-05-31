@@ -1,25 +1,32 @@
 use crate::cli::{Process, UninstallAllOptions};
 use crate::commands::list::list_packages;
-use crate::commands::uninstall::uninstall_package;
+use crate::commands::uninstall::uninstall_package_owned;
 use crate::metadata::LoadMetadataConfig;
-use owo_colors::OwoColorize;
+use crate::promises::handle_promises;
 
-pub async fn uninstall_all(force: bool) -> Result<(), String> {
-    let mut all_ok = true;
+pub async fn uninstall_all(
+    force: bool,
+    venv_names: &[String],
+) -> Result<(), String> {
+    let mut promises = vec![];
 
-    for meta in list_packages(&LoadMetadataConfig::none(), None).await? {
-        match uninstall_package(&meta.name, force).await {
-            Ok(msg) => {
-                println!("{msg}");
-            },
-            Err(msg) => {
-                eprintln!("{}", msg.red());
-                all_ok = false;
-            },
-        }
+    for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names)).await? {
+        promises.push(uninstall_package_owned(meta.name, force));
     }
 
+    let promise_len = promises.len();
+    let results = handle_promises(promises).await;
+    let all_ok = promise_len == results.len();
+
     if all_ok {
+        if venv_names.is_empty() {
+            eprintln!("🗑️ All packages uninstalled.");
+        } else {
+            for msg in results {
+                eprintln!("{msg}");
+            }
+        }
+
         Ok(())
     } else {
         Err(String::from(
@@ -30,7 +37,7 @@ pub async fn uninstall_all(force: bool) -> Result<(), String> {
 
 impl Process for UninstallAllOptions {
     async fn process(self) -> Result<i32, String> {
-        match uninstall_all(self.force).await {
+        match uninstall_all(self.force, &self.venv_names).await {
             Ok(()) => Ok(0),
             Err(msg) => Err(msg),
         }

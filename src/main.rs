@@ -5,6 +5,7 @@ mod commands;
 mod helpers;
 mod metadata;
 mod pip;
+mod promises;
 mod pypi;
 mod symlinks;
 mod uv;

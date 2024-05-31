@@ -160,6 +160,8 @@ pub struct UninstallAllOptions {
         help = "Remove executable with the same name (in ~/.local/bin) even if related venv was not found."
     )]
     pub force: bool,
+
+    pub venv_names: Vec<String>,
 }
 
 #[derive(Debug, Parser)]

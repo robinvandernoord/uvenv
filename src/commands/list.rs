@@ -1,10 +1,9 @@
 use std::fs::ReadDir;
 
-use futures::future;
-
 use crate::cli::{ListOptions, Process};
 use crate::helpers::ResultToString;
 use crate::metadata::{get_venv_dir, LoadMetadataConfig, Metadata};
+use crate::promises::handle_promises;
 
 async fn read_from_folder_filtered(
     metadata_dir: ReadDir,
@@ -25,17 +24,7 @@ async fn read_from_folder_filtered(
         );
     }
 
-    future::join_all(promises)
-        .await
-        .into_iter()
-        .filter_map(|res| match res {
-            Ok(data) => Some(data),
-            Err(msg) => {
-                eprintln!("{msg}");
-                None
-            },
-        })
-        .collect()
+    handle_promises(promises).await
 }
 
 impl ListOptions {
@@ -66,7 +55,7 @@ impl ListOptions {
 
 pub async fn list_packages(
     config: &LoadMetadataConfig,
-    filter_names: Option<&Vec<String>>,
+    filter_names: Option<&[String]>,
 ) -> Result<Vec<Metadata>, String> {
     let venv_dir_path = get_venv_dir();
 
@@ -78,7 +67,7 @@ pub async fn list_packages(
         std::fs::read_dir(&venv_dir_path).map_err_to_string()?
     };
 
-    Ok(read_from_folder_filtered(must_exist, config, filter_names.unwrap_or(&vec![])).await)
+    Ok(read_from_folder_filtered(must_exist, config, filter_names.unwrap_or(&[])).await)
 }
 
 impl Process for ListOptions {
