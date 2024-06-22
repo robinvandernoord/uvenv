@@ -7,7 +7,7 @@ use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
 use uv_cache::Cache;
 use uv_installer::SitePackages;
-use uv_interpreter::PythonEnvironment;
+use uv_toolchain::{PythonEnvironment, Toolchain};
 
 use crate::helpers::PathToString;
 
@@ -52,19 +52,21 @@ pub async fn uv_with_output<S: AsRef<OsStr>>(args: Vec<S>) -> Result<i32, String
     run_print_output(script, args).await
 }
 
-pub fn uv_cache() -> Option<Cache> {
-    ProjectDirs::from("", "", "uv")
-        .map_or_else(
-            || Cache::from_path(".uv_cache"),
-            |project_dirs| Cache::from_path(project_dirs.cache_dir()),
-        )
-        .ok()
+pub fn uv_cache() -> Cache {
+    ProjectDirs::from("", "", "uv").map_or_else(
+        || Cache::from_path(".uv_cache"),
+        |project_dirs| Cache::from_path(project_dirs.cache_dir()),
+    )
+}
+
+pub fn uv_toolchain(maybe_cache: Option<Cache>) -> Option<Toolchain> {
+    let cache = maybe_cache.unwrap_or_else(uv_cache);
+
+    Toolchain::find_virtualenv(&cache).ok()
 }
 
 pub fn uv_venv(maybe_cache: Option<Cache>) -> Option<PythonEnvironment> {
-    maybe_cache
-        .or_else(uv_cache)
-        .and_then(|cache| PythonEnvironment::from_virtualenv(&cache).ok())
+    uv_toolchain(maybe_cache).map(PythonEnvironment::from_toolchain)
 }
 
 pub fn uv_get_installed_version(

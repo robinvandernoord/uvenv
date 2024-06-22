@@ -13,7 +13,7 @@ use std::collections::HashMap;
 
 use std::path::{Path, PathBuf};
 
-use uv_interpreter::PythonEnvironment;
+use uv_toolchain::PythonEnvironment;
 
 pub async fn _install_package(
     package_name: &str,

@@ -13,7 +13,7 @@ use std::str::FromStr;
 use tokio::fs::{create_dir_all, File};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
-use uv_interpreter::PythonEnvironment;
+use uv_toolchain::PythonEnvironment;
 
 const BIN_DIR: &str = ".local/bin";
 const WORK_DIR: &str = ".local/uvx";

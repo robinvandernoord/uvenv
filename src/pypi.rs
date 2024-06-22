@@ -6,10 +6,10 @@ use uv_client::{RegistryClient, RegistryClientBuilder, SimpleMetadatum};
 use crate::pip::parse_requirement;
 use crate::uv::uv_cache;
 
-pub fn get_client() -> Option<RegistryClient> {
-    let cache = uv_cache()?;
+pub fn get_client() -> RegistryClient {
+    let cache = uv_cache();
 
-    Some(RegistryClientBuilder::new(cache).build())
+    RegistryClientBuilder::new(cache).build()
 }
 
 pub fn deserialize_version(datum: &rkyv::Archived<Version>) -> Option<Version> {
@@ -32,9 +32,7 @@ pub async fn get_versions_for_packagename(
 ) -> Vec<Version> {
     let mut versions: Vec<Version> = vec![];
 
-    let Some(client) = get_client() else {
-        return versions;
-    };
+    let client = get_client();
 
     let data = match client.simple(package_name).await {
         Err(err) => {
@@ -73,7 +71,7 @@ pub async fn get_latest_version_for_packagename(
 }
 #[allow(dead_code)]
 pub async fn get_pypi_data_for_packagename(package_name: &PackageName) -> Option<SimpleMetadatum> {
-    let client = get_client()?;
+    let client = get_client();
 
     let data = client.simple(package_name).await.ok()?;
 

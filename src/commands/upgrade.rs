@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
-use uv_interpreter::PythonEnvironment;
+use uv_toolchain::PythonEnvironment;
 
 use crate::helpers::StringExt;
 use crate::metadata::LoadMetadataConfig;
