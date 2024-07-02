@@ -7,7 +7,7 @@ use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
 use uv_cache::Cache;
 use uv_installer::SitePackages;
-use uv_toolchain::{PythonEnvironment, Toolchain};
+use uv_toolchain::{EnvironmentPreference, PythonEnvironment, ToolchainRequest};
 
 use crate::helpers::PathToString;
 
@@ -59,14 +59,18 @@ pub fn uv_cache() -> Cache {
     )
 }
 
-pub fn uv_toolchain(maybe_cache: Option<Cache>) -> Option<Toolchain> {
+/// try to find an `PythonEnvironment` based on Cache or currently active virtualenv (`VIRTUAL_ENV`).
+pub fn uv_venv(maybe_cache: Option<Cache>) -> Option<PythonEnvironment> {
     let cache = maybe_cache.unwrap_or_else(uv_cache);
 
-    Toolchain::find_virtualenv(&cache).ok()
-}
+    let x = PythonEnvironment::find(
+        &ToolchainRequest::Any,             // just find me a python
+        EnvironmentPreference::OnlyVirtual, // venv is always virtual
+        &cache,
+    )
+    .ok();
 
-pub fn uv_venv(maybe_cache: Option<Cache>) -> Option<PythonEnvironment> {
-    uv_toolchain(maybe_cache).map(PythonEnvironment::from_toolchain)
+    dbg!(x)
 }
 
 pub fn uv_get_installed_version(
@@ -76,10 +80,10 @@ pub fn uv_get_installed_version(
     let environment: PythonEnvironment; // lifetime for if maybe_venv is None
 
     let site_packages = if let Some(venv) = maybe_venv {
-        SitePackages::from_executable(venv)
+        SitePackages::from_environment(venv)
     } else {
         environment = uv_venv(None).ok_or_else(|| format!("{}", "Failed to set up venv!".red()))?;
-        SitePackages::from_executable(&environment)
+        SitePackages::from_environment(&environment)
     }
     .ok();
 

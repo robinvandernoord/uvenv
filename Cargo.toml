@@ -21,7 +21,7 @@ tokio = "1.38"
 # serialize
 rmp-serde = "1.3"
 serde = { version = "1.0.203", features = ["derive"] }
-serde_json = "1.0.117"
+serde_json = "1.0.120"
 rkyv = "0.7.44" # archiving/serializing used by uv
 
 # helpers
@@ -40,16 +40,16 @@ anstyle = "1.0" # color styling for clap
 owo-colors = "4.0" # color styling for strings
 
 # uv
-# uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.13" }
-uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.13" }
-uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.13" }
-uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.13" }
-uv-toolchain = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.13" }
-# uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.13" }
-pep440_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.13" }
-pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.13" }
-# install-wheel-rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.13" }
-# distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.13" }
+# uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.18" }
+uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.18" }
+uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.18" }
+uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.18" }
+uv-toolchain = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.18" }
+# uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.18" }
+pep440_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.18" }
+pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.18" }
+# install-wheel-rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.18" }
+# distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.18" }
 
 # security bumps/pins:
 rustls = "0.23"
