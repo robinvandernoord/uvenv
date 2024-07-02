@@ -8,6 +8,7 @@ mod pip;
 mod promises;
 mod pypi;
 mod symlinks;
+mod tests;
 mod uv;
 mod venv;
 
