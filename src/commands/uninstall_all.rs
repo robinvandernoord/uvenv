@@ -2,6 +2,7 @@ use crate::cli::{Process, UninstallAllOptions};
 use crate::commands::list::list_packages;
 use crate::commands::uninstall::uninstall_package;
 use crate::metadata::LoadMetadataConfig;
+use anyhow::anyhow;
 use owo_colors::OwoColorize;
 
 pub async fn uninstall_all(
@@ -32,10 +33,10 @@ pub async fn uninstall_all(
 }
 
 impl Process for UninstallAllOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match uninstall_all(self.force, &self.venv_names).await {
             Ok(()) => Ok(0),
-            Err(msg) => Err(msg),
+            Err(msg) => Err(anyhow!(msg)),
         }
     }
 }

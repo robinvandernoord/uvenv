@@ -63,14 +63,12 @@ pub fn uv_cache() -> Cache {
 pub fn uv_venv(maybe_cache: Option<Cache>) -> Option<PythonEnvironment> {
     let cache = maybe_cache.unwrap_or_else(uv_cache);
 
-    let x = PythonEnvironment::find(
+    PythonEnvironment::find(
         &ToolchainRequest::Any,             // just find me a python
         EnvironmentPreference::OnlyVirtual, // venv is always virtual
         &cache,
     )
-    .ok();
-
-    dbg!(x)
+    .ok()
 }
 
 pub fn uv_get_installed_version(

@@ -3,6 +3,7 @@ use crate::{
     uv::uv_with_output,
     venv::setup_environ_from_requirement,
 };
+use anyhow::anyhow;
 
 pub async fn runuv(
     venv_name: &str,
@@ -14,10 +15,10 @@ pub async fn runuv(
 }
 
 impl Process for RunuvOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match runuv(&self.venv, self.uv_args).await {
             Ok(code) => Ok(code),
-            Err(msg) => Err(msg),
+            Err(msg) => Err(anyhow!(msg)),
         }
     }
 }

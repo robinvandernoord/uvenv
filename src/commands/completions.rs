@@ -1,4 +1,5 @@
 use crate::cli::{CompletionsOptions, Process};
+use anyhow::anyhow;
 
 use crate::cmd::run_if_bash_else_warn;
 use owo_colors::OwoColorize;
@@ -26,7 +27,7 @@ pub async fn completions(install: bool) -> Result<i32, String> {
 }
 
 impl Process for CompletionsOptions {
-    async fn process(self) -> Result<i32, String> {
-        completions(self.install).await
+    async fn process(self) -> anyhow::Result<i32> {
+        completions(self.install).await.map_err(|e| anyhow!(e))
     }
 }

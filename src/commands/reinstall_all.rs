@@ -2,6 +2,7 @@ use crate::cli::{Process, ReinstallAllOptions};
 use crate::commands::list::list_packages;
 use crate::commands::reinstall::reinstall;
 use crate::metadata::LoadMetadataConfig;
+use anyhow::anyhow;
 use owo_colors::OwoColorize;
 
 pub async fn reinstall_all(
@@ -44,7 +45,7 @@ pub async fn reinstall_all(
 }
 
 impl Process for ReinstallAllOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match reinstall_all(
             self.python.as_ref(),
             self.force,
@@ -56,7 +57,7 @@ impl Process for ReinstallAllOptions {
         .await
         {
             Ok(()) => Ok(0),
-            Err(msg) => Err(msg),
+            Err(msg) => Err(anyhow!(msg)),
         }
     }
 }

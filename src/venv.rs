@@ -1,7 +1,8 @@
-use crate::helpers::{PathToString, ResultToString};
+use crate::helpers::PathToString;
 use crate::metadata::venv_path;
 use crate::pip::parse_requirement;
 use crate::uv::{uv, uv_venv};
+use anyhow::{anyhow, bail};
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
 use std::path::{Path, PathBuf};
@@ -13,12 +14,10 @@ pub async fn create_venv_raw(
     python: Option<&String>,
     force: bool,
     with_pip: bool,
-) -> Result<(), String> {
+) -> anyhow::Result<()> {
     if !force && venv_path.exists() {
-        return Err(
-            format!("'{}' is already installed.\nUse '{}' to update existing tools or pass '{}' to this command to ignore this message.",
+        bail!("'{}' is already installed.\nUse '{}' to update existing tools or pass '{}' to this command to ignore this message.",
                     &venv_path.to_str().unwrap_or_default().green(), "uvx upgrade".green(), "--force".green())
-        );
     }
 
     let mut args: Vec<&str> = vec!["venv", venv_path.to_str().unwrap_or_default()];
@@ -31,7 +30,7 @@ pub async fn create_venv_raw(
         args.push("--seed");
     }
 
-    uv(args).await?;
+    uv(args).await.map_err(|e| anyhow!(e))?;
 
     Ok(())
 }
@@ -42,7 +41,7 @@ pub async fn create_venv(
     force: bool,
     with_pip: bool,
     custom_prefix: Option<String>,
-) -> Result<PathBuf, String> {
+) -> anyhow::Result<PathBuf> {
     let venv_path = custom_prefix.map_or_else(
         || venv_path(package_name.as_ref()),
         |prefix| PathBuf::from(format!("{prefix}{package_name}")),
@@ -81,8 +80,8 @@ pub async fn setup_environ_from_requirement(
     Ok((requirement, environ))
 }
 
-pub async fn remove_venv(venv: &PathBuf) -> Result<(), String> {
-    tokio::fs::remove_dir_all(venv).await.map_err_to_string()?;
+pub async fn remove_venv(venv: &PathBuf) -> anyhow::Result<()> {
+    tokio::fs::remove_dir_all(venv).await?;
     Ok(())
 }
 

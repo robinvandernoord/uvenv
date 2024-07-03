@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use std::fs::ReadDir;
 
 use crate::cli::{ListOptions, Process};
@@ -31,11 +32,11 @@ impl ListOptions {
     pub fn process_json(
         self,
         items: &Vec<Metadata>,
-    ) -> Result<i32, String> {
+    ) -> anyhow::Result<i32> {
         let json = if self.short {
-            serde_json::to_string(items).map_err_to_string()?
+            serde_json::to_string(items)?
         } else {
-            serde_json::to_string_pretty(items).map_err_to_string()?
+            serde_json::to_string_pretty(items)?
         };
 
         println!("{json}");
@@ -71,10 +72,12 @@ pub async fn list_packages(
 }
 
 impl Process for ListOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         let config = self.to_metadataconfig();
 
-        let items = list_packages(&config, Some(&self.venv_names)).await?;
+        let items = list_packages(&config, Some(&self.venv_names))
+            .await
+            .map_err(|e| anyhow!(e))?;
 
         if self.json {
             return self.process_json(&items);

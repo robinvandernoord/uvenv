@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use std::path::PathBuf;
 
 use chrono::Local;
@@ -87,8 +88,11 @@ pub async fn ensure_path_generate() -> String {
 }
 
 impl Process for EnsurepathOptions {
-    async fn process(self) -> Result<i32, String> {
-        ensure_path(self.force).await?;
-        Ok(0)
+    async fn process(self) -> anyhow::Result<i32> {
+        if let Err(msg) = ensure_path(self.force).await {
+            Err(anyhow!(msg))
+        } else {
+            Ok(0)
+        }
     }
 }

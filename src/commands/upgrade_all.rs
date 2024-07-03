@@ -2,6 +2,7 @@ use crate::cli::{Process, UpgradeAllOptions};
 use crate::commands::list::list_packages;
 use crate::commands::upgrade::upgrade_package;
 use crate::metadata::LoadMetadataConfig;
+use anyhow::anyhow;
 use owo_colors::OwoColorize;
 
 pub async fn upgrade_all(
@@ -31,7 +32,7 @@ pub async fn upgrade_all(
 }
 
 impl Process for UpgradeAllOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match upgrade_all(
             self.force,
             self.no_cache,
@@ -41,7 +42,7 @@ impl Process for UpgradeAllOptions {
         .await
         {
             Ok(()) => Ok(0),
-            Err(msg) => Err(msg),
+            Err(msg) => Err(anyhow!(msg)),
         }
     }
 }

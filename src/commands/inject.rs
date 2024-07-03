@@ -6,6 +6,7 @@ use crate::{
     uv::{uv, Helpers},
     venv::setup_environ_from_requirement,
 };
+use anyhow::anyhow;
 use owo_colors::OwoColorize;
 
 pub async fn inject_package(
@@ -50,13 +51,13 @@ pub async fn inject_package(
 }
 
 impl Process for InjectOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match inject_package(&self.into, &self.package_specs, self.no_cache).await {
             Ok(msg) => {
                 println!("{msg}");
                 Ok(0)
             },
-            Err(msg) => Err(msg),
+            Err(msg) => Err(anyhow!(msg)),
         }
     }
 }

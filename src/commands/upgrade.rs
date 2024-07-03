@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
@@ -140,7 +141,7 @@ pub async fn upgrade_package(
 }
 
 impl Process for UpgradeOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match upgrade_package(
             &self.package_name,
             self.force,
@@ -153,7 +154,7 @@ impl Process for UpgradeOptions {
                 println!("{msg}");
                 Ok(0)
             },
-            Err(msg) => Err(msg),
+            Err(msg) => Err(anyhow!(msg)),
         }
     }
 }

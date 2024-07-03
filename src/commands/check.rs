@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use owo_colors::OwoColorize;
 use std::collections::BTreeMap;
 
@@ -5,7 +6,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::cli::{CheckOptions, Process};
 use crate::commands::list::list_packages;
-use crate::helpers::ResultToString;
 use crate::metadata::LoadMetadataConfig;
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
@@ -35,8 +35,8 @@ impl Issues {
         self.count_outdated() + self.count_scripts()
     }
 
-    pub fn print_json(&self) -> Result<i32, String> {
-        let json = serde_json::to_string_pretty(self).map_err_to_string()?;
+    pub fn print_json(&self) -> anyhow::Result<i32> {
+        let json = serde_json::to_string_pretty(self)?;
 
         eprintln!("{json}");
 
@@ -96,10 +96,12 @@ impl CheckOptions {
 }
 
 impl Process for CheckOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         let config = self.to_metadataconfig();
 
-        let items = list_packages(&config, Some(&self.venv_names)).await?;
+        let items = list_packages(&config, Some(&self.venv_names))
+            .await
+            .map_err(|e| anyhow!(e))?;
 
         let mut issues = Issues::new();
 

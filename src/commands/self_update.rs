@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use std::path::{Path, PathBuf};
 
 use owo_colors::OwoColorize;
@@ -118,7 +119,7 @@ pub async fn self_update(with_uv: bool) -> Result<i32, String> {
 }
 
 impl Process for SelfUpdateOptions {
-    async fn process(self) -> Result<i32, String> {
-        self_update(!self.without_uv).await
+    async fn process(self) -> anyhow::Result<i32> {
+        self_update(!self.without_uv).await.map_err(|e| anyhow!(e))
     }
 }

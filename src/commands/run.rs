@@ -1,3 +1,4 @@
+use anyhow::{anyhow, bail, Context};
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
 use std::path::{Path, PathBuf};
@@ -16,8 +17,9 @@ async fn _find_executable(
     requirement: &Requirement,
     package_spec: &str,
     venv: &PythonEnvironment,
-) -> Result<String, String> {
-    let installed_version = uv_get_installed_version(&requirement.name, Some(venv))?;
+) -> anyhow::Result<String> {
+    let installed_version =
+        uv_get_installed_version(&requirement.name, Some(venv)).map_err(|e| anyhow!(e))?;
     let symlinks = find_symlinks(requirement, &installed_version, venv).await;
 
     match symlinks.len() {
@@ -35,13 +37,11 @@ async fn _find_executable(
                 related.push_str(&format!("\t- {} | `{}` \n", option.green(), code.blue()));
             }
 
-            Err(
-                format!("'{}' executable not found for install spec '{}'.\nMultiple related scripts were found:\n{}",
+            bail!("'{}' executable not found for install spec '{}'.\nMultiple related scripts were found:\n{}",
                         requirement.name.to_string().green(),
                         package_spec.green(),
                         related,
                 )
-            )
         },
     }
 }
@@ -52,7 +52,7 @@ pub async fn find_executable(
     package_spec: &str,
     venv: &PythonEnvironment,
     venv_path: &Path,
-) -> Result<PathBuf, String> {
+) -> anyhow::Result<PathBuf> {
     let executable = match binary {
         Some(executable) => executable.to_owned(),
         None => _find_executable(requirement, package_spec, venv).await?,
@@ -69,7 +69,7 @@ pub async fn run_executable(
     venv: &PythonEnvironment,
     venv_path: &Path,
     args: Vec<String>,
-) -> Result<i32, String> {
+) -> anyhow::Result<i32> {
     let full_exec_path =
         find_executable(requirement, binary, package_spec, venv, venv_path).await?;
 
@@ -82,7 +82,7 @@ pub async fn run_package(
     no_cache: bool,
     binary: Option<&String>,
     args: Vec<String>,
-) -> Result<i32, String> {
+) -> anyhow::Result<i32> {
     // 1. create a temp venv
     // 2. install package
     // 3. run 'binary' or find runnable(s) in package
@@ -90,7 +90,9 @@ pub async fn run_package(
 
     // ### 1 ###
 
-    let (requirement, _) = parse_requirement(package_spec).await?;
+    let (requirement, _) = parse_requirement(package_spec)
+        .await
+        .map_err(|e| anyhow!(e))?;
 
     let venv_path = &create_venv(
         &requirement.name,
@@ -99,7 +101,8 @@ pub async fn run_package(
         true,
         Some(String::from("/tmp/uvx-")),
     )
-    .await?;
+    .await
+    .map_err(|e| anyhow!(e))?;
 
     let venv_name = &venv_path.to_str().unwrap_or_default();
 
@@ -108,10 +111,12 @@ pub async fn run_package(
     }
 
     // ### 2 ###
-    let venv = &activate_venv(venv_path).await?;
+    let venv = &activate_venv(venv_path).await.map_err(|e| anyhow!(e))?;
 
     // already expects activated venv:
-    _install_package(package_spec, &Vec::new(), no_cache, false, false).await?;
+    _install_package(package_spec, &Vec::new(), no_cache, false, false)
+        .await
+        .map_err(|e| anyhow!(e))?;
 
     // ### 3 ###
     let result = run_executable(&requirement, binary, package_spec, venv, venv_path, args).await;
@@ -126,8 +131,8 @@ pub async fn run_package(
 }
 
 impl Process for RunOptions {
-    async fn process(self) -> Result<i32, String> {
-        match run_package(
+    async fn process(self) -> anyhow::Result<i32> {
+        run_package(
             &self.package_name,
             self.python.as_ref(),
             self.keep,
@@ -136,9 +141,11 @@ impl Process for RunOptions {
             self.args,
         )
         .await
-        {
-            Ok(code) => Ok(code),
-            Err(msg) => Err(msg),
-        }
+        .with_context(|| {
+            format!(
+                "Something went wrong while trying to run '{}';",
+                &self.package_name
+            )
+        })
     }
 }

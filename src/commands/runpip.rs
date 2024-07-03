@@ -3,6 +3,7 @@ use crate::{
     cmd::run_print_output,
     venv::{setup_environ_from_requirement, venv_script},
 };
+use anyhow::anyhow;
 
 pub async fn runpip(
     venv_name: &str,
@@ -16,10 +17,10 @@ pub async fn runpip(
 }
 
 impl Process for RunpipOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match runpip(&self.venv, self.pip_args).await {
             Ok(code) => Ok(code),
-            Err(msg) => Err(msg),
+            Err(msg) => Err(anyhow!(msg)),
         }
     }
 }

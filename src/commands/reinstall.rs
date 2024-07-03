@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use owo_colors::OwoColorize;
 
 use crate::commands::create::create;
@@ -66,6 +67,7 @@ pub async fn reinstall(
             force,
         )
         .await
+        .map_err(|e| format!("{e}")) // fixme
     } else {
         install_package(
             new_install_spec,
@@ -81,7 +83,7 @@ pub async fn reinstall(
 }
 
 impl Process for ReinstallOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match reinstall(
             &self.package,
             self.python.as_ref(),
@@ -96,7 +98,7 @@ impl Process for ReinstallOptions {
                 println!("{msg}");
                 Ok(0)
             },
-            Err(msg) => Err(msg),
+            Err(msg) => Err(anyhow!(msg)),
         }
     }
 }

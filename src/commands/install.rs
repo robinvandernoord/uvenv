@@ -11,6 +11,7 @@ use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
 use std::collections::HashMap;
 
+use anyhow::{anyhow, bail};
 use std::path::{Path, PathBuf};
 
 use uv_toolchain::PythonEnvironment;
@@ -53,16 +54,14 @@ async fn ensure_venv(
     requirement: &Requirement,
     python: Option<&String>,
     force: bool,
-) -> Result<PathBuf, String> {
+) -> anyhow::Result<PathBuf> {
     match maybe_venv {
         Some(venv) => {
             let buf = venv.to_path_buf();
             if buf.exists() {
                 Ok(buf)
             } else {
-                Err(String::from(
-                    "Package could not be installed because supplied venv was misssing.",
-                ))
+                bail!("Package could not be installed because supplied venv was misssing.")
             }
         },
         None => create_venv(&requirement.name, python, force, true, None).await,
@@ -144,7 +143,9 @@ pub async fn install_package(
 ) -> Result<String, String> {
     let (requirement, resolved_install_spec) = parse_requirement(install_spec).await?;
 
-    let venv_path = ensure_venv(maybe_venv, &requirement, python, force).await?;
+    let venv_path = ensure_venv(maybe_venv, &requirement, python, force)
+        .await
+        .map_err(|e| format!("{e}"))?; // fixme
     let uv_venv = activate_venv(&venv_path).await?;
 
     if let Err(e) = _install_package(install_spec, &inject, no_cache, force, editable).await {
@@ -174,7 +175,7 @@ pub async fn install_package(
 }
 
 impl Process for InstallOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match install_package(
             &self.package_name,
             None,
@@ -190,7 +191,7 @@ impl Process for InstallOptions {
                 println!("{msg}");
                 Ok(0)
             },
-            Err(msg) => Err(msg),
+            Err(msg) => Err(anyhow!(msg)),
         }
     }
 }

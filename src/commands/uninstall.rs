@@ -1,5 +1,6 @@
 use crate::pip::parse_requirement;
 use crate::uv::Helpers;
+use anyhow::{anyhow, Context};
 use owo_colors::OwoColorize;
 
 use crate::cli::{Process, UninstallOptions};
@@ -10,8 +11,10 @@ use crate::venv::{activate_venv, remove_venv};
 pub async fn uninstall_package(
     package_name: &str,
     force: bool,
-) -> Result<String, String> {
-    let (requirement, _) = parse_requirement(package_name).await?;
+) -> anyhow::Result<String> {
+    let (requirement, _) = parse_requirement(package_name)
+        .await
+        .map_err(|e| anyhow!(e))?;
     let requirement_name = requirement.name.to_string();
 
     let venv_dir = venv_path(&requirement_name);
@@ -19,18 +22,18 @@ pub async fn uninstall_package(
     if !venv_dir.exists() {
         return if force {
             remove_symlink(&requirement_name).await?;
-            Err(format!(
+            Err(anyhow!(
                 "{}: No virtualenv for '{}'.",
                 "Warning".yellow(),
                 &requirement_name.green()
             ))
         } else {
-            Err(format!("No virtualenv for '{}', stopping.\nUse '{}' to remove an executable with that name anyway.",
+            Err(anyhow!("No virtualenv for '{}', stopping.\nUse '{}' to remove an executable with that name anyway.",
                                         &requirement_name.green(), "--force".green()))
         };
     }
 
-    let venv = activate_venv(&venv_dir).await?;
+    let venv = activate_venv(&venv_dir).await.map_err(|e| anyhow!(e))?;
 
     let metadata = Metadata::for_requirement(&requirement, &LoadMetadataConfig::none()).await;
 
@@ -53,13 +56,18 @@ pub async fn uninstall_package(
 }
 
 impl Process for UninstallOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match uninstall_package(&self.package_name, self.force).await {
             Ok(msg) => {
                 println!("{msg}");
                 Ok(0)
             },
-            Err(msg) => Err(msg),
+            Err(msg) => Err(msg).with_context(|| {
+                format!(
+                    "Something went wrong while uninstalling '{}';",
+                    &self.package_name
+                )
+            }),
         }
     }
 }

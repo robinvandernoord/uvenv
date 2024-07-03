@@ -1,5 +1,4 @@
 use crate::cli::{ChangelogOptions, Process};
-use crate::helpers::fmt_error;
 use anyhow::{anyhow, Context};
 use owo_colors::OwoColorize;
 use regex::Regex;
@@ -126,10 +125,9 @@ pub async fn changelog() -> anyhow::Result<i32> {
 }
 
 impl Process for ChangelogOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         changelog()
             .await
-            .with_context(|| "while loading the changelog;".to_string())
-            .map_err(fmt_error)
+            .with_context(|| "Something went wrong while loading the changelog;".to_string())
     }
 }

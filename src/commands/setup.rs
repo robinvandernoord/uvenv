@@ -64,7 +64,7 @@ pub async fn setup_for_bash(
     do_completions: bool,
     do_activate: bool,
     force: bool,
-) -> Result<i32, String> {
+) -> anyhow::Result<i32> {
     let mut any_warnings: bool = false;
 
     let mut metadata = load_setup_metadata().await;
@@ -104,7 +104,7 @@ pub async fn setup_for_bash(
 }
 
 impl Process for SetupOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         let result = run_if_bash_else_warn(move |_| {
             // some logic here
             let result = setup_for_bash(

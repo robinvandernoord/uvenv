@@ -10,8 +10,8 @@ impl<T, E: std::error::Error> ResultToString<T, E> for Result<T, E> {
     }
 }
 
-pub fn fmt_error(e: anyhow::Error) -> String {
-    format!("{:?}", e)
+pub fn fmt_error(e: &anyhow::Error) -> String {
+    format!("{e:?}")
 }
 
 // https://users.rust-lang.org/t/is-there-a-simple-way-to-give-a-default-string-if-the-string-variable-is-empty/100411

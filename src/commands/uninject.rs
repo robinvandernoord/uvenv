@@ -2,6 +2,7 @@ use crate::animate::{show_loading_indicator, AnimationSettings};
 use crate::cli::{Process, UnInjectOptions};
 use crate::metadata::{LoadMetadataConfig, Metadata};
 use crate::venv::setup_environ_from_requirement;
+use anyhow::anyhow;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
 
@@ -46,13 +47,13 @@ pub async fn eject_package(
 }
 
 impl Process for UnInjectOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match eject_package(&self.outof, &self.package_specs).await {
             Ok(msg) => {
                 println!("{msg}");
                 Ok(0)
             },
-            Err(msg) => Err(msg),
+            Err(msg) => Err(anyhow!(msg)),
         }
     }
 }

@@ -1,10 +1,10 @@
+use anyhow::{anyhow, Context};
 use std::ffi::OsStr;
 use std::path::Path;
 use subprocess::Exec;
 
 use crate::{
     cli::{Process, RunpythonOptions},
-    helpers::ResultToString,
     venv::setup_environ_from_requirement,
 };
 
@@ -12,22 +12,22 @@ use crate::{
 pub fn process_subprocess<S: AsRef<OsStr>>(
     exec_path: &Path,
     args: &[S],
-) -> Result<i32, String> {
-    Ok(
-        match Exec::cmd(exec_path).args(args).join().map_err_to_string()? {
-            subprocess::ExitStatus::Exited(int) => int as i32,
-            subprocess::ExitStatus::Signaled(int) => int as i32,
-            subprocess::ExitStatus::Other(int) => int,
-            subprocess::ExitStatus::Undetermined => 0,
-        },
-    )
+) -> anyhow::Result<i32> {
+    Ok(match Exec::cmd(exec_path).args(args).join()? {
+        subprocess::ExitStatus::Exited(int) => int as i32,
+        subprocess::ExitStatus::Signaled(int) => int as i32,
+        subprocess::ExitStatus::Other(int) => int,
+        subprocess::ExitStatus::Undetermined => 0,
+    })
 }
 
 pub async fn run_python(
     venv_name: &str,
     python_args: Vec<String>,
-) -> Result<i32, String> {
-    let (_, environ) = setup_environ_from_requirement(venv_name).await?;
+) -> anyhow::Result<i32> {
+    let (_, environ) = setup_environ_from_requirement(venv_name)
+        .await
+        .map_err(|e| anyhow!(e))?;
 
     let py = environ.interpreter().sys_executable();
 
@@ -36,10 +36,14 @@ pub async fn run_python(
 }
 
 impl Process for RunpythonOptions {
-    async fn process(self) -> Result<i32, String> {
-        match run_python(&self.venv, self.python_args).await {
-            Ok(code) => Ok(code),
-            Err(msg) => Err(msg),
-        }
+    async fn process(self) -> anyhow::Result<i32> {
+        run_python(&self.venv, self.python_args)
+            .await
+            .with_context(|| {
+                format!(
+                    "Something went wrong trying to run Python in '{}'",
+                    &self.venv
+                )
+            })
     }
 }

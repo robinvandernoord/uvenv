@@ -40,7 +40,7 @@ pub const fn get_styles() -> clap::builder::Styles {
 }
 
 pub trait Process {
-    async fn process(self) -> Result<i32, String>;
+    async fn process(self) -> anyhow::Result<i32>;
 }
 
 #[derive(Parser, Debug)]
@@ -350,7 +350,7 @@ pub enum Commands {
 //   - show packages with script issues
 
 impl Process for Commands {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match self {
             Self::List(opts) => opts.process().await,
             Self::Install(opts) => opts.process().await,
@@ -396,7 +396,7 @@ pub enum SelfCommands {
 }
 
 impl Process for SelfCommands {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         match self {
             Self::Update(opts) => opts.process().await,
             Self::Changelog(opts) => opts.process().await,

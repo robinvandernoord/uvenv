@@ -17,7 +17,7 @@ pub async fn install_activate() -> Result<(), String> {
 }
 
 impl Process for ActivateOptions {
-    async fn process(self) -> Result<i32, String> {
+    async fn process(self) -> anyhow::Result<i32> {
         // wait a minute, this is not a bash script!
         // show warning with setup info:
 

@@ -20,6 +20,7 @@ use clap_complete::{generate, Generator, Shell};
 use crate::cli::{Args, Process};
 use crate::commands::activate::generate_activate;
 use crate::commands::ensurepath::ensure_path_generate;
+use crate::helpers::fmt_error;
 
 pub fn print_completions<G: Generator>(
     gen: G,
@@ -68,7 +69,7 @@ async fn main() {
     } else {
         let result = args.cmd.process().await;
         result.unwrap_or_else(|msg| {
-            eprintln!("Something went wrong | {msg}");
+            eprintln!("{}", fmt_error(&msg));
             1
         })
     };

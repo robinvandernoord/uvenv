@@ -115,20 +115,18 @@ pub async fn check_symlink(
     is_symlink(&symlink_path) && points_to(&symlink_path, target_path)
 }
 
-pub async fn remove_symlink(symlink: &str) -> Result<(), String> {
+pub async fn remove_symlink(symlink: &str) -> anyhow::Result<()> {
     let bin_dir = ensure_bin_dir().await;
     let target_path = bin_dir.join(symlink);
 
     if is_symlink(&target_path) {
-        tokio::fs::remove_file(&target_path)
-            .await
-            .map_err(|_| format!("Failed to remove symlink {:?}", &target_path))?;
+        tokio::fs::remove_file(&target_path).await?;
     };
 
     Ok(())
 }
 
-pub async fn remove_symlinks(symlinks: Vec<String>) -> Result<(), String> {
+pub async fn remove_symlinks(symlinks: Vec<String>) -> anyhow::Result<()> {
     for symlink in symlinks {
         remove_symlink(&symlink).await?;
     }
