@@ -1,4 +1,6 @@
 use crate::cli::{ChangelogOptions, Process};
+use crate::helpers::fmt_error;
+use anyhow::{anyhow, Context};
 use owo_colors::OwoColorize;
 use regex::Regex;
 use std::collections::BTreeMap;
@@ -60,10 +62,17 @@ fn parse_changelog(markdown: &str) -> Changelogs {
     changelog
 }
 
-pub async fn get_changelog() -> Option<String> {
-    let body = reqwest::get(CHANGELOG_URL).await.ok()?.text().await.ok()?;
+async fn _get_changelog() -> reqwest::Result<String> {
+    let resp = reqwest::get(CHANGELOG_URL).await?;
+    let resp = resp.error_for_status()?;
 
-    Some(body)
+    let body = resp.text().await?;
+
+    Ok(body)
+}
+
+pub async fn get_changelog() -> anyhow::Result<String> {
+    _get_changelog().await.map_err(|e| anyhow!(e))
 }
 
 fn color(category: &str) -> String {
@@ -104,20 +113,23 @@ pub fn display_changelog(changelog: &Changelogs) {
     }
 }
 
-pub async fn changelog() -> Option<i32> {
+pub async fn changelog() -> anyhow::Result<i32> {
     let md = get_changelog().await?;
+
+    dbg!(&md);
 
     let parsed = parse_changelog(&md);
 
     display_changelog(&parsed);
 
-    Some(0)
+    Ok(0)
 }
 
 impl Process for ChangelogOptions {
     async fn process(self) -> Result<i32, String> {
         changelog()
             .await
-            .ok_or_else(|| String::from("Something went wrong while loading the changelog."))
+            .with_context(|| "while loading the changelog;".to_string())
+            .map_err(fmt_error)
     }
 }
