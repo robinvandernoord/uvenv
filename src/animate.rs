@@ -56,7 +56,7 @@ pub async fn animation(
         };
 
         idx = (idx + 1) % spinner_chars.len();
-        io::stdout().flush().unwrap();
+        io::stdout().flush().expect("Writing to stdout failed?");
         tokio::time::sleep(Duration::from_millis(100)).await;
     }
 }

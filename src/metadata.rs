@@ -65,7 +65,7 @@ pub fn venv_path(venv_name: &str) -> PathBuf {
 }
 
 pub fn version_0() -> Version {
-    Version::from_str("0.0.0").unwrap()
+    Version::from_str("0.0.0").expect("Version 0.0.0 should be parseable.")
 }
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)] // dbg_pls::DebugPls
