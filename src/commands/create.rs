@@ -41,7 +41,7 @@ impl Process for CreateOptions {
             },
             Err(msg) => Err(msg).with_context(|| {
                 format!(
-                    "Something went wrong trying to create '{}'",
+                    "Something went wrong trying to create '{}';",
                     &self.venv_name
                 )
             }),

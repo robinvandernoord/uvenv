@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use anyhow::Context;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
@@ -19,7 +19,7 @@ pub async fn update_metadata(
     requirement: &Requirement,
     environ: &PythonEnvironment,
     requested_version: String,
-) -> Result<String, String> {
+) -> anyhow::Result<String> {
     let new_version = uv_get_installed_version(&requirement.name, Some(environ))?;
 
     metadata.requested_version = requested_version;
@@ -67,7 +67,7 @@ pub async fn _upgrade_package(
     force: bool,
     no_cache: bool,
     skip_injected: bool,
-) -> Result<String, String> {
+) -> anyhow::Result<String> {
     let old_version = metadata.installed_version.clone();
 
     let mut args = vec!["pip", "install", "--upgrade"];
@@ -120,7 +120,7 @@ pub async fn upgrade_package(
     force: bool,
     no_cache: bool,
     skip_injected: bool,
-) -> Result<String, String> {
+) -> anyhow::Result<String> {
     // No virtualenv for '{package_name}', stopping. Use 'uvx install' instead.
     let (requirement, environ) = setup_environ_from_requirement(install_spec).await?;
 
@@ -154,7 +154,12 @@ impl Process for UpgradeOptions {
                 println!("{msg}");
                 Ok(0)
             },
-            Err(msg) => Err(anyhow!(msg)),
+            Err(msg) => Err(msg).with_context(|| {
+                format!(
+                    "Something went wrong trying to upgrade '{}';",
+                    &self.package_name
+                )
+            }),
         }
     }
 }

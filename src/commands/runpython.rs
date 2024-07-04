@@ -41,7 +41,7 @@ impl Process for RunpythonOptions {
             .await
             .with_context(|| {
                 format!(
-                    "Something went wrong trying to run Python in '{}'",
+                    "Something went wrong trying to run Python in '{}';",
                     &self.venv
                 )
             })

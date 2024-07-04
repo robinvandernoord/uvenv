@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use anyhow::{anyhow, bail};
 use std::path::{Path, PathBuf};
 
 use owo_colors::OwoColorize;
@@ -51,25 +51,25 @@ pub async fn get_package_versions<S: AsRef<str>>(
         .collect()
 }
 
-pub fn find_global_python() -> Result<PathBuf, String> {
+pub fn find_global_python() -> anyhow::Result<PathBuf> {
     let fallback = PathBuf::from("/usr/bin/python3");
     if fallback.exists() {
         Ok(fallback)
     } else {
-        Err(format!(
+        bail!(
             "Python could not be found! Is `{}` installed globally (without a venv)?",
             "uvx".green()
-        ))
+        )
     }
 }
 
-pub async fn find_python() -> Result<PathBuf, String> {
+pub async fn find_python() -> anyhow::Result<PathBuf> {
     find_sibling("python")
         .await
         .map_or_else(find_global_python, Ok)
 }
 
-pub async fn self_update(with_uv: bool) -> Result<i32, String> {
+pub async fn self_update(with_uv: bool) -> anyhow::Result<i32> {
     let exe = find_python().await?;
 
     // todo: with 'uv' instead of pip later?

@@ -41,7 +41,7 @@ pub async fn reinstall(
 
     if let Err(err) = uninstall_package(&requirement_name, force).await {
         eprintln!(
-            "{}: something went wrong during uninstall ({})",
+            "{}: something went wrong during uninstall ({});",
             "Warning".yellow(),
             err
         );

@@ -1,3 +1,4 @@
+use anyhow::bail;
 use std::path::Path;
 use std::str::FromStr;
 
@@ -5,11 +6,8 @@ use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
 use tempfile::NamedTempFile;
 
+use crate::animate::{show_loading_indicator, AnimationSettings};
 use crate::cmd::{run, run_get_output};
-use crate::{
-    animate::{show_loading_indicator, AnimationSettings},
-    helpers::ResultToString,
-};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct PipDownloadInfo {
@@ -60,7 +58,7 @@ struct PipData {
     // environment: Environment,
 }
 
-pub async fn pip(args: Vec<&str>) -> Result<bool, String> {
+pub async fn pip(args: Vec<&str>) -> anyhow::Result<bool> {
     let err_prefix = format!("pip {}", &args[0]);
 
     run("pip", args, Some(err_prefix)).await
@@ -78,7 +76,7 @@ impl FakeInstallResult {
     }
 }
 
-pub async fn fake_install(install_spec: &str) -> Result<FakeInstallResult, String> {
+pub async fn fake_install(install_spec: &str) -> anyhow::Result<FakeInstallResult> {
     let mut args: Vec<&str> = vec![
         "install",
         "--no-deps",
@@ -87,11 +85,9 @@ pub async fn fake_install(install_spec: &str) -> Result<FakeInstallResult, Strin
         "--report",
     ];
 
-    let tempfile = NamedTempFile::new().map_err_to_string()?;
+    let tempfile = NamedTempFile::new()?;
     let Some(tempfile_path) = tempfile.as_ref().to_str() else {
-        return Err(String::from(
-            "No temp file could be created for a dry pip install.",
-        ));
+        bail!("No temp file could be created for a dry pip install.",)
     };
 
     args.push(tempfile_path); // tmpfile
@@ -99,14 +95,12 @@ pub async fn fake_install(install_spec: &str) -> Result<FakeInstallResult, Strin
 
     pip(args).await?;
 
-    let json_file = tempfile.reopen().map_err_to_string()?;
+    let json_file = tempfile.reopen()?;
 
-    let pip_data: PipData = serde_json::from_reader(json_file).map_err_to_string()?;
+    let pip_data: PipData = serde_json::from_reader(json_file)?;
 
     let Some(install) = pip_data.install.first() else {
-        return Err(String::from(
-            "Failed to find package name for local install.",
-        ));
+        bail!("Failed to find package name for local install.",)
     };
 
     // if extras exist, the full name is name[extras]. Otherwise, it's just the name.
@@ -125,7 +119,7 @@ pub async fn fake_install(install_spec: &str) -> Result<FakeInstallResult, Strin
 
 pub async fn try_parse_local_requirement(
     install_spec: &str
-) -> Result<(Requirement, String), String> {
+) -> anyhow::Result<(Requirement, String)> {
     // fake install and extract the relevant info
     let promise = fake_install(install_spec);
 
@@ -137,12 +131,12 @@ pub async fn try_parse_local_requirement(
     .await?;
 
     let new_install_spec = result.to_spec();
-    let requirement = Requirement::from_str(&new_install_spec).map_err_to_string()?;
+    let requirement = Requirement::from_str(&new_install_spec)?;
 
     Ok((requirement, new_install_spec))
 }
 
-pub async fn parse_requirement(install_spec: &str) -> Result<(Requirement, String), String> {
+pub async fn parse_requirement(install_spec: &str) -> anyhow::Result<(Requirement, String)> {
     match Requirement::from_str(install_spec) {
         Ok(requirement) => Ok((requirement, String::from(install_spec))),
         Err(_) => try_parse_local_requirement(install_spec).await,

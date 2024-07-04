@@ -11,7 +11,7 @@ use crate::uv::{uv, Helpers};
 pub async fn eject_package(
     from: &str,
     to_eject_specs: &[String],
-) -> Result<String, String> {
+) -> anyhow::Result<String> {
     let (requirement, environ) = setup_environ_from_requirement(from).await?;
     let mut metadata = Metadata::for_requirement(&requirement, &LoadMetadataConfig::none()).await;
 

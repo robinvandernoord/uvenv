@@ -2,7 +2,7 @@ use crate::helpers::PathToString;
 use crate::metadata::venv_path;
 use crate::pip::parse_requirement;
 use crate::uv::{uv, uv_venv};
-use anyhow::{anyhow, bail};
+use anyhow::{anyhow, bail, Context};
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
 use std::path::{Path, PathBuf};
@@ -52,11 +52,11 @@ pub async fn create_venv(
     Ok(venv_path)
 }
 
-pub async fn activate_venv(venv: &Path) -> Result<PythonEnvironment, String> {
+pub async fn activate_venv(venv: &Path) -> anyhow::Result<PythonEnvironment> {
     let venv_str = venv.to_str().unwrap_or_default();
     std::env::set_var("VIRTUAL_ENV", venv_str);
 
-    uv_venv(None).ok_or_else(|| format!("Could not properly activate venv '{venv_str}'!"))
+    uv_venv(None).with_context(|| format!("Could not properly activate venv '{venv_str}'!"))
 }
 
 #[allow(dead_code)]
@@ -69,12 +69,12 @@ pub async fn find_venv(install_spec: &str) -> Option<PathBuf> {
 
 pub async fn setup_environ_from_requirement(
     install_spec: &str
-) -> Result<(Requirement, PythonEnvironment), String> {
+) -> anyhow::Result<(Requirement, PythonEnvironment)> {
     let (requirement, _) = parse_requirement(install_spec).await?;
     let requirement_name = requirement.name.to_string();
     let venv_dir = venv_path(&requirement_name);
     if !venv_dir.exists() {
-        return Err(format!("No virtualenv for '{}'.", install_spec.green(),));
+        return Err(anyhow!("No virtualenv for '{}'.", install_spec.green(),));
     }
     let environ = activate_venv(&venv_dir).await?;
     Ok((requirement, environ))

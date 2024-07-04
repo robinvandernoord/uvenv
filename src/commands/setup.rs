@@ -53,7 +53,7 @@ pub async fn load_setup_metadata() -> SetupMetadata {
         .unwrap_or_else(|_| SetupMetadata::new())
 }
 
-pub async fn store_setup_metadata(metadata: &SetupMetadata) -> Result<(), String> {
+pub async fn store_setup_metadata(metadata: &SetupMetadata) -> anyhow::Result<()> {
     let filename = setup_metadata_filename();
 
     store_generic_msgpack(&filename, metadata).await

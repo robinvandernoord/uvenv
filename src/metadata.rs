@@ -160,13 +160,13 @@ impl Metadata {
         let venv = match maybe_venv {
             Some(v) => v,
             None => match uv_venv(None) {
-                Some(venv) => {
+                Ok(venv) => {
                     // black magic fuckery to
                     // get a reference to the currently active venv
                     environment = venv;
                     &environment
                 },
-                None => return None,
+                Err(_) => return None,
             },
         };
 
@@ -231,7 +231,7 @@ impl Metadata {
     pub async fn save(
         &self,
         dirname: &Path,
-    ) -> Result<(), String> {
+    ) -> anyhow::Result<()> {
         let meta_path = dirname.join(".metadata");
         store_metadata(&meta_path, self).await
     }
@@ -480,16 +480,16 @@ pub async fn load_metadata(
 pub async fn store_generic_msgpack<T: serde::Serialize>(
     filename: &Path,
     metadata: &T,
-) -> Result<(), String> {
+) -> anyhow::Result<()> {
     // Open the msgpack file
-    let mut file = File::create(filename).await.map_err_to_string()?;
+    let mut file = File::create(filename).await?;
 
     // Read the contents of the file into a Metadata struct
-    let mut bytes = rmp_serde::encode::to_vec(metadata).map_err_to_string()?;
+    let mut bytes = rmp_serde::encode::to_vec(metadata)?;
 
     add_header(&mut bytes);
 
-    file.write_all(&bytes).await.map_err_to_string()?;
+    file.write_all(&bytes).await?;
 
     Ok(())
 }
@@ -497,6 +497,6 @@ pub async fn store_generic_msgpack<T: serde::Serialize>(
 pub async fn store_metadata(
     filename: &Path,
     metadata: &Metadata,
-) -> Result<(), String> {
+) -> anyhow::Result<()> {
     store_generic_msgpack(filename, metadata).await
 }

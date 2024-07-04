@@ -1,3 +1,4 @@
+use anyhow::{anyhow, Context};
 use std::ffi::OsStr;
 use std::{collections::HashSet, path::PathBuf};
 
@@ -34,7 +35,7 @@ pub async fn get_uv_binary() -> String {
     )
 }
 
-pub async fn uv<S>(args: Vec<S>) -> Result<bool, String>
+pub async fn uv<S>(args: Vec<S>) -> anyhow::Result<bool>
 where
     S: AsRef<OsStr>,
 {
@@ -47,7 +48,7 @@ where
     run(&script, args, Some(err_prefix)).await
 }
 
-pub async fn uv_with_output<S: AsRef<OsStr>>(args: Vec<S>) -> Result<i32, String> {
+pub async fn uv_with_output<S: AsRef<OsStr>>(args: Vec<S>) -> anyhow::Result<i32> {
     let script = get_uv_binary().await;
     run_print_output(script, args).await
 }
@@ -60,7 +61,7 @@ pub fn uv_cache() -> Cache {
 }
 
 /// try to find an `PythonEnvironment` based on Cache or currently active virtualenv (`VIRTUAL_ENV`).
-pub fn uv_venv(maybe_cache: Option<Cache>) -> Option<PythonEnvironment> {
+pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> {
     let cache = maybe_cache.unwrap_or_else(uv_cache);
 
     PythonEnvironment::find(
@@ -68,19 +69,20 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> Option<PythonEnvironment> {
         EnvironmentPreference::OnlyVirtual, // venv is always virtual
         &cache,
     )
-    .ok()
+    .map_err(|e| anyhow!(e))
 }
 
 pub fn uv_get_installed_version(
     package_name: &PackageName,
     maybe_venv: Option<&PythonEnvironment>,
-) -> Result<String, String> {
+) -> anyhow::Result<String> {
     let environment: PythonEnvironment; // lifetime for if maybe_venv is None
 
     let site_packages = if let Some(venv) = maybe_venv {
         SitePackages::from_environment(venv)
     } else {
-        environment = uv_venv(None).ok_or_else(|| format!("{}", "Failed to set up venv!".red()))?;
+        environment =
+            uv_venv(None).with_context(|| format!("{}", "Failed to set up venv!".red()))?;
         SitePackages::from_environment(&environment)
     }
     .ok();
@@ -92,7 +94,7 @@ pub fn uv_get_installed_version(
         }
     };
 
-    Err(format!(
+    Err(anyhow!(
         "No version found for '{}'.",
         package_name.to_string().yellow()
     ))

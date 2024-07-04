@@ -1,3 +1,4 @@
+use anyhow::anyhow;
 use std::env;
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -6,8 +7,6 @@ use std::process::Stdio;
 use owo_colors::OwoColorize;
 use tokio::fs::canonicalize;
 use tokio::process::Command;
-
-use crate::helpers::ResultToString;
 
 pub async fn find_sibling(name: &str) -> Option<PathBuf> {
     let Ok(binary_path) = &env::current_exe() else {
@@ -33,12 +32,12 @@ pub async fn find_sibling(name: &str) -> Option<PathBuf> {
 pub async fn run_print_output<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
     command: S1,
     args: Vec<S2>,
-) -> Result<i32, String> {
+) -> anyhow::Result<i32> {
     let mut cmd = Command::new(command);
     cmd.args(args);
     cmd.stdout(Stdio::inherit());
     cmd.stderr(Stdio::inherit());
-    let code = cmd.status().await.map_err_to_string()?;
+    let code = cmd.status().await?;
 
     Ok(code.code().unwrap_or(-1))
 }
@@ -62,7 +61,7 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
     script: S1,
     args: Vec<S2>,
     err_prefix: Option<String>,
-) -> Result<bool, String> {
+) -> anyhow::Result<bool> {
     let result = Command::new(script).args(args).output().await;
 
     match result {
@@ -71,17 +70,14 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
             Some(_) | None => {
                 let err = String::from_utf8(result.stderr).unwrap_or_default();
                 match err_prefix {
-                    Some(prefix) => Err(format!("{prefix} | {err}")),
-                    None => Err(err),
+                    Some(prefix) => Err(anyhow!("{prefix} | {err}")),
+                    None => Err(anyhow!(err)),
                 }
             },
         },
-        Err(result) => {
-            let err = result.to_string();
-            match err_prefix {
-                Some(prefix) => Err(format!("{prefix} | {err}")),
-                None => Err(err),
-            }
+        Err(result) => match err_prefix {
+            Some(prefix) => Err(anyhow!("{prefix} | {}", result.to_string())),
+            None => Err(anyhow!(result)),
         },
     }
 }

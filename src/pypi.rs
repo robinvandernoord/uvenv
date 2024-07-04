@@ -36,7 +36,7 @@ pub async fn get_versions_for_packagename(
 
     let data = match client.simple(package_name).await {
         Err(err) => {
-            eprintln!("Something went wrong: {err}");
+            eprintln!("Something went wrong: {err};");
             return versions;
         },
         Ok(data) => data,
