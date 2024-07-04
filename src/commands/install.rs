@@ -22,7 +22,7 @@ pub async fn _install_package(
     no_cache: bool,
     force: bool,
     editable: bool,
-) -> Result<bool, String> {
+) -> anyhow::Result<bool> {
     let mut args: Vec<&str> = vec!["pip", "install"];
 
     if !inject.is_empty() {
@@ -47,6 +47,7 @@ pub async fn _install_package(
         AnimationSettings::default(),
     )
     .await
+    .map_err(|e| anyhow!(e))
 }
 
 async fn ensure_venv(
@@ -75,7 +76,7 @@ async fn store_metadata(
     editable: bool,
     install_spec: &str,
     venv: &PythonEnvironment,
-) -> Result<Metadata, String> {
+) -> anyhow::Result<Metadata> {
     let mut metadata = Metadata::new(requirement_name);
     let _ = metadata.fill(Some(venv));
 
@@ -99,7 +100,10 @@ async fn store_metadata(
         metadata.installed_version = version;
     }
 
-    metadata.save(&venv.to_path_buf()).await?;
+    metadata
+        .save(&venv.to_path_buf())
+        .await
+        .map_err(|e| anyhow!(e))?;
     Ok(metadata)
 }
 
@@ -109,7 +113,7 @@ pub async fn install_symlinks(
     requirement: &Requirement,
     force: bool,
     binaries: &[&str],
-) -> Result<(), String> {
+) -> anyhow::Result<()> {
     let venv_root = venv.root();
 
     let symlinks = find_symlinks(requirement, &meta.installed_version, venv).await;
@@ -127,7 +131,7 @@ pub async fn install_symlinks(
     }
 
     meta.scripts = results;
-    meta.save(venv_root).await?;
+    meta.save(venv_root).await.map_err(|e| anyhow!(e))?;
 
     Ok(())
 }
@@ -140,13 +144,13 @@ pub async fn install_package(
     inject: Vec<&str>,
     no_cache: bool,
     editable: bool,
-) -> Result<String, String> {
-    let (requirement, resolved_install_spec) = parse_requirement(install_spec).await?;
-
-    let venv_path = ensure_venv(maybe_venv, &requirement, python, force)
+) -> anyhow::Result<String> {
+    let (requirement, resolved_install_spec) = parse_requirement(install_spec)
         .await
-        .map_err(|e| format!("{e}"))?; // fixme
-    let uv_venv = activate_venv(&venv_path).await?;
+        .map_err(|e| anyhow!(e))?;
+
+    let venv_path = ensure_venv(maybe_venv, &requirement, python, force).await?;
+    let uv_venv = activate_venv(&venv_path).await.map_err(|e| anyhow!(e))?;
 
     if let Err(e) = _install_package(install_spec, &inject, no_cache, force, editable).await {
         let _ = remove_venv(&venv_path).await;

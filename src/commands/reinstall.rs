@@ -1,4 +1,4 @@
-use anyhow::anyhow;
+use anyhow::{anyhow, bail};
 use owo_colors::OwoColorize;
 
 use crate::commands::create::create;
@@ -18,18 +18,18 @@ pub async fn reinstall(
     with_injected: bool,
     no_cache: bool,
     editable: bool,
-) -> Result<String, String> {
-    let (requirement, _resolved_install_spec) = parse_requirement(install_spec).await?;
+) -> anyhow::Result<String> {
+    let (requirement, _resolved_install_spec) = parse_requirement(install_spec)
+        .await
+        .map_err(|e| anyhow!(e))?;
     let requirement_name = requirement.name.to_string();
 
     let venv_dir = venv_path(&requirement_name);
 
     if !venv_dir.exists() && !force {
-        return Err(
-            format!("'{}' was not previously installed. Please run 'uvx install {}' or pass `--force` instead.", 
+        bail!("'{}' was not previously installed. Please run 'uvx install {}' or pass `--force` instead.",
             &requirement_name,
             &install_spec,
-        )
         );
     }
 
@@ -67,7 +67,6 @@ pub async fn reinstall(
             force,
         )
         .await
-        .map_err(|e| format!("{e}")) // fixme
     } else {
         install_package(
             new_install_spec,
