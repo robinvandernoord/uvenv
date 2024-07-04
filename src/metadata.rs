@@ -27,6 +27,7 @@ const MAGIC_HEADER: &[u8] = &[0x55, 0x56, 0x58, 0x01, 0x32, 0x04, 0x00]; // hex,
 pub fn get_home_dir() -> PathBuf {
     if cfg!(test) {
         let test_dir = std::env::temp_dir().join("uvx-test");
+        // fixme:
         let _ = dbg!(remove_dir_all(&test_dir));
         let _ = dbg!(std::fs::create_dir_all(&test_dir));
         test_dir

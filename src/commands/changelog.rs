@@ -114,9 +114,6 @@ pub fn display_changelog(changelog: &Changelogs) {
 
 pub async fn changelog() -> anyhow::Result<i32> {
     let md = get_changelog().await?;
-
-    dbg!(&md);
-
     let parsed = parse_changelog(&md);
 
     display_changelog(&parsed);
