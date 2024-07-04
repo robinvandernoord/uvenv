@@ -11,7 +11,7 @@ use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
 use std::collections::HashMap;
 
-use anyhow::{anyhow, bail};
+use anyhow::{bail, Context};
 use std::path::{Path, PathBuf};
 
 use uv_toolchain::PythonEnvironment;
@@ -47,7 +47,6 @@ pub async fn _install_package(
         AnimationSettings::default(),
     )
     .await
-    .map_err(|e| anyhow!(e))
 }
 
 async fn ensure_venv(
@@ -100,10 +99,7 @@ async fn store_metadata(
         metadata.installed_version = version;
     }
 
-    metadata
-        .save(&venv.to_path_buf())
-        .await
-        .map_err(|e| anyhow!(e))?;
+    metadata.save(&venv.to_path_buf()).await?;
     Ok(metadata)
 }
 
@@ -131,7 +127,7 @@ pub async fn install_symlinks(
     }
 
     meta.scripts = results;
-    meta.save(venv_root).await.map_err(|e| anyhow!(e))?;
+    meta.save(venv_root).await?;
 
     Ok(())
 }
@@ -145,12 +141,10 @@ pub async fn install_package(
     no_cache: bool,
     editable: bool,
 ) -> anyhow::Result<String> {
-    let (requirement, resolved_install_spec) = parse_requirement(install_spec)
-        .await
-        .map_err(|e| anyhow!(e))?;
+    let (requirement, resolved_install_spec) = parse_requirement(install_spec).await?;
 
     let venv_path = ensure_venv(maybe_venv, &requirement, python, force).await?;
-    let uv_venv = activate_venv(&venv_path).await.map_err(|e| anyhow!(e))?;
+    let uv_venv = activate_venv(&venv_path).await?;
 
     if let Err(e) = _install_package(install_spec, &inject, no_cache, force, editable).await {
         let _ = remove_venv(&venv_path).await;
@@ -195,7 +189,12 @@ impl Process for InstallOptions {
                 println!("{msg}");
                 Ok(0)
             },
-            Err(msg) => Err(anyhow!(msg)),
+            Err(msg) => Err(msg).with_context(|| {
+                format!(
+                    "Something went wrong trying to install '{}';",
+                    self.package_name
+                )
+            }),
         }
     }
 }

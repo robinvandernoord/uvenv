@@ -1,4 +1,4 @@
-use anyhow::{anyhow, bail};
+use anyhow::{bail, Context};
 use owo_colors::OwoColorize;
 
 use crate::commands::create::create;
@@ -19,9 +19,7 @@ pub async fn reinstall(
     no_cache: bool,
     editable: bool,
 ) -> anyhow::Result<String> {
-    let (requirement, _resolved_install_spec) = parse_requirement(install_spec)
-        .await
-        .map_err(|e| anyhow!(e))?;
+    let (requirement, _resolved_install_spec) = parse_requirement(install_spec).await?;
     let requirement_name = requirement.name.to_string();
 
     let venv_dir = venv_path(&requirement_name);
@@ -97,7 +95,12 @@ impl Process for ReinstallOptions {
                 println!("{msg}");
                 Ok(0)
             },
-            Err(msg) => Err(anyhow!(msg)),
+            Err(msg) => Err(msg).with_context(|| {
+                format!(
+                    "Something went wrong trying to reinstall '{}';",
+                    self.package
+                )
+            }),
         }
     }
 }

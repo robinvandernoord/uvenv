@@ -6,7 +6,7 @@ use crate::{
     uv::{uv, Helpers},
     venv::setup_environ_from_requirement,
 };
-use anyhow::anyhow;
+use anyhow::Context;
 use owo_colors::OwoColorize;
 
 pub async fn inject_package(
@@ -57,7 +57,12 @@ impl Process for InjectOptions {
                 println!("{msg}");
                 Ok(0)
             },
-            Err(msg) => Err(anyhow!(msg)),
+            Err(msg) => Err(msg).with_context(|| {
+                format!(
+                    "Something went wrong trying to inject {:?} into '{}';",
+                    &self.package_specs, self.into
+                )
+            }),
         }
     }
 }

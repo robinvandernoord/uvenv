@@ -1,4 +1,4 @@
-use anyhow::{anyhow, bail, Context};
+use anyhow::{bail, Context};
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
 use std::path::{Path, PathBuf};
@@ -18,8 +18,7 @@ async fn _find_executable(
     package_spec: &str,
     venv: &PythonEnvironment,
 ) -> anyhow::Result<String> {
-    let installed_version =
-        uv_get_installed_version(&requirement.name, Some(venv)).map_err(|e| anyhow!(e))?;
+    let installed_version = uv_get_installed_version(&requirement.name, Some(venv))?;
     let symlinks = find_symlinks(requirement, &installed_version, venv).await;
 
     match symlinks.len() {
@@ -90,9 +89,7 @@ pub async fn run_package(
 
     // ### 1 ###
 
-    let (requirement, _) = parse_requirement(package_spec)
-        .await
-        .map_err(|e| anyhow!(e))?;
+    let (requirement, _) = parse_requirement(package_spec).await?;
 
     let venv_path = &create_venv(
         &requirement.name,
@@ -101,8 +98,7 @@ pub async fn run_package(
         true,
         Some(String::from("/tmp/uvx-")),
     )
-    .await
-    .map_err(|e| anyhow!(e))?;
+    .await?;
 
     let venv_name = &venv_path.to_str().unwrap_or_default();
 
@@ -111,12 +107,10 @@ pub async fn run_package(
     }
 
     // ### 2 ###
-    let venv = &activate_venv(venv_path).await.map_err(|e| anyhow!(e))?;
+    let venv = &activate_venv(venv_path).await?;
 
     // already expects activated venv:
-    _install_package(package_spec, &Vec::new(), no_cache, false, false)
-        .await
-        .map_err(|e| anyhow!(e))?;
+    _install_package(package_spec, &Vec::new(), no_cache, false, false).await?;
 
     // ### 3 ###
     let result = run_executable(&requirement, binary, package_spec, venv, venv_path, args).await;

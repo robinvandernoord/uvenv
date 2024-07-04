@@ -1,4 +1,4 @@
-use anyhow::{anyhow, bail};
+use anyhow::{bail, Context};
 use std::path::{Path, PathBuf};
 
 use owo_colors::OwoColorize;
@@ -120,6 +120,8 @@ pub async fn self_update(with_uv: bool) -> anyhow::Result<i32> {
 
 impl Process for SelfUpdateOptions {
     async fn process(self) -> anyhow::Result<i32> {
-        self_update(!self.without_uv).await.map_err(|e| anyhow!(e))
+        self_update(!self.without_uv)
+            .await
+            .with_context(|| "Something went wrong trying to update 'uvx';")
     }
 }

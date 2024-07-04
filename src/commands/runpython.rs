@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context};
+use anyhow::Context;
 use std::ffi::OsStr;
 use std::path::Path;
 use subprocess::Exec;
@@ -25,9 +25,7 @@ pub async fn run_python(
     venv_name: &str,
     python_args: Vec<String>,
 ) -> anyhow::Result<i32> {
-    let (_, environ) = setup_environ_from_requirement(venv_name)
-        .await
-        .map_err(|e| anyhow!(e))?;
+    let (_, environ) = setup_environ_from_requirement(venv_name).await?;
 
     let py = environ.interpreter().sys_executable();
 

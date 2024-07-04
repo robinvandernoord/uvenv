@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Context};
+use anyhow::{anyhow, bail, Context};
 use std::ffi::OsStr;
 use std::{collections::HashSet, path::PathBuf};
 
@@ -69,7 +69,7 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> 
         EnvironmentPreference::OnlyVirtual, // venv is always virtual
         &cache,
     )
-    .map_err(|e| anyhow!(e))
+    .map_err(|e| anyhow!(e)) // core Result to anyhow Result
 }
 
 pub fn uv_get_installed_version(
@@ -94,10 +94,10 @@ pub fn uv_get_installed_version(
         }
     };
 
-    Err(anyhow!(
+    bail!(
         "No version found for '{}'.",
         package_name.to_string().yellow()
-    ))
+    )
 }
 
 pub trait Helpers {

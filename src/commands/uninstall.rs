@@ -1,6 +1,6 @@
 use crate::pip::parse_requirement;
 use crate::uv::Helpers;
-use anyhow::{anyhow, Context};
+use anyhow::{bail, Context};
 use owo_colors::OwoColorize;
 
 use crate::cli::{Process, UninstallOptions};
@@ -12,28 +12,27 @@ pub async fn uninstall_package(
     package_name: &str,
     force: bool,
 ) -> anyhow::Result<String> {
-    let (requirement, _) = parse_requirement(package_name)
-        .await
-        .map_err(|e| anyhow!(e))?;
+    let (requirement, _) = parse_requirement(package_name).await?;
     let requirement_name = requirement.name.to_string();
 
     let venv_dir = venv_path(&requirement_name);
 
     if !venv_dir.exists() {
-        return if force {
+        #[allow(clippy::redundant_else)]
+        if force {
             remove_symlink(&requirement_name).await?;
-            Err(anyhow!(
+            bail!(
                 "{}: No virtualenv for '{}'.",
                 "Warning".yellow(),
                 &requirement_name.green()
-            ))
+            )
         } else {
-            Err(anyhow!("No virtualenv for '{}', stopping.\nUse '{}' to remove an executable with that name anyway.",
-                                        &requirement_name.green(), "--force".green()))
+            bail!("No virtualenv for '{}', stopping.\nUse '{}' to remove an executable with that name anyway.",
+                                        &requirement_name.green(), "--force".green())
         };
     }
 
-    let venv = activate_venv(&venv_dir).await.map_err(|e| anyhow!(e))?;
+    let venv = activate_venv(&venv_dir).await?;
 
     let metadata = Metadata::for_requirement(&requirement, &LoadMetadataConfig::none()).await;
 

@@ -2,23 +2,25 @@ use crate::cli::{Process, UpgradeAllOptions};
 use crate::commands::list::list_packages;
 use crate::commands::upgrade::upgrade_package;
 use crate::metadata::LoadMetadataConfig;
-use anyhow::anyhow;
-use owo_colors::OwoColorize;
+use anyhow::{anyhow, Context};
 
 pub async fn upgrade_all(
     force: bool,
     no_cache: bool,
     skip_injected: bool,
     venv_names: &[String],
-) -> Result<(), String> {
+) -> anyhow::Result<()> {
     let mut all_ok = true;
+    let mut err_result = Err(anyhow!(""));
+
     for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names)).await? {
         match upgrade_package(&meta.name, force, no_cache, skip_injected).await {
             Ok(msg) => {
                 println!("{msg}");
             },
             Err(msg) => {
-                eprintln!("{}", msg.red());
+                // eprintln!("{}", msg.red());
+                err_result = err_result.with_context(|| msg);
                 all_ok = false;
             },
         }
@@ -27,7 +29,7 @@ pub async fn upgrade_all(
     if all_ok {
         Ok(())
     } else {
-        Err(String::from("⚠️ Not all packages were properly upgraded!"))
+        err_result.with_context(|| "⚠️ Not all packages were properly upgraded!")
     }
 }
 
@@ -42,7 +44,7 @@ impl Process for UpgradeAllOptions {
         .await
         {
             Ok(()) => Ok(0),
-            Err(msg) => Err(anyhow!(msg)),
+            Err(msg) => Err(msg),
         }
     }
 }

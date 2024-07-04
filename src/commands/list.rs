@@ -1,8 +1,6 @@
-use anyhow::anyhow;
 use std::fs::ReadDir;
 
 use crate::cli::{ListOptions, Process};
-use crate::helpers::ResultToString;
 use crate::metadata::{get_venv_dir, LoadMetadataConfig, Metadata};
 use crate::promises::handle_promises;
 
@@ -57,15 +55,15 @@ impl ListOptions {
 pub async fn list_packages(
     config: &LoadMetadataConfig,
     filter_names: Option<&[String]>,
-) -> Result<Vec<Metadata>, String> {
+) -> anyhow::Result<Vec<Metadata>> {
     let venv_dir_path = get_venv_dir();
 
     // no tokio::fs because ReadDir.flatten doesn't exist then.
     let must_exist = if let Ok(dir) = std::fs::read_dir(&venv_dir_path) {
         dir
     } else {
-        std::fs::create_dir_all(&venv_dir_path).map_err_to_string()?;
-        std::fs::read_dir(&venv_dir_path).map_err_to_string()?
+        std::fs::create_dir_all(&venv_dir_path)?;
+        std::fs::read_dir(&venv_dir_path)?
     };
 
     Ok(read_from_folder_filtered(must_exist, config, filter_names.unwrap_or(&[])).await)
@@ -75,9 +73,7 @@ impl Process for ListOptions {
     async fn process(self) -> anyhow::Result<i32> {
         let config = self.to_metadataconfig();
 
-        let items = list_packages(&config, Some(&self.venv_names))
-            .await
-            .map_err(|e| anyhow!(e))?;
+        let items = list_packages(&config, Some(&self.venv_names)).await?;
 
         if self.json {
             return self.process_json(&items);

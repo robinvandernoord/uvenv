@@ -64,6 +64,7 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
 ) -> anyhow::Result<bool> {
     let result = Command::new(script).args(args).output().await;
 
+    #[allow(clippy::option_if_let_else)]
     match result {
         Ok(result) => match result.status.code() {
             Some(0) => Ok(true),

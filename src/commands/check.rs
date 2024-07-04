@@ -1,4 +1,3 @@
-use anyhow::anyhow;
 use owo_colors::OwoColorize;
 use std::collections::BTreeMap;
 
@@ -99,9 +98,7 @@ impl Process for CheckOptions {
     async fn process(self) -> anyhow::Result<i32> {
         let config = self.to_metadataconfig();
 
-        let items = list_packages(&config, Some(&self.venv_names))
-            .await
-            .map_err(|e| anyhow!(e))?;
+        let items = list_packages(&config, Some(&self.venv_names)).await?;
 
         let mut issues = Issues::new();
 

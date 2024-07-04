@@ -2,7 +2,7 @@ use crate::helpers::PathToString;
 use crate::metadata::venv_path;
 use crate::pip::parse_requirement;
 use crate::uv::{uv, uv_venv};
-use anyhow::{anyhow, bail, Context};
+use anyhow::{bail, Context};
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
 use std::path::{Path, PathBuf};
@@ -30,7 +30,7 @@ pub async fn create_venv_raw(
         args.push("--seed");
     }
 
-    uv(args).await.map_err(|e| anyhow!(e))?;
+    uv(args).await?;
 
     Ok(())
 }
@@ -74,7 +74,7 @@ pub async fn setup_environ_from_requirement(
     let requirement_name = requirement.name.to_string();
     let venv_dir = venv_path(&requirement_name);
     if !venv_dir.exists() {
-        return Err(anyhow!("No virtualenv for '{}'.", install_spec.green(),));
+        bail!("No virtualenv for '{}'.", install_spec.green(),);
     }
     let environ = activate_venv(&venv_dir).await?;
     Ok((requirement, environ))

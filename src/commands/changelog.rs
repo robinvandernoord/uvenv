@@ -71,7 +71,7 @@ async fn _get_changelog() -> reqwest::Result<String> {
 }
 
 pub async fn get_changelog() -> anyhow::Result<String> {
-    _get_changelog().await.map_err(|e| anyhow!(e))
+    _get_changelog().await.map_err(|e| anyhow!(e)) // reqwest to anyhow
 }
 
 fn color(category: &str) -> String {

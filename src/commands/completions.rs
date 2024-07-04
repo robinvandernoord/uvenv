@@ -1,12 +1,12 @@
 use crate::cli::{CompletionsOptions, Process};
-use anyhow::anyhow;
+use anyhow::Context;
 
 use crate::cmd::run_if_bash_else_warn;
 use owo_colors::OwoColorize;
 
 use super::ensurepath::add_to_bashrc;
 
-pub async fn completions(install: bool) -> Result<i32, String> {
+pub async fn completions(install: bool) -> anyhow::Result<i32> {
     let for_bash = r#"eval "$(uvx --generate=bash completions)""#;
 
     if install {
@@ -28,6 +28,8 @@ pub async fn completions(install: bool) -> Result<i32, String> {
 
 impl Process for CompletionsOptions {
     async fn process(self) -> anyhow::Result<i32> {
-        completions(self.install).await.map_err(|e| anyhow!(e))
+        completions(self.install).await.with_context(|| {
+            "Something went wrong trying to generate or install completions;".to_string()
+        })
     }
 }

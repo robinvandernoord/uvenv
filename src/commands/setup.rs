@@ -7,6 +7,7 @@ use crate::cmd::run_if_bash_else_warn;
 use crate::commands::activate::install_activate;
 use crate::commands::completions::completions;
 use crate::commands::ensurepath::ensure_path;
+use crate::helpers::fmt_error;
 use crate::metadata::{get_work_dir, load_generic_msgpack, store_generic_msgpack};
 
 #[derive(Debug, PartialEq, Eq, Deserialize, Serialize)] // dbg_pls::DebugPls
@@ -72,7 +73,7 @@ pub async fn setup_for_bash(
     if do_ensurepath && (!metadata.feature_ensurepath || force) {
         if let Err(msg) = ensure_path(force).await {
             any_warnings = true;
-            eprintln!("{msg}");
+            eprintln!("{}", fmt_error(&msg));
         }
         metadata.feature_ensurepath = true;
     }
@@ -80,7 +81,7 @@ pub async fn setup_for_bash(
     if do_completions && (!metadata.feature_completions || force) {
         if let Err(msg) = completions(true).await {
             any_warnings = true;
-            eprintln!("{msg}");
+            eprintln!("{}", fmt_error(&msg));
         }
         metadata.feature_completions = true;
     }
@@ -88,14 +89,14 @@ pub async fn setup_for_bash(
     if do_activate && (!metadata.feature_activate || force) {
         if let Err(msg) = install_activate().await {
             any_warnings = true;
-            eprintln!("{msg}");
+            eprintln!("{}", fmt_error(&msg));
         }
         metadata.feature_activate = true;
     }
 
     if let Err(msg) = store_setup_metadata(&metadata).await {
         any_warnings = true;
-        eprintln!("{msg}");
+        eprintln!("{}", fmt_error(&msg));
     }
 
     println!("Setup finished, you may want to run `{}` now in order to apply these changes to your shell.", "exec bash".green());

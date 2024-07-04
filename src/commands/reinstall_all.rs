@@ -2,8 +2,7 @@ use crate::cli::{Process, ReinstallAllOptions};
 use crate::commands::list::list_packages;
 use crate::commands::reinstall::reinstall;
 use crate::metadata::LoadMetadataConfig;
-use anyhow::anyhow;
-use owo_colors::OwoColorize;
+use anyhow::{anyhow, Context};
 
 pub async fn reinstall_all(
     python: Option<&String>,
@@ -12,8 +11,10 @@ pub async fn reinstall_all(
     no_cache: bool,
     editable: bool,
     venv_names: &[String],
-) -> Result<(), String> {
+) -> anyhow::Result<()> {
     let mut all_ok = true;
+    // only used if not all_ok, but already created for chaining:
+    let mut err_result = Err(anyhow!(""));
 
     for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names)).await? {
         match reinstall(
@@ -30,7 +31,8 @@ pub async fn reinstall_all(
                 println!("{msg}");
             },
             Err(msg) => {
-                eprintln!("{}", msg.red());
+                err_result = err_result.with_context(|| msg);
+                // eprintln!("{}", msg.red());
                 all_ok = false;
             },
         }
@@ -38,9 +40,7 @@ pub async fn reinstall_all(
     if all_ok {
         Ok(())
     } else {
-        Err(String::from(
-            "⚠️ Not all packages were properly reinstalled!",
-        ))
+        err_result.with_context(|| "⚠️ Not all packages were properly reinstalled!")
     }
 }
 
@@ -57,7 +57,7 @@ impl Process for ReinstallAllOptions {
         .await
         {
             Ok(()) => Ok(0),
-            Err(msg) => Err(anyhow!(msg)),
+            Err(msg) => Err(msg),
         }
     }
 }

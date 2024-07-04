@@ -9,7 +9,7 @@ pub async fn generate_activate() -> String {
     String::from(include_str!("../shell/activate.sh"))
 }
 
-pub async fn install_activate() -> Result<(), String> {
+pub async fn install_activate() -> anyhow::Result<()> {
     let bash_code = r#"eval "$(uvx --generate=bash activate _)""#;
     // call eval instead of actually adding the bash function() to bashrc
     // so updates are available immediately
