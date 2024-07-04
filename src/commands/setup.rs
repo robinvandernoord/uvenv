@@ -37,7 +37,7 @@ fn setup_metadata_filename() -> PathBuf {
     workdir.join("setup.metadata")
 }
 
-async fn _load_setup_metadata() -> Result<SetupMetadata, String> {
+async fn _load_setup_metadata() -> anyhow::Result<SetupMetadata> {
     let filename = setup_metadata_filename();
 
     let mut buf = Vec::new(); // allocate memory for the object

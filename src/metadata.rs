@@ -1,7 +1,7 @@
-use crate::helpers::ResultToString;
 use crate::pypi::get_latest_version;
 use crate::symlinks::check_symlink;
 use crate::uv::{uv_get_installed_version, uv_venv, Helpers};
+use anyhow::anyhow;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
 use pep440_rs::{Version, VersionSpecifier};
@@ -181,7 +181,7 @@ impl Metadata {
     pub async fn for_owned_dir(
         dirname: PathBuf,
         config: &LoadMetadataConfig,
-    ) -> Result<Self, String> {
+    ) -> anyhow::Result<Self> {
         let meta_path = dirname.join(".metadata");
 
         Self::for_file(&meta_path, config).await.map_or_else(
@@ -191,7 +191,7 @@ impl Metadata {
                     .and_then(|fname| fname.to_str())
                     .unwrap_or_default();
 
-                Err(format!(
+                Err(anyhow!(
                     "Metadata for '{}' could not be loaded.",
                     venv_name.red()
                 ))
@@ -387,7 +387,7 @@ fn add_header(buf: &mut Vec<u8>) {
 /// Mimimal example:
 ///
 ///
-///     pub async fn load_setup_metadata(filename: &Path) -> Result<SetupMetadata, String> {
+///     pub async fn load_setup_metadata(filename: &Path) -> anyhow::Result<SetupMetadata> {
 ///       let mut buf = Vec::new(); // allocate memory for the object
 ///
 ///       // Open the msgpack file
@@ -398,16 +398,16 @@ fn add_header(buf: &mut Vec<u8>) {
 pub async fn load_generic_msgpack<'a, T: serde::Deserialize<'a>>(
     filename: &Path,
     buf: &'a mut Vec<u8>,
-) -> Result<T, String> {
+) -> anyhow::Result<T> {
     // Open the msgpack file
-    let mut file = File::open(filename).await.map_err_to_string()?;
+    let mut file = File::open(filename).await?;
 
     // for some reason (I guess the lifetime), buf can just be passed around now?
-    file.read_to_end(buf).await.map_err_to_string()?;
+    file.read_to_end(buf).await?;
     strip_header(buf);
 
     // Read the contents of the file into a Metadata struct
-    let metadata: T = rmp_serde::decode::from_slice(&buf[..]).map_err_to_string()?;
+    let metadata: T = rmp_serde::decode::from_slice(&buf[..])?;
 
     Ok(metadata)
 }
@@ -453,7 +453,7 @@ impl LoadMetadataConfig {
 pub async fn load_metadata(
     filename: &Path,
     config: &LoadMetadataConfig,
-) -> Result<Metadata, String> {
+) -> anyhow::Result<Metadata> {
     let mut buf = Vec::new();
 
     let mut metadata: Metadata = load_generic_msgpack(filename, &mut buf).await?;

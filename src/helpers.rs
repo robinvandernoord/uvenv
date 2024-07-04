@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 pub trait ResultToString<T, E> {
+    #[allow(dead_code)]
     fn map_err_to_string(self) -> Result<T, String>;
 }
 

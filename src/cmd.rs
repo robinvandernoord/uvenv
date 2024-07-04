@@ -45,15 +45,15 @@ pub async fn run_print_output<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
 pub async fn run_get_output<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
     command: S1,
     args: Vec<S2>,
-) -> Result<String, String> {
+) -> anyhow::Result<String> {
     let result = Command::new(command).args(args).output().await;
 
     match result {
         Ok(result) => match result.status.code() {
             Some(0) => Ok(String::from_utf8(result.stdout).unwrap_or_default()),
-            Some(_) | None => Err(String::from_utf8(result.stderr).unwrap_or_default()),
+            Some(_) | None => Err(anyhow!(String::from_utf8(result.stderr).unwrap_or_default())),
         },
-        Err(result) => Err(result.to_string()),
+        Err(result) => Err(result)?,
     }
 }
 
@@ -78,7 +78,7 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
         },
         Err(result) => match err_prefix {
             Some(prefix) => Err(anyhow!("{prefix} | {}", result.to_string())),
-            None => Err(anyhow!(result)),
+            None => Err(result)?,
         },
     }
 }

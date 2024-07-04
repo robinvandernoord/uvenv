@@ -143,7 +143,7 @@ pub async fn parse_requirement(install_spec: &str) -> anyhow::Result<(Requiremen
     }
 }
 
-pub async fn pip_freeze(python: &Path) -> Result<String, String> {
+pub async fn pip_freeze(python: &Path) -> anyhow::Result<String> {
     // let py = python.to_str().unwrap_or_default(); // idk why python.to_string() doesn't work
     run_get_output(python, vec!["-m", "pip", "freeze"]).await
 }

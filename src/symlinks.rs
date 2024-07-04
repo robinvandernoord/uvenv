@@ -1,3 +1,4 @@
+use anyhow::{anyhow, bail, Context};
 use std::path::Path;
 
 use pep508_rs::Requirement;
@@ -6,14 +7,14 @@ use uv_toolchain::PythonEnvironment;
 use crate::metadata::ensure_bin_dir;
 use configparser::ini::Ini;
 
-pub async fn console_scripts(entry_points_path: &str) -> Result<Vec<String>, String> {
+pub async fn console_scripts(entry_points_path: &str) -> anyhow::Result<Vec<String>> {
     let Ok(ini) = tokio::fs::read_to_string(entry_points_path).await else {
         return Ok(Vec::new()); // file missing = empty list
     };
 
     let entry_points_mapping = Ini::new_cs()
         .read(ini)
-        .map_err(|err| format!("entry_points.txt is invalid: {err}"))?;
+        .map_err(|err| anyhow!("entry_points.txt is invalid: {err}"))?;
 
     let Some(console_scripts) = entry_points_mapping.get("console_scripts") else {
         return Ok(Vec::new());
@@ -55,7 +56,7 @@ pub async fn create_symlink(
     venv: &Path,
     force: bool,
     binaries: &[&str],
-) -> Result<bool, String> {
+) -> anyhow::Result<bool> {
     let bin_dir = ensure_bin_dir().await;
 
     if !binaries.is_empty() && !binaries.contains(&symlink) {
@@ -66,25 +67,23 @@ pub async fn create_symlink(
 
     if target_path.exists() {
         if !force {
-            return Err(format!(
+            bail!(
                 "Script {symlink} already exists in {bin_dir:?}. Use --force to ignore this warning.",
-            ));
+            )
         }
         tokio::fs::remove_file(&target_path)
             .await
-            .map_err(|_| format!("Failed to create symlink {:?}", &target_path))?;
+            .with_context(|| format!("Failed to create symlink {:?}", &target_path))?;
     }
 
     let symlink_path = venv.join("bin").join(symlink);
     if !symlink_path.exists() {
-        return Err(format!(
-            "Could not symlink {symlink_path:?} because the script didn't exist.",
-        ));
+        bail!("Could not symlink {symlink_path:?} because the script didn't exist.",);
     }
 
     tokio::fs::symlink(&symlink_path, &target_path)
         .await
-        .map_err(|_| format!("Failed to create symlink {:?}", &target_path))?;
+        .with_context(|| format!("Failed to create symlink {:?}", &target_path))?;
 
     Ok(true)
 }
