@@ -17,7 +17,7 @@ pub async fn create_venv_raw(
     if !force && venv_path.exists() {
         return Err(
             format!("'{}' is already installed.\nUse '{}' to update existing tools or pass '{}' to this command to ignore this message.",
-                    &venv_path.to_str().unwrap_or_default().green(), "uvx upgrade".green(), "--force".green())
+                    &venv_path.to_str().unwrap_or_default().green(), "uvenv upgrade".green(), "--force".green())
         );
     }
 

@@ -3270,8 +3270,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "uvx"
-version = "2.4.1"
+name = "uvenv"
+version = "3.0.0-alpha2"
 dependencies = [
  "anstyle",
  "chrono",

@@ -55,7 +55,7 @@ pub struct Args {
 
 // impl Args {
 //     pub fn parse_from_python() -> Args {
-//         return Args::parse_from(env::args().skip(1)); // first argument is now 'python' instead of 'uvx' so skip it
+//         return Args::parse_from(env::args().skip(1)); // first argument is now 'python' instead of 'uvenv' so skip it
 //     }
 // }
 
@@ -68,7 +68,7 @@ pub struct SetupOptions {
     pub skip_ensurepath: bool,
     #[clap(long, help = "Don't enable completions via .bashrc")]
     pub skip_completions: bool,
-    #[clap(long, help = "Don't enable `uvx activate` via .bashrc")]
+    #[clap(long, help = "Don't enable `uvenv activate` via .bashrc")]
     pub skip_activate: bool,
     #[clap(
         short,
@@ -296,31 +296,31 @@ pub struct CompletionsOptions {
 pub enum Commands {
     #[clap(about = "Setup additional (bash-specific) functionality.")]
     Setup(SetupOptions),
-    #[clap(about = "List packages and apps installed with uvx.")]
+    #[clap(about = "List packages and apps installed with uvenv.")]
     List(ListOptions),
     #[clap(about = "Install a package (by pip name).")]
     Install(InstallOptions),
     #[clap(about = "Create a new (empty) virtualenv")]
     Create(CreateOptions),
-    #[clap(about = "Activate an uvx-managed virtualenv (bash only)")]
+    #[clap(about = "Activate a uvenv-managed virtualenv (bash only)")]
     Activate(ActivateOptions),
     #[clap(about = "Upgrade a package.")]
     Upgrade(UpgradeOptions),
-    #[clap(about = "Upgrade all uvx-installed packages.")]
+    #[clap(about = "Upgrade all uvenv-installed packages.")]
     UpgradeAll(UpgradeAllOptions),
     #[clap(aliases = &["delete", "remove"], about = "Uninstall a package (by pip name).")]
     Uninstall(UninstallOptions),
-    #[clap(about = "Uninstall all uvx-installed packages.")]
+    #[clap(about = "Uninstall all uvenv-installed packages.")]
     UninstallAll(UninstallAllOptions),
     #[clap(
         about = "Uninstall a package (by pip name) and re-install from the original spec (unless a new spec is supplied)."
     )]
     Reinstall(ReinstallOptions),
-    #[clap(about = "Reinstall all uvx-installed packages.")]
+    #[clap(about = "Reinstall all uvenv-installed packages.")]
     ReinstallAll(ReinstallAllOptions),
-    #[clap(about = "Install additional packages to a virtual environment managed by uvx.")]
+    #[clap(about = "Install additional packages to a virtual environment managed by uvenv.")]
     Inject(InjectOptions),
-    #[clap(aliases = &["eject"], about="Uninstall additional packages from a virtual environment managed by uvx. (alias: `eject`)")]
+    #[clap(aliases = &["eject"], about="Uninstall additional packages from a virtual environment managed by uvenv. (alias: `eject`)")]
     Uninject(UnInjectOptions),
     #[clap(about = "Check for possible issues and updates.")]
     Check(CheckOptions),
@@ -334,17 +334,17 @@ pub enum Commands {
     #[clap(about = "Run 'python' in the right venv.")]
     Runpython(RunpythonOptions),
     #[clap(
-        about = "Update ~/.bashrc with a PATH that includes the local bin directory that uvx uses."
+        about = "Update ~/.bashrc with a PATH that includes the local bin directory that uvenv uses."
     )]
     Ensurepath(EnsurepathOptions),
     #[clap(about = "Use --install to install the autocomplete script (bash).")]
     Completions(CompletionsOptions),
 
-    #[clap(subcommand, about = "Manage uvx itself.")]
+    #[clap(subcommand, about = "Manage uvenv itself.")]
     Self_(SelfCommands),
 }
 
-// todo `uvx check`:
+// todo `uvenv check`:
 //   - show missing metadata
 //   - show packages with updates
 //   - show packages with script issues
@@ -388,10 +388,10 @@ pub struct ChangelogOptions {}
 
 #[derive(Subcommand, Debug)]
 pub enum SelfCommands {
-    #[clap(about = "Update the current installation of uvx (and optionally uv).")]
+    #[clap(about = "Update the current installation of uvenv (and optionally uv).")]
     Update(SelfUpdateOptions),
 
-    #[clap(about = "Show the uvx changelog")]
+    #[clap(about = "Show the uvenv changelog")]
     Changelog(ChangelogOptions),
 }
 

@@ -34,17 +34,17 @@ pub async fn generate_bash(generator: Shell) {
     let args = &cmd.clone().get_matches();
     match args.subcommand_name() {
         Some("activate") => {
-            // generate code for uvx activate
+            // generate code for uvenv activate
             println!("{}", generate_activate().await);
         },
         Some("ensurepath") => {
-            // geneate code for uvx ensurepath
+            // geneate code for uvenv ensurepath
             println!("{}", ensure_path_generate().await);
         },
         _ => {
             // other cases: show regular completions
             print_completions(generator, &mut cmd);
-            // todo: dynamic completions for e.g. `uvx upgrade <venv>`
+            // todo: dynamic completions for e.g. `uvenv upgrade <venv>`
         },
     }
 }

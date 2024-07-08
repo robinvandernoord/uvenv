@@ -57,7 +57,7 @@ pub fn find_global_python() -> Result<PathBuf, String> {
     } else {
         Err(format!(
             "Python could not be found! Is `{}` installed globally (without a venv)?",
-            "uvx".green()
+            "uvenv".green()
         ))
     }
 }
@@ -72,10 +72,10 @@ pub async fn self_update(with_uv: bool) -> Result<i32, String> {
     let exe = find_python().await?;
 
     // todo: with 'uv' instead of pip later?
-    let mut args = vec!["-m", "pip", "install", "--no-cache-dir", "--upgrade", "uvx"];
+    let mut args = vec!["-m", "pip", "install", "--no-cache-dir", "--upgrade", "uvenv"];
 
-    let mut to_track = vec!["uvx"];
-    let mut msg = String::from("uvx");
+    let mut to_track = vec!["uvenv"];
+    let mut msg = String::from("uvenv");
     if with_uv {
         args.push("uv");
         to_track.push("uv");

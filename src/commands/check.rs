@@ -62,7 +62,7 @@ impl Issues {
 
             println!(
                 "{}",
-                "💡 Tip: you can use `uvx upgrade <package>` to update a specific environment."
+                "💡 Tip: you can use `uvenv upgrade <package>` to update a specific environment."
                     .blue()
             );
         }
@@ -77,7 +77,7 @@ impl Issues {
                 }
             }
 
-            println!("{}", "💡 Tip: you can use `uvx reinstall <package>` to reinstall an environment, which might fix the missing scripts.".blue());
+            println!("{}", "💡 Tip: you can use `uvenv reinstall <package>` to reinstall an environment, which might fix the missing scripts.".blue());
         }
 
         issue_count

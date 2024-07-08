@@ -44,7 +44,7 @@ fn build_msg(
             msg.push_str(&format!("\n💡 This package was installed with a version constraint ({}). If you want to ignore this constraint, use `{}`.",
             &metadata.requested_version.cyan(),
 
-            format!("uvx upgrade --force {}", &metadata.name).green()
+            format!("uvenv upgrade --force {}", &metadata.name).green()
         ));
         }
     } else {
@@ -120,7 +120,7 @@ pub async fn upgrade_package(
     no_cache: bool,
     skip_injected: bool,
 ) -> Result<String, String> {
-    // No virtualenv for '{package_name}', stopping. Use 'uvx install' instead.
+    // No virtualenv for '{package_name}', stopping. Use 'uvenv install' instead.
     let (requirement, environ) = setup_environ_from_requirement(install_spec).await?;
 
     let mut config = LoadMetadataConfig::default();
