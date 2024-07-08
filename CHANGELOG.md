@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## 2.5.0 (2025-07-08)
+
+### BREAKING CHANGE
+
+* Added deprecation warning for `uvx`, which is replaced by `uvenv`.
+* Added `uvenv` as a dependency.
+* `uvx auto update` will now install `uvenv` and uninstall itself.
+
 ## 2.4.1 (2024-05-31)
 
 ### Fix
