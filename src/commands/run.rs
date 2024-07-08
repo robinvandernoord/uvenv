@@ -32,7 +32,7 @@ async fn _find_executable(
             let mut related = String::new();
 
             for option in symlinks {
-                let code = format!("uvx run {package_spec} --binary {option} ...");
+                let code = format!("uvenv run {package_spec} --binary {option} ...");
                 related.push_str(&format!("\t- {} | `{}` \n", option.green(), code.blue()));
             }
 
@@ -96,7 +96,7 @@ pub async fn run_package(
         python,
         true,
         true,
-        Some(String::from("/tmp/uvx-")),
+        Some(String::from("/tmp/uvenv-")),
     )
     .await?;
 

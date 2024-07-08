@@ -1,11 +1,11 @@
 [package]
-name = "uvx"
-description = "uvx: pipx for uv (🦀)"
-version = "2.4.1"
+name = "uvenv"
+description = "uvenv: pipx for uv (🦀)"
+version = "3.0.0-alpha3"
 edition = "2021"
 categories = ["development-tools", "development-tools::build-utils", "virtualization", "external-ffi-bindings", "command-line-interface"]
 keywords = ["Python", "uv", "pip", "packaging"]
-repository = "https://github.com/robinvandernoord/uvx2"
+repository = "https://github.com/robinvandernoord/uvenv"
 license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

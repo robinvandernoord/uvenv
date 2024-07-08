@@ -58,7 +58,7 @@ pub fn find_global_python() -> anyhow::Result<PathBuf> {
     } else {
         bail!(
             "Python could not be found! Is `{}` installed globally (without a venv)?",
-            "uvx".green()
+            "uvenv".green()
         )
     }
 }
@@ -73,10 +73,10 @@ pub async fn self_update(with_uv: bool) -> anyhow::Result<i32> {
     let exe = find_python().await?;
 
     // todo: with 'uv' instead of pip later?
-    let mut args = vec!["-m", "pip", "install", "--no-cache-dir", "--upgrade", "uvx"];
+    let mut args = vec!["-m", "pip", "install", "--no-cache-dir", "--upgrade", "uvenv"];
 
-    let mut to_track = vec!["uvx"];
-    let mut msg = String::from("uvx");
+    let mut to_track = vec!["uvenv"];
+    let mut msg = String::from("uvenv");
     if with_uv {
         args.push("uv");
         to_track.push("uv");
@@ -122,6 +122,6 @@ impl Process for SelfUpdateOptions {
     async fn process(self) -> anyhow::Result<i32> {
         self_update(!self.without_uv)
             .await
-            .with_context(|| "Something went wrong trying to update 'uvx';")
+            .with_context(|| "Something went wrong trying to update 'uvenv';")
     }
 }

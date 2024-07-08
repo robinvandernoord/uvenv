@@ -10,7 +10,7 @@ fn test_0_custom_home_dir() {
     let home_dir_str = home_dir_path.clone().to_string();
 
     assert!(!home_dir_str.contains(".local"));
-    assert!(home_dir_str.starts_with("/tmp/uvx-test"));
+    assert!(home_dir_str.starts_with("/tmp/uvenv-test"));
 
     assert!(home_dir_path.exists());
     assert!(shared::is_empty(&home_dir_path));
@@ -39,8 +39,8 @@ fn test_1_write_file() -> shared::TestResult {
 }
 
 #[test]
-/// special test which makes sure uvx uses a custom home directory
-/// to prevent breaking normal installed uvx packages on host system.
+/// special test which makes sure uvenv uses a custom home directory
+/// to prevent breaking normal installed uvenv packages on host system.
 fn test_home_dir_flow() -> shared::TestResult {
     test_0_custom_home_dir();
     test_1_write_file()?;

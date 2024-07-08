@@ -5,7 +5,7 @@ use regex::Regex;
 use std::collections::BTreeMap;
 
 const CHANGELOG_URL: &str =
-    "https://raw.githubusercontent.com/robinvandernoord/uvx2/master/CHANGELOG.md";
+    "https://raw.githubusercontent.com/robinvandernoord/uvenv/master/CHANGELOG.md";
 
 type Changelogs = BTreeMap<String, BTreeMap<String, Vec<String>>>;
 

@@ -25,7 +25,7 @@ pub async fn reinstall(
     let venv_dir = venv_path(&requirement_name);
 
     if !venv_dir.exists() && !force {
-        bail!("'{}' was not previously installed. Please run 'uvx install {}' or pass `--force` instead.",
+        bail!("'{}' was not previously installed. Please run 'uvenv install {}' or pass `--force` instead.",
             &requirement_name,
             &install_spec,
         );

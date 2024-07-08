@@ -37,7 +37,7 @@ pub async fn add_to_bashrc(
     /*    with (Path.home() / ".bashrc").resolve().open("a") as f:
            now = str(datetime.now()).split(".")[0]
            final_text = "\n"
-           final_text += f"# Added by `uvx` at {now}\n" if with_comment else ""
+           final_text += f"# Added by `uvenv` at {now}\n" if with_comment else ""
            final_text += text + "\n"
            f.write(final_text)
     */
@@ -46,7 +46,7 @@ pub async fn add_to_bashrc(
     let now = now();
     let mut final_text = String::from("\n");
     if with_comment {
-        final_text.push_str(&format!("# Added by `uvx` at {now}\n"));
+        final_text.push_str(&format!("# Added by `uvenv` at {now}\n"));
     }
 
     final_text.push_str(text);
