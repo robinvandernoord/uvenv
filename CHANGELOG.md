@@ -2,6 +2,28 @@
 
 <!--next-version-placeholder-->
 
+## 3.0.0 (2024-07-08)
+
+### BREAKING CHANGE
+
+- **Renaming**: Renamed `uvx` to `uvenv` due to a naming collision with a new `uv` command. The
+  new name better reflects its purpose, combining `uv` with `venv`. You can run `uvenv self migrate` to move your
+  environments and installed commands from `uvx` to `uvenv`.
+
+### Features
+
+- Added `uvenv self migrate` command to facilitate migration from `uvx` to `uvenv` easily.
+- Improved error logging (with more context) using `anyhow`.
+
+### Updates
+
+- Updated `uv` from 0.2.4 to 0.2.13 and applied necessary patches to work with new/updated APIs.
+
+### Documentation
+
+- Updated documentation to reflect the changes and new features introduced in this version.
+- Started groundwork on automated testing 
+
 ## 2.4.1 (2024-05-31)
 
 ### Fix
