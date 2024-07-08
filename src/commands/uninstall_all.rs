@@ -9,7 +9,7 @@ pub async fn uninstall_all(
     venv_names: &[String],
 ) -> anyhow::Result<()> {
     let mut all_ok = true;
-    let mut err_result = Err(anyhow!(""));
+    let mut err_result = Err(anyhow!("-> Failed uninstall-all."));
 
     for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names)).await? {
         match uninstall_package(&meta.name, force).await {

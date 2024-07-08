@@ -73,7 +73,14 @@ pub async fn self_update(with_uv: bool) -> anyhow::Result<i32> {
     let exe = find_python().await?;
 
     // todo: with 'uv' instead of pip later?
-    let mut args = vec!["-m", "pip", "install", "--no-cache-dir", "--upgrade", "uvenv"];
+    let mut args = vec![
+        "-m",
+        "pip",
+        "install",
+        "--no-cache-dir",
+        "--upgrade",
+        "uvenv",
+    ];
 
     let mut to_track = vec!["uvenv"];
     let mut msg = String::from("uvenv");

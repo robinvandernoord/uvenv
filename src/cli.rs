@@ -384,7 +384,10 @@ pub struct SelfUpdateOptions {
 }
 
 #[derive(Debug, Parser)]
-pub struct ChangelogOptions {}
+pub struct SelfChangelogOptions {}
+
+#[derive(Debug, Parser)]
+pub struct SelfMigrateOptions {}
 
 #[derive(Subcommand, Debug)]
 pub enum SelfCommands {
@@ -392,7 +395,10 @@ pub enum SelfCommands {
     Update(SelfUpdateOptions),
 
     #[clap(about = "Show the uvenv changelog")]
-    Changelog(ChangelogOptions),
+    Changelog(SelfChangelogOptions),
+
+    #[clap(about = "Migrate installed environments and commands from `uvx` to `uvenv`")]
+    Migrate(SelfMigrateOptions),
 }
 
 impl Process for SelfCommands {
@@ -400,6 +406,7 @@ impl Process for SelfCommands {
         match self {
             Self::Update(opts) => opts.process().await,
             Self::Changelog(opts) => opts.process().await,
+            Self::Migrate(opts) => opts.process().await,
         }
     }
 }

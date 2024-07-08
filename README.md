@@ -6,7 +6,8 @@ Inspired by:
 - [uv](https://github.com/astral-sh/uv)
 
 > **Note:** The tool previously named `uvx` is now `uvenv` due to a naming collision with a new `uv` command. The new name
-> better reflects its purpose, combining `uv` with `venv`.
+> better reflects its purpose, combining `uv` with `venv`.  
+> You can run `uvenv self migrate` to move your environments and installed commands from `uvx` to `uvenv`.
 
 ## Installation
 

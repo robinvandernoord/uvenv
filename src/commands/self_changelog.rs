@@ -1,4 +1,4 @@
-use crate::cli::{ChangelogOptions, Process};
+use crate::cli::{Process, SelfChangelogOptions};
 use anyhow::{anyhow, Context};
 use owo_colors::OwoColorize;
 use regex::Regex;
@@ -121,7 +121,7 @@ pub async fn changelog() -> anyhow::Result<i32> {
     Ok(0)
 }
 
-impl Process for ChangelogOptions {
+impl Process for SelfChangelogOptions {
     async fn process(self) -> anyhow::Result<i32> {
         changelog()
             .await

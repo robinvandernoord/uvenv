@@ -2,7 +2,6 @@ pub mod activate;
 pub mod completions;
 pub mod create;
 
-pub mod changelog;
 pub mod check;
 pub mod ensurepath;
 pub mod inject;
@@ -14,6 +13,8 @@ pub mod run;
 pub mod runpip;
 pub mod runpython;
 pub mod runuv;
+pub mod self_changelog;
+mod self_migrate;
 pub mod self_update;
 pub mod setup;
 pub mod uninject;
