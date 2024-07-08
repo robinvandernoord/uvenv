@@ -38,6 +38,7 @@ pub async fn get_package_version(
     extract_version(&output, package)
 }
 
+#[allow(dead_code)]
 pub async fn get_package_versions<S: AsRef<str>>(
     python: &Path,
     packages: &[S],
@@ -68,6 +69,7 @@ pub async fn find_python() -> Result<PathBuf, String> {
         .map_or_else(find_global_python, Ok)
 }
 
+#[allow(dead_code)]
 pub async fn self_update(with_uv: bool) -> Result<i32, String> {
     let exe = find_python().await?;
 
@@ -117,8 +119,66 @@ pub async fn self_update(with_uv: bool) -> Result<i32, String> {
     Ok(0)
 }
 
+async fn install_uvenv() -> Result<(), String> {
+    let exe = find_python().await?;
+
+    // todo: with 'uv' instead of pip later?
+    let args = vec![
+        "-m",
+        "pip",
+        "install",
+        "--no-cache-dir",
+        "--upgrade",
+        "uvenv",
+    ];
+
+    let exe_str = exe.to_str().unwrap_or_default();
+    let promise = run(&exe_str, args, None);
+
+    show_loading_indicator(
+        promise,
+        format!("Installing {}", "uvenv".green()),
+        AnimationSettings::default(),
+    )
+    .await?;
+
+    eprintln!("In with the new!");
+
+    Ok(())
+}
+
+async fn uninstall_uvx() -> Result<(), String> {
+    let exe = find_python().await?;
+
+    // todo: with 'uv' instead of pip later?
+    let args = vec!["-m", "pip", "uninstall", "uvx", "-y"];
+
+    let exe_str = exe.to_str().unwrap_or_default();
+    let promise = run(&exe_str, args, None);
+
+    show_loading_indicator(
+        promise,
+        format!("Removing {}", "uvx".yellow()),
+        AnimationSettings::default(),
+    )
+    .await?;
+
+    eprintln!("Out with the old!");
+
+    Ok(())
+}
+
+async fn self_update_3x() -> Result<i32, String> {
+    // update uvx to uvenv
+    install_uvenv().await?;
+    uninstall_uvx().await?;
+
+    Ok(0)
+}
+
 impl Process for SelfUpdateOptions {
     async fn process(self) -> Result<i32, String> {
-        self_update(!self.without_uv).await
+        // self_update(!self.without_uv).await
+        self_update_3x().await
     }
 }

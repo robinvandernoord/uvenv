@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 use clap_complete::Shell;
+use owo_colors::OwoColorize;
 
 pub const fn get_styles() -> clap::builder::Styles {
     clap::builder::Styles::styled()
@@ -351,6 +352,8 @@ pub enum Commands {
 
 impl Process for Commands {
     async fn process(self) -> Result<i32, String> {
+        eprintln!("{}", "Deprecation Message: `uvx` is deprecated in favor of `uvenv`. Please run `uvx self update` to switch to the latest version.".yellow().bold());
+
         match self {
             Self::List(opts) => opts.process().await,
             Self::Install(opts) => opts.process().await,
