@@ -65,7 +65,7 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> 
     let cache = maybe_cache.unwrap_or_else(uv_cache);
 
     PythonEnvironment::find(
-        &PythonRequest::Any,             // just find me a python
+        &PythonRequest::Any,                // just find me a python
         EnvironmentPreference::OnlyVirtual, // venv is always virtual
         &cache,
     )
