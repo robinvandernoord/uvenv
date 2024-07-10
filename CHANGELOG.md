@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## 3.0.2 (2024-07-10)
+
+### Fix
+
+- Improved changelog parsing
+
 ## 3.0.1 (2024-07-10)
 
 ### Updates
