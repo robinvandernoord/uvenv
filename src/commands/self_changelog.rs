@@ -15,13 +15,13 @@ fn parse_changelog(markdown: &str) -> Changelogs {
     let mut current_version = String::new();
     let mut current_category = String::new();
 
-    let Ok(version_re) = Regex::new(r"^## (.+)") else {
+    let Ok(version_re) = Regex::new(r"^## v?(.+)") else {
         return changelog;
     };
     let Ok(category_re) = Regex::new(r"^### (.+)") else {
         return changelog;
     };
-    let Ok(feature_re) = Regex::new(r"^\* (.+)") else {
+    let Ok(feature_re) = Regex::new(r"^[*-] (.+)") else {
         return changelog;
     };
 
