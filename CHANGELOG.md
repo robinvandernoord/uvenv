@@ -2,7 +2,7 @@
 
 <!--next-version-placeholder-->
 
-## 3.0.0 (2024-07-10)
+## 3.0.1 (2024-07-10)
 
 ### Updates
 
