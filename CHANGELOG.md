@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## 3.0.0 (2024-07-10)
+
+### Updates
+
+- Bump `uv` to 0.2.24
+
 ## 3.0.0 (2024-07-08)
 
 ### BREAKING CHANGE
