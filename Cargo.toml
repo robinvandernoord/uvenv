@@ -35,26 +35,26 @@ chrono = "0.4"
 subprocess = "0.2"
 reqwest = { version = "0.12", default-features = false, features = ["json", "gzip", "brotli", "stream", "rustls-tls", "rustls-tls-native-roots"] }
 regex = "1.10"
+futures = "0.3"
 
 # fancy
 anstyle = "1.0" # color styling for clap
 owo-colors = "4.0" # color styling for strings
 
 # uv
-# uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.24" }
-uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.24" }
-uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.24" }
-uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.24" }
-uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.24" }
-# uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.24" }
-pep440_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.24" }
-pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.24" }
-# install-wheel-rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.24" }
-# distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.24" }
+# uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.25" }
+uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.25" }
+uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.25" }
+uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.25" }
+uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.25" }
+# uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.25" }
+pep440_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.25" }
+pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.25" }
+# install-wheel-rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.25" }
+# distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.25" }
 
 # security bumps/pins:
 rustls = "0.23"
-futures = "0.3"
 
 [patch.crates-io]
 # black magic fuckery, required after 0.2.18, otherwise uv-client won't compile
