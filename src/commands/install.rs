@@ -10,15 +10,16 @@ use crate::venv::{activate_venv, create_venv, remove_venv};
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
 use std::collections::HashMap;
+use std::fmt::Display;
 
 use anyhow::{bail, Context};
 use std::path::{Path, PathBuf};
 
 use uv_python::PythonEnvironment;
 
-pub async fn _install_package(
+pub async fn _install_package<S: AsRef<str>>(
     package_name: &str,
-    inject: &[&str],
+    inject: &[S],
     no_cache: bool,
     force: bool,
     editable: bool,
@@ -26,7 +27,7 @@ pub async fn _install_package(
     let mut args: Vec<&str> = vec!["pip", "install"];
 
     if !inject.is_empty() {
-        args.append(&mut inject.to_owned());
+        args.append(&mut inject.iter().map(AsRef::as_ref).collect());
     }
 
     if no_cache || force {
@@ -68,10 +69,10 @@ async fn ensure_venv(
     }
 }
 
-async fn store_metadata(
+async fn store_metadata<S: Display>(
     requirement_name: &str,
     requirement: &Requirement,
-    inject: &[&str],
+    inject: &[S],
     editable: bool,
     install_spec: &str,
     venv: &PythonEnvironment,
@@ -132,12 +133,12 @@ pub async fn install_symlinks(
     Ok(())
 }
 
-pub async fn install_package(
+pub async fn install_package<S: AsRef<str> + Display>(
     install_spec: &str,
     maybe_venv: Option<&Path>,
     python: Option<&String>,
     force: bool,
-    inject: &[&str],
+    inject: &[S],
     no_cache: bool,
     editable: bool,
 ) -> anyhow::Result<String> {
@@ -179,7 +180,7 @@ impl Process for InstallOptions {
             None,
             self.python.as_ref(),
             self.force,
-            &[], // empty array should be a bit more efficiant than empty vec
+            &self.with,
             self.no_cache,
             self.editable,
         )

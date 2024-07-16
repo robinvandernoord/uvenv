@@ -112,6 +112,8 @@ pub struct InstallOptions {
     pub python: Option<String>,
     #[clap(long, short, help = "Editable Install")]
     pub editable: bool,
+    #[clap(long, short, help = "Include extra dependencies")]
+    pub with: Vec<String>,
 }
 
 #[derive(Debug, Parser)]
@@ -222,6 +224,8 @@ pub struct RunOptions {
     pub python: Option<String>,
     #[clap(long, help = "Don't remove the temporary venv when done running")]
     pub keep: bool,
+    #[clap(long, short, help = "Include extra dependencies")]
+    pub with: Vec<String>,
     #[clap(
         long,
         help = "Custom name of an executable to run (e.g. 'semantic-release' in the package 'python-semantic-release')"

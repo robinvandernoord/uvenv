@@ -8,10 +8,11 @@ use crate::{
 };
 use anyhow::Context;
 use owo_colors::OwoColorize;
+use std::fmt::Display;
 
-pub async fn inject_package(
+pub async fn inject_package<S: AsRef<str> + Display>(
     venv_spec: &str,
-    to_inject_specs: &[String],
+    to_inject_specs: &[S],
     no_cache: bool,
 ) -> anyhow::Result<String> {
     let (requirement, environ) = setup_environ_from_requirement(venv_spec).await?;
@@ -23,9 +24,9 @@ pub async fn inject_package(
         args.push("--no-cache");
     }
 
-    // vec<string> -> vec<str>
-    let inject_args: Vec<&str> = to_inject_specs.iter().map(AsRef::as_ref).collect();
-    args.extend(inject_args);
+    // &[&str] -> Vec<&str>
+    let to_inject_specs: Vec<&str> = to_inject_specs.iter().map(AsRef::as_ref).collect();
+    args.extend(&to_inject_specs);
 
     let promise = uv(&args);
 
@@ -39,6 +40,7 @@ pub async fn inject_package(
 
     metadata
         .injected
+        // Vec<&str> -> Vec<String>
         .extend(to_inject_specs.iter().map(ToString::to_string));
 
     metadata.save(&environ.to_path_buf()).await?;
@@ -52,6 +54,7 @@ pub async fn inject_package(
 
 impl Process for InjectOptions {
     async fn process(self) -> anyhow::Result<i32> {
+        // vec<string> -> vec<str>
         match inject_package(&self.into, &self.package_specs, self.no_cache).await {
             Ok(msg) => {
                 println!("{msg}");

@@ -32,6 +32,11 @@ async fn _find_executable(
             let mut related = String::new();
 
             for option in symlinks {
+                if package_spec == option {
+                    // exact match -> probably what you want!
+                    return Ok(option);
+                }
+
                 let code = format!("uvenv run {package_spec} --binary {option} ...");
                 related.push_str(&format!("\t- {} | `{}` \n", option.green(), code.blue()));
             }
@@ -74,12 +79,13 @@ pub async fn run_executable(
 
     process_subprocess(full_exec_path.as_path(), args)
 }
-pub async fn run_package(
+pub async fn run_package<S: AsRef<str>>(
     package_spec: &str,
     python: Option<&String>,
     keep: bool,
     no_cache: bool,
     binary: Option<&String>,
+    inject: &[S],
     args: &[String],
 ) -> anyhow::Result<i32> {
     // 1. create a temp venv
@@ -110,7 +116,7 @@ pub async fn run_package(
     let venv = &activate_venv(venv_path).await?;
 
     // already expects activated venv:
-    _install_package(package_spec, &[], no_cache, false, false).await?;
+    _install_package(package_spec, inject, no_cache, false, false).await?;
 
     // ### 3 ###
     let result = run_executable(&requirement, binary, package_spec, venv, venv_path, args).await;
@@ -132,6 +138,7 @@ impl Process for RunOptions {
             self.keep,
             self.no_cache,
             self.binary.as_ref(),
+            &self.with,
             &self.args,
         )
         .await
