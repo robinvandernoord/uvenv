@@ -1,4 +1,4 @@
-use anyhow::{anyhow, bail, Context};
+use anyhow::{bail, Context};
 use std::ffi::OsStr;
 use std::{collections::HashSet, path::PathBuf};
 
@@ -63,13 +63,15 @@ pub fn uv_cache() -> Cache {
 /// try to find an `PythonEnvironment` based on Cache or currently active virtualenv (`VIRTUAL_ENV`).
 pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> {
     let cache = maybe_cache.unwrap_or_else(uv_cache);
+    cache.environment()?; // set up the cache
 
-    PythonEnvironment::find(
+    let environ = PythonEnvironment::find(
         &PythonRequest::Any,                // just find me a python
         EnvironmentPreference::OnlyVirtual, // venv is always virtual
         &cache,
-    )
-    .map_err(|e| anyhow!(e)) // core Result to anyhow Result
+    )?;
+
+    Ok(environ)
 }
 
 pub fn uv_get_installed_version(
