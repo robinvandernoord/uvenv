@@ -27,7 +27,7 @@ pub async fn inject_package(
     let inject_args: Vec<&str> = to_inject_specs.iter().map(AsRef::as_ref).collect();
     args.extend(inject_args);
 
-    let promise = uv(args);
+    let promise = uv(&args);
 
     let to_inject_str = &to_inject_specs.join(", ");
     show_loading_indicator(

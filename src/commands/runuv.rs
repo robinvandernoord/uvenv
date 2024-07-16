@@ -7,7 +7,7 @@ use anyhow::Context;
 
 pub async fn runuv(
     venv_name: &str,
-    uv_args: Vec<String>,
+    uv_args: &[String],
 ) -> anyhow::Result<i32> {
     setup_environ_from_requirement(venv_name).await?;
 
@@ -16,7 +16,7 @@ pub async fn runuv(
 
 impl Process for RunuvOptions {
     async fn process(self) -> anyhow::Result<i32> {
-        match runuv(&self.venv, self.uv_args).await {
+        match runuv(&self.venv, &self.uv_args).await {
             Ok(code) => Ok(code),
             Err(msg) => Err(msg).with_context(|| {
                 format!("Something went wrong trying to run uv in '{}';", &self.venv)

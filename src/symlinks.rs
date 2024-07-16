@@ -125,9 +125,9 @@ pub async fn remove_symlink(symlink: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub async fn remove_symlinks(symlinks: Vec<String>) -> anyhow::Result<()> {
+pub async fn remove_symlinks(symlinks: &[String]) -> anyhow::Result<()> {
     for symlink in symlinks {
-        remove_symlink(&symlink).await?;
+        remove_symlink(symlink).await?;
     }
 
     Ok(())

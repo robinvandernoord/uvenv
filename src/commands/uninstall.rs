@@ -39,7 +39,7 @@ pub async fn uninstall_package(
     // symlinks = find_symlinks(package_name, venv_path) or [package_name]
     let symlinks = find_symlinks(&requirement, &metadata.installed_version, &venv).await;
 
-    remove_symlinks(symlinks).await?;
+    remove_symlinks(&symlinks).await?;
 
     remove_venv(&venv.to_path_buf()).await?;
 

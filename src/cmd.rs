@@ -31,7 +31,7 @@ pub async fn find_sibling(name: &str) -> Option<PathBuf> {
 
 pub async fn run_print_output<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
     command: S1,
-    args: Vec<S2>,
+    args: &[S2],
 ) -> anyhow::Result<i32> {
     let mut cmd = Command::new(command);
     cmd.args(args);
@@ -44,7 +44,7 @@ pub async fn run_print_output<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
 
 pub async fn run_get_output<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
     command: S1,
-    args: Vec<S2>,
+    args: &[S2],
 ) -> anyhow::Result<String> {
     let result = Command::new(command).args(args).output().await;
 
@@ -59,7 +59,7 @@ pub async fn run_get_output<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
 
 pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
     script: S1,
-    args: Vec<S2>,
+    args: &[S2],
     err_prefix: Option<String>,
 ) -> anyhow::Result<bool> {
     let result = Command::new(script).args(args).output().await;

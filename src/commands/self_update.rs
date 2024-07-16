@@ -93,7 +93,7 @@ pub async fn self_update(with_uv: bool) -> anyhow::Result<i32> {
     let old = get_package_versions(&exe, &to_track).await;
 
     let exe_str = exe.to_str().unwrap_or_default();
-    let promise = run(&exe_str, args, None);
+    let promise = run(&exe_str, &args, None);
 
     show_loading_indicator(
         promise,

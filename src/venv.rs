@@ -30,7 +30,7 @@ pub async fn create_venv_raw(
         args.push("--seed");
     }
 
-    uv(args).await?;
+    uv(&args).await?;
 
     Ok(())
 }

@@ -266,14 +266,12 @@ impl Metadata {
     }
 
     pub fn invalid_scripts(&self) -> Vec<String> {
-        let list: Vec<String> = self
+        self
             .scripts
             .iter()
             //                                if True, the script is valid -> skip from filter_map
             .filter_map(|(k, v)| if *v { None } else { Some(k.to_owned()) })
-            .collect();
-
-        list
+            .collect()
     }
 
     pub fn format_installed_version(&self) -> String {

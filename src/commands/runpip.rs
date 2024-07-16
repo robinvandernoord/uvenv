@@ -7,7 +7,7 @@ use anyhow::Context;
 
 pub async fn runpip(
     venv_name: &str,
-    pip_args: Vec<String>,
+    pip_args: &[String],
 ) -> anyhow::Result<i32> {
     let (_, env) = setup_environ_from_requirement(venv_name).await?;
 
@@ -18,7 +18,7 @@ pub async fn runpip(
 
 impl Process for RunpipOptions {
     async fn process(self) -> anyhow::Result<i32> {
-        match runpip(&self.venv, self.pip_args).await {
+        match runpip(&self.venv, &self.pip_args).await {
             Ok(code) => Ok(code),
             Err(msg) => Err(msg).with_context(|| {
                 format!(

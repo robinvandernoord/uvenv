@@ -101,7 +101,7 @@ pub async fn _upgrade_package(
         args.extend(metadata.vec_injected());
     }
 
-    let promise = uv(args);
+    let promise = uv(&args);
 
     show_loading_indicator(
         promise,

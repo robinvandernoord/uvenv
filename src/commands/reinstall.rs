@@ -71,7 +71,7 @@ pub async fn reinstall(
             None,
             python,
             force,
-            inject,
+            &inject,
             no_cache,
             editable,
         )

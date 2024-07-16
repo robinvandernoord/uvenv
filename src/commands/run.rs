@@ -67,12 +67,12 @@ pub async fn run_executable(
     package_spec: &str,
     venv: &PythonEnvironment,
     venv_path: &Path,
-    args: Vec<String>,
+    args: &[String],
 ) -> anyhow::Result<i32> {
     let full_exec_path =
         find_executable(requirement, binary, package_spec, venv, venv_path).await?;
 
-    process_subprocess(full_exec_path.as_path(), &args)
+    process_subprocess(full_exec_path.as_path(), args)
 }
 pub async fn run_package(
     package_spec: &str,
@@ -80,7 +80,7 @@ pub async fn run_package(
     keep: bool,
     no_cache: bool,
     binary: Option<&String>,
-    args: Vec<String>,
+    args: &[String],
 ) -> anyhow::Result<i32> {
     // 1. create a temp venv
     // 2. install package
@@ -110,7 +110,7 @@ pub async fn run_package(
     let venv = &activate_venv(venv_path).await?;
 
     // already expects activated venv:
-    _install_package(package_spec, &Vec::new(), no_cache, false, false).await?;
+    _install_package(package_spec, &[], no_cache, false, false).await?;
 
     // ### 3 ###
     let result = run_executable(&requirement, binary, package_spec, venv, venv_path, args).await;
@@ -132,7 +132,7 @@ impl Process for RunOptions {
             self.keep,
             self.no_cache,
             self.binary.as_ref(),
-            self.args,
+            &self.args,
         )
         .await
         .with_context(|| {

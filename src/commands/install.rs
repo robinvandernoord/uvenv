@@ -39,7 +39,7 @@ pub async fn _install_package(
     }
     args.push(package_name);
 
-    let promise = uv(args);
+    let promise = uv(&args);
 
     show_loading_indicator(
         promise,
@@ -137,7 +137,7 @@ pub async fn install_package(
     maybe_venv: Option<&Path>,
     python: Option<&String>,
     force: bool,
-    inject: Vec<&str>,
+    inject: &[&str],
     no_cache: bool,
     editable: bool,
 ) -> anyhow::Result<String> {
@@ -146,7 +146,7 @@ pub async fn install_package(
     let venv_path = ensure_venv(maybe_venv, &requirement, python, force).await?;
     let uv_venv = activate_venv(&venv_path).await?;
 
-    if let Err(e) = _install_package(install_spec, &inject, no_cache, force, editable).await {
+    if let Err(e) = _install_package(install_spec, inject, no_cache, force, editable).await {
         let _ = remove_venv(&venv_path).await;
 
         return Err(e);
@@ -156,7 +156,7 @@ pub async fn install_package(
     let mut metadata = store_metadata(
         &requirement_name,
         &requirement,
-        &inject,
+        inject,
         editable,
         &resolved_install_spec,
         &uv_venv,
@@ -179,7 +179,7 @@ impl Process for InstallOptions {
             None,
             self.python.as_ref(),
             self.force,
-            vec![],
+            &[], // empty array should be a bit more efficiant than empty vec
             self.no_cache,
             self.editable,
         )

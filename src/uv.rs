@@ -35,7 +35,7 @@ pub async fn get_uv_binary() -> String {
     )
 }
 
-pub async fn uv<S>(args: Vec<S>) -> anyhow::Result<bool>
+pub async fn uv<S>(args: &[S]) -> anyhow::Result<bool>
 where
     S: AsRef<OsStr>,
 {
@@ -48,7 +48,7 @@ where
     run(&script, args, Some(err_prefix)).await
 }
 
-pub async fn uv_with_output<S: AsRef<OsStr>>(args: Vec<S>) -> anyhow::Result<i32> {
+pub async fn uv_with_output<S: AsRef<OsStr>>(args: &[S]) -> anyhow::Result<i32> {
     let script = get_uv_binary().await;
     run_print_output(script, args).await
 }

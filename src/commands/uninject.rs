@@ -20,7 +20,7 @@ pub async fn eject_package(
     let eject_args: Vec<&str> = to_eject_specs.iter().map(AsRef::as_ref).collect();
     args.extend(eject_args);
 
-    let promise = uv(args);
+    let promise = uv(&args);
 
     let to_eject_str = &to_eject_specs.iter().map(|it| it.green()).join(", ");
     show_loading_indicator(

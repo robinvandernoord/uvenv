@@ -9,7 +9,8 @@ async fn read_from_folder_filtered(
     config: &LoadMetadataConfig,
     filter_names: &[String],
 ) -> Vec<Metadata> {
-    let mut promises = vec![];
+    let (cap, _) = metadata_dir.size_hint(); // estimate size
+    let mut promises = Vec::with_capacity(cap);
 
     for dir in metadata_dir.flatten() {
         let venv_name = dir.file_name().into_string().unwrap_or_default();
@@ -29,7 +30,7 @@ async fn read_from_folder_filtered(
 impl ListOptions {
     pub fn process_json(
         self,
-        items: &Vec<Metadata>,
+        items: &[Metadata],
     ) -> anyhow::Result<i32> {
         let json = if self.short {
             serde_json::to_string(items)?

@@ -29,12 +29,14 @@ impl AnimationSettings {
     }
 }
 
-fn get_spinner_chars(style: &AnimationStyle) -> Vec<char> {
+const fn get_spinner_chars(style: &AnimationStyle) -> [char; 8] {
     match style {
         AnimationStyle::Classic => {
-            vec!['|', '/', '-', '\\']
+            // 2x 4 = 8
+            // array is more efficient than heap
+            ['|', '/', '-', '\\', '|', '/', '-', '\\']
         },
-        AnimationStyle::Modern => vec!['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'],
+        AnimationStyle::Modern => ['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'],
     }
 }
 

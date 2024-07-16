@@ -58,8 +58,8 @@ struct PipData {
     // environment: Environment,
 }
 
-pub async fn pip(args: Vec<&str>) -> anyhow::Result<bool> {
-    let err_prefix = format!("pip {}", &args[0]);
+pub async fn pip(args: &[&str]) -> anyhow::Result<bool> {
+    let err_prefix = format!("pip {}", args[0]);
 
     run("pip", args, Some(err_prefix)).await
 }
@@ -77,23 +77,23 @@ impl FakeInstallResult {
 }
 
 pub async fn fake_install(install_spec: &str) -> anyhow::Result<FakeInstallResult> {
-    let mut args: Vec<&str> = vec![
-        "install",
-        "--no-deps",
-        "--dry-run",
-        "--ignore-installed",
-        "--report",
-    ];
-
     let tempfile = NamedTempFile::new()?;
     let Some(tempfile_path) = tempfile.as_ref().to_str() else {
         bail!("No temp file could be created for a dry pip install.",)
     };
 
-    args.push(tempfile_path); // tmpfile
-    args.push(install_spec); // tmpfile
+    // array instead of vec:
+    let args = [
+        "install",
+        "--no-deps",
+        "--dry-run",
+        "--ignore-installed",
+        "--report",
+        tempfile_path,
+        install_spec,
+    ];
 
-    pip(args).await?;
+    pip(&args).await?;
 
     let json_file = tempfile.reopen()?;
 
@@ -144,6 +144,5 @@ pub async fn parse_requirement(install_spec: &str) -> anyhow::Result<(Requiremen
 }
 
 pub async fn pip_freeze(python: &Path) -> anyhow::Result<String> {
-    // let py = python.to_str().unwrap_or_default(); // idk why python.to_string() doesn't work
-    run_get_output(python, vec!["-m", "pip", "freeze"]).await
+    run_get_output(python, &["-m", "pip", "freeze"]).await
 }

@@ -23,19 +23,19 @@ pub fn process_subprocess<S: AsRef<OsStr>>(
 
 pub async fn run_python(
     venv_name: &str,
-    python_args: Vec<String>,
+    python_args: &[String],
 ) -> anyhow::Result<i32> {
     let (_, environ) = setup_environ_from_requirement(venv_name).await?;
 
     let py = environ.interpreter().sys_executable();
 
     // Launch Python in interactive mode
-    process_subprocess(py, &python_args)
+    process_subprocess(py, python_args)
 }
 
 impl Process for RunpythonOptions {
     async fn process(self) -> anyhow::Result<i32> {
-        run_python(&self.venv, self.python_args)
+        run_python(&self.venv, &self.python_args)
             .await
             .with_context(|| {
                 format!(

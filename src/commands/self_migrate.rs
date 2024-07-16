@@ -45,7 +45,7 @@ impl Process for SelfMigrateOptions {
 
         // reinstall to setup proper symlinks etc:
 
-        match reinstall_all(None, true, false, false, false, &Vec::new()).await {
+        match reinstall_all(None, true, false, false, false, &[]).await {
             Ok(()) => {},
             Err(err) => {
                 error = error.with_context(|| err);
