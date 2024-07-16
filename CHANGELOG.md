@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## 3.1.0 (2024-07-16)
+
+## Features
+
+- `--with` for install and run to immediately inject dependencies
+
+## Fix
+
+- make sure uv cache is available when venv is activated
+
+## Updates
+
+- bump to uv 0.2.25
+- update other cargo dependencies
+
 ## 3.0.2 (2024-07-10)
 
 ### Fix
