@@ -21,7 +21,7 @@ pub fn now() -> String {
 
 pub async fn append(
     file: &PathBuf,
-    text: String,
+    text: &str,
 ) -> anyhow::Result<()> {
     let mut file = OpenOptions::new().append(true).open(file).await?;
 
@@ -52,7 +52,7 @@ pub async fn add_to_bashrc(
     final_text.push_str(text);
     final_text.push('\n');
 
-    append(&path, final_text).await
+    append(&path, &final_text).await
 }
 
 pub async fn ensure_path(force: bool) -> anyhow::Result<()> {

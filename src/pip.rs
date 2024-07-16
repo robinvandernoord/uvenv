@@ -113,7 +113,7 @@ pub async fn fake_install(install_spec: &str) -> anyhow::Result<FakeInstallResul
 
     Ok(FakeInstallResult {
         name: full_name,
-        file_url: String::from(file_url),
+        file_url: file_url.into(),
     })
 }
 

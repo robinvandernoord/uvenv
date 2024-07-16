@@ -3,10 +3,10 @@ use crate::cmd::run_if_bash_else_warn;
 use crate::commands::ensurepath::add_to_bashrc;
 use owo_colors::OwoColorize;
 
-pub async fn generate_activate() -> String {
+pub async fn generate_activate() -> &'static str {
     // Used by `uvenv --generate bash activate _`
     // note: only bash is supported right now!
-    String::from(include_str!("../shell/activate.sh"))
+    include_str!("../shell/activate.sh")
 }
 
 pub async fn install_activate() -> anyhow::Result<()> {
