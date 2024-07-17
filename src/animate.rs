@@ -1,5 +1,6 @@
 use std::future::Future;
 use std::io::{self, Write};
+use std::iter::Cycle;
 use std::time::Duration;
 use tokio::task;
 
@@ -27,37 +28,33 @@ impl AnimationSettings {
             order: AnimationOrder::Before,
         }
     }
-}
 
-const fn get_spinner_chars(style: &AnimationStyle) -> [char; 8] {
-    match style {
-        AnimationStyle::Classic => {
-            // 2x 4 = 8
-            // array is more efficient than heap
-            ['|', '/', '-', '\\', '|', '/', '-', '\\']
-        },
-        AnimationStyle::Modern => ['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'],
+    pub fn get_spinner_chars(&self) -> Cycle<std::slice::Iter<char>> {
+        match self.style {
+            AnimationStyle::Classic => ['|', '/', '-', '\\'].iter(),
+            AnimationStyle::Modern => ['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'].iter(),
+        }
+        .cycle()
     }
 }
 
 pub async fn animation(
     message: String,
     style: AnimationSettings,
-) {
-    let spinner_chars = get_spinner_chars(&style.style);
+) -> Option<()> {
+    let mut spinner_chars = style.get_spinner_chars();
     let ordering = &style.order;
-    let mut idx = 0;
     loop {
+        let char = spinner_chars.next()?; // Cycle never returns None, but ? required for type
         match &ordering {
             AnimationOrder::Before => {
-                eprint!("\r{} {} ", &spinner_chars[idx], &message);
+                eprint!("\r{} {} ", &char, &message);
             },
             AnimationOrder::After => {
-                eprint!("\r{} {} ", &message, &spinner_chars[idx]);
+                eprint!("\r{} {} ", &message, &char);
             },
         };
 
-        idx = (idx + 1) % spinner_chars.len();
         io::stdout().flush().expect("Writing to stdout failed?");
         tokio::time::sleep(Duration::from_millis(100)).await;
     }
