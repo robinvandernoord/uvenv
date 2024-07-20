@@ -42,16 +42,16 @@ anstyle = "1.0" # color styling for clap
 owo-colors = "4.0" # color styling for strings
 
 # uv
-# uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.26" }
-uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.26" }
-uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.26" }
-uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.26" }
-uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.26" }
-# uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.26" }
-pep440_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.26" }
-pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.26" }
-# install-wheel-rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.26" }
-# distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.26" }
+# uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.27" }
+uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.27" }
+uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.27" }
+uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.27" }
+uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.27" }
+# uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.27" }
+pep440_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.27" }
+pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.27" }
+# install-wheel-rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.27" }
+# distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.27" }
 
 # security bumps/pins:
 rustls = "0.23"
