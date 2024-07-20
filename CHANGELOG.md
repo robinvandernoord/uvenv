@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## 3.1.1 (2024-07-20)
+
+## Fix
+
+* Upgrade to work with uv 0.2.27
+
 ## 3.1.0 (2024-07-16)
 
 ## Features
@@ -50,6 +56,19 @@
 
 - Updated documentation to reflect the changes and new features introduced in this version.
 - Started groundwork on automated testing 
+
+## 2.5.1 (2024-07-20)
+
+## Fix
+
+* Upgrade to work with uv 0.2.27
+
+## 2.5.0 (2024-07-08)
+
+## Feature
+
+* Show deprecation warning in favor of `uvenv`
+* Migrate to uvenv on `self update`
 
 ## 2.4.1 (2024-05-31)
 
