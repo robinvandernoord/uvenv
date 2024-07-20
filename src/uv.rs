@@ -7,7 +7,7 @@ use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
 use uv_cache::Cache;
 use uv_installer::SitePackages;
-use uv_toolchain::{EnvironmentPreference, PythonEnvironment, ToolchainRequest};
+use uv_python::{EnvironmentPreference, PythonEnvironment, PythonRequest};
 
 use crate::helpers::PathToString;
 
@@ -62,15 +62,14 @@ pub fn uv_cache() -> Cache {
 /// try to find an `PythonEnvironment` based on Cache or currently active virtualenv (`VIRTUAL_ENV`).
 pub fn uv_venv(maybe_cache: Option<Cache>) -> Option<PythonEnvironment> {
     let cache = maybe_cache.unwrap_or_else(uv_cache);
+    cache.environment().ok()?; // set up the cache
 
-    let x = PythonEnvironment::find(
-        &ToolchainRequest::Any,             // just find me a python
+    PythonEnvironment::find(
+        &PythonRequest::Any,             // just find me a python
         EnvironmentPreference::OnlyVirtual, // venv is always virtual
         &cache,
     )
-    .ok();
-
-    dbg!(x)
+        .ok()
 }
 
 pub fn uv_get_installed_version(

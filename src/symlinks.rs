@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use pep508_rs::Requirement;
-use uv_toolchain::PythonEnvironment;
+use uv_python::PythonEnvironment;
 
 use crate::metadata::ensure_bin_dir;
 use configparser::ini::Ini;

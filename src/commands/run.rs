@@ -2,7 +2,7 @@ use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
 use std::path::{Path, PathBuf};
 
-use uv_toolchain::PythonEnvironment;
+use uv_python::PythonEnvironment;
 
 use crate::cli::{Process, RunOptions};
 use crate::commands::install::_install_package;

@@ -6,7 +6,7 @@ use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
 use std::path::{Path, PathBuf};
 
-use uv_toolchain::PythonEnvironment;
+use uv_python::PythonEnvironment;
 
 pub async fn create_venv_raw(
     venv_path: &Path,
