@@ -225,8 +225,7 @@ impl Metadata {
         filename: &Path,
         config: &LoadMetadataConfig,
     ) -> Option<Self> {
-        let result = load_metadata(filename, config).await;
-        result.ok()
+        load_metadata(filename, config).await.ok()
     }
 
     pub async fn save(

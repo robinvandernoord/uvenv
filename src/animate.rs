@@ -1,3 +1,4 @@
+use scopeguard::defer;
 use std::future::Future;
 use std::io::{self, Write};
 use std::iter::Cycle;
@@ -67,9 +68,10 @@ pub async fn show_loading_indicator<T, S: Into<String>>(
 ) -> T {
     let spinner = task::spawn(animation(message.into(), style));
 
-    let result = promise.await;
-    spinner.abort(); // Abort the spinner loop as download completes
-    eprint!("\r\x1B[2K"); // clear the line
+    defer! {
+        spinner.abort(); // Abort the spinner loop as download completes
+        eprint!("\r\x1B[2K"); // clear the line
+    }
 
-    result
+    promise.await
 }

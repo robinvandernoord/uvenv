@@ -3389,6 +3389,7 @@ dependencies = [
  "rkyv",
  "rmp-serde",
  "rustls",
+ "scopeguard",
  "serde",
  "serde_json",
  "subprocess",

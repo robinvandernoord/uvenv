@@ -67,8 +67,7 @@ async fn main() {
     let exit_code = if let Some(generator) = args.generator {
         generate_code(generator).await
     } else {
-        let result = args.cmd.process().await;
-        result.unwrap_or_else(|msg| {
+        args.cmd.process().await.unwrap_or_else(|msg| {
             eprintln!("{}", fmt_error(&msg));
             1
         })

@@ -124,6 +124,7 @@ pub async fn run_package<S: AsRef<str>>(
     // ### 4 ###
 
     if !keep {
+        // defer! not possible here because of await
         remove_venv(venv_path).await?;
     }
 
