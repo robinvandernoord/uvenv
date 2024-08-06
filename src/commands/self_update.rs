@@ -78,6 +78,7 @@ pub async fn self_update(with_uv: bool) -> anyhow::Result<i32> {
         "pip",
         "install",
         "--no-cache-dir",
+        "--break-system-packages",
         "--upgrade",
         "uvenv",
     ];
