@@ -36,6 +36,10 @@ dependencies = [
     "patchelf", # idk, but required
 ]
 
+[project.optional-dependencies]
+dev = [
+    "maturin",
+]
 
 [tool.maturin]
 bindings = "bin"
