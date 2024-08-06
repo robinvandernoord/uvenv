@@ -59,13 +59,13 @@
 
 ## 2.5.1 (2024-07-20)
 
-## Fix
+### Fix
 
 * Upgrade to work with uv 0.2.27
 
 ## 2.5.0 (2024-07-08)
 
-## Feature
+### Feature
 
 * Show deprecation warning in favor of `uvenv`
 * Migrate to uvenv on `self update`
