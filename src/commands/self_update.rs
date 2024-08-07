@@ -69,7 +69,7 @@ pub async fn find_python() -> anyhow::Result<PathBuf> {
         .map_or_else(find_global_python, Ok)
 }
 
-pub async fn self_update(with_uv: bool) -> anyhow::Result<i32> {
+pub async fn self_update(with_uv: bool, with_patchelf: bool) -> anyhow::Result<i32> {
     let exe = find_python().await?;
 
     // todo: with 'uv' instead of pip later?
@@ -89,6 +89,12 @@ pub async fn self_update(with_uv: bool) -> anyhow::Result<i32> {
         args.push("uv");
         to_track.push("uv");
         msg.push_str(" and uv");
+    }
+
+    if with_patchelf {
+        args.push("patchelf");
+        to_track.push("patchelf");
+        msg.push_str(" and patchelf");
     }
 
     let old = get_package_versions(&exe, &to_track).await;
@@ -128,7 +134,7 @@ pub async fn self_update(with_uv: bool) -> anyhow::Result<i32> {
 
 impl Process for SelfUpdateOptions {
     async fn process(self) -> anyhow::Result<i32> {
-        self_update(!self.without_uv)
+        self_update(!self.without_uv, !self.without_patchelf)
             .await
             .with_context(|| "Something went wrong trying to update 'uvenv';")
     }

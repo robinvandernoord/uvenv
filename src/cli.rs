@@ -385,6 +385,8 @@ impl Process for Commands {
 pub struct SelfUpdateOptions {
     #[clap(long, help = "Update without also updating uv")]
     pub without_uv: bool,
+    #[clap(long, help = "Update without also updating patchelf")]
+    pub without_patchelf: bool,
 }
 
 #[derive(Debug, Parser)]
@@ -392,6 +394,9 @@ pub struct SelfChangelogOptions {}
 
 #[derive(Debug, Parser)]
 pub struct SelfMigrateOptions {}
+
+#[derive(Debug, Parser)]
+pub struct SelfVersionOptions {}
 
 #[derive(Subcommand, Debug)]
 pub enum SelfCommands {
@@ -403,6 +408,9 @@ pub enum SelfCommands {
 
     #[clap(about = "Migrate installed environments and commands from `uvx` to `uvenv`")]
     Migrate(SelfMigrateOptions),
+
+    #[clap(about = "Show version info about uvenv and it's dependencies")]
+    Version(SelfVersionOptions),
 }
 
 impl Process for SelfCommands {
@@ -411,6 +419,7 @@ impl Process for SelfCommands {
             Self::Update(opts) => opts.process().await,
             Self::Changelog(opts) => opts.process().await,
             Self::Migrate(opts) => opts.process().await,
+            Self::Version(opts) => opts.process().await,
         }
     }
 }
