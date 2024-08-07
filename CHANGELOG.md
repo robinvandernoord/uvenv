@@ -2,6 +2,19 @@
 
 <!--next-version-placeholder-->
 
+## 3.2 (2024-08-07)
+
+### Features
+
+* add `uvenv self version` to show version info about uvenv and its dependencies
+* warn about outdated uvenv on 'uvenv list'
+
+### Fix
+
+* allow `self update` on ubuntu 24.04 by setting --break-system-packages
+* fix changelog headings
+* use new default branch 'uvenv' instead of 'master' for changelog
+
 ## 3.1.1 (2024-07-20)
 
 ### Fix
