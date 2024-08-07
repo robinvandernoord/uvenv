@@ -99,7 +99,6 @@ impl Process for ListOptions {
         if self.venv_names.is_empty() {
             // don't show uvenv version warning if package names were supplied
             is_uvenv_outdated(false).await;
-            return Ok(0);
         }
 
         let config = self.to_metadataconfig();
