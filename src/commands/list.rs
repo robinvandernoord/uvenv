@@ -1,8 +1,10 @@
-use std::fs::ReadDir;
-
 use crate::cli::{ListOptions, Process};
+use crate::commands::self_version::{is_latest, uvenv_version};
 use crate::metadata::{get_venv_dir, LoadMetadataConfig, Metadata};
 use crate::promises::handle_promises;
+use crate::pypi::get_latest_version;
+use owo_colors::OwoColorize;
+use std::fs::ReadDir;
 
 async fn read_from_folder_filtered(
     metadata_dir: ReadDir,
@@ -53,6 +55,28 @@ impl ListOptions {
     }
 }
 
+async fn is_uvenv_outdated(silent: bool) -> bool {
+    let latest = get_latest_version("uvenv", true, None).await;
+
+    // uvenv version comes from Cargo.toml
+    let version = uvenv_version();
+
+    let is_outdated = !is_latest(version, latest.as_ref());
+
+    if is_outdated && !silent {
+        if let Some(latest_version) = latest {
+            eprintln!(
+                "{} ({} < {})",
+                "uvenv is outdated!".yellow(),
+                version.red(),
+                latest_version.to_string().green()
+            );
+        }
+    }
+
+    is_outdated
+}
+
 pub async fn list_packages(
     config: &LoadMetadataConfig,
     filter_names: Option<&[String]>,
@@ -72,6 +96,12 @@ pub async fn list_packages(
 
 impl Process for ListOptions {
     async fn process(self) -> anyhow::Result<i32> {
+        if self.venv_names.is_empty() {
+            // don't show uvenv version warning if package names were supplied
+            is_uvenv_outdated(false).await;
+            return Ok(0);
+        }
+
         let config = self.to_metadataconfig();
 
         let items = list_packages(&config, Some(&self.venv_names)).await?;

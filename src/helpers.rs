@@ -48,12 +48,11 @@ impl PathToString for PathBuf {
     }
 }
 
-
-/// Option<Option<T>> can be flattened with .flatten()
+/// Option<Option<T>> can be flattened with `.flatten()`
 /// but this can be used for Option<&Option<T>>
-pub fn flatten_option_ref<T>(nested: Option<&Option<T>>) -> Option<&T> {
+pub const fn flatten_option_ref<T>(nested: Option<&Option<T>>) -> Option<&T> {
     match nested {
         Some(Some(version)) => Some(version),
-        _ => None
+        _ => None,
     }
 }

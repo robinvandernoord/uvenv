@@ -18,7 +18,7 @@ async fn get_latest_versions(package_names: Vec<&str>) -> BTreeMap<String, Optio
     let resolved = future::join_all(promises).await;
 
     let mut result = BTreeMap::new();
-    for (package, version) in package_names.iter().zip(resolved.into_iter()) {
+    for (package, version) in package_names.into_iter().zip(resolved.into_iter()) {
         result.insert(package.to_string(), version);
     }
 
@@ -36,7 +36,7 @@ fn red_or_green(
     }
 }
 
-fn is_latest(
+pub fn is_latest(
     current: &str,
     latest: Option<&Version>,
 ) -> bool {
@@ -44,6 +44,10 @@ fn is_latest(
 
     let version_str = version.to_string();
     version_str == current
+}
+
+pub const fn uvenv_version() -> &'static str {
+    env!("CARGO_PKG_VERSION")
 }
 
 impl Process for SelfVersionOptions {
@@ -54,7 +58,7 @@ impl Process for SelfVersionOptions {
         let latest = get_latest_versions(vec!["uvenv", "uv", "patchelf"]).await;
 
         // uvenv version comes from Cargo.toml
-        let version = env!("CARGO_PKG_VERSION");
+        let version = uvenv_version();
         let to_track = ["uv", "patchelf"]; // + Python version
         let versions = get_package_versions(&exe, &to_track).await;
 
@@ -63,11 +67,11 @@ impl Process for SelfVersionOptions {
 
         for (package, version) in to_track.into_iter().zip(versions.iter()) {
             let pkg_is_latest = is_latest(version, flatten_option_ref(latest.get(package)));
-            println!("  - {}: {}", package, red_or_green(version, pkg_is_latest))
+            println!("  - {}: {}", package, red_or_green(version, pkg_is_latest));
         }
 
         if let Some(py_version) = python_version {
-            eprintln!("\n{} ({})", py_version.trim(), exe.to_string().trim())
+            eprintln!("\n{} ({})", py_version.trim(), exe.to_string().trim());
         }
 
         Ok(0)

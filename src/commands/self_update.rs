@@ -69,7 +69,10 @@ pub async fn find_python() -> anyhow::Result<PathBuf> {
         .map_or_else(find_global_python, Ok)
 }
 
-pub async fn self_update(with_uv: bool, with_patchelf: bool) -> anyhow::Result<i32> {
+pub async fn self_update(
+    with_uv: bool,
+    with_patchelf: bool,
+) -> anyhow::Result<i32> {
     let exe = find_python().await?;
 
     // todo: with 'uv' instead of pip later?
