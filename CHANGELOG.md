@@ -2,7 +2,13 @@
 
 <!--next-version-placeholder-->
 
-## 3.2 (2024-08-07)
+## 3.2.1 (2024-08-07)
+
+### Features
+
+* `uvenv list` should NOT stop after displaying outdated message
+
+## 3.2.0 (2024-08-07)
 
 ### Features
 
