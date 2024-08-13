@@ -98,7 +98,7 @@ impl Process for CheckOptions {
     async fn process(self) -> anyhow::Result<i32> {
         let config = self.to_metadataconfig();
 
-        let items = list_packages(&config, Some(&self.venv_names)).await?;
+        let items = list_packages(&config, Some(&self.venv_names), None).await?;
 
         let mut issues = Issues::new();
 

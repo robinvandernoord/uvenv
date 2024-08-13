@@ -16,7 +16,7 @@ pub async fn reinstall_all(
     // only used if not all_ok, but already created for chaining:
     let mut err_result = Err(anyhow!("-> Failed reinstall-all."));
 
-    for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names)).await? {
+    for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names), None).await? {
         match reinstall(
             &meta.name,
             python,

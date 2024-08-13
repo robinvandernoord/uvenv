@@ -93,7 +93,11 @@ pub struct ListOptions {
     pub show_prereleases: bool,
     #[clap(long, help="Ignore version constraints when checking updates", conflicts_with_all = ["skip_updates"])]
     pub ignore_constraints: bool,
-
+    #[clap(
+        long,
+        help = "List only packages installed wwith a specific version of Python"
+    )]
+    pub python: Option<String>,
     pub venv_names: Vec<String>,
 }
 

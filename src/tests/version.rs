@@ -1,3 +1,8 @@
+#[allow(unused_imports)]
+use crate::commands::self_version::_compare_versions;
+#[allow(unused_imports)]
+use crate::tests::shared::TestResult;
+
 #[test]
 /// special test which makes sure uvenv uses a custom home directory
 /// to prevent breaking normal installed uvenv packages on host system.

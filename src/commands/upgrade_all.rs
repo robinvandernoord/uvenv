@@ -13,7 +13,7 @@ pub async fn upgrade_all(
     let mut all_ok = true;
     let mut err_result = Err(anyhow!("-> Failed upgrade-all."));
 
-    for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names)).await? {
+    for meta in list_packages(&LoadMetadataConfig::none(), Some(venv_names), None).await? {
         match upgrade_package(&meta.name, force, no_cache, skip_injected).await {
             Ok(msg) => {
                 println!("{msg}");

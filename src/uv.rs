@@ -7,8 +7,12 @@ use directories::ProjectDirs;
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
 use uv_cache::Cache;
+use uv_client::{BaseClientBuilder, Connectivity};
 use uv_installer::SitePackages;
-use uv_python::{EnvironmentPreference, PythonEnvironment, PythonRequest};
+use uv_python::{
+    EnvironmentPreference, Interpreter, PythonDownloads, PythonEnvironment, PythonInstallation,
+    PythonPreference, PythonRequest,
+};
 
 use crate::helpers::PathToString;
 
@@ -74,6 +78,40 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> 
     Ok(environ)
 }
 
+fn uv_offline_client() -> BaseClientBuilder<'static> {
+    BaseClientBuilder::default()
+        .connectivity(Connectivity::Offline)
+        .native_tls(false)
+}
+
+/// e.g. 3.12 -> /usr/lib/python3.12, to match with `metadata.python_raw`
+pub async fn uv_search_python(python: Option<&String>) -> Option<String> {
+    let interpreter_request =
+        python.map(|requested_version| PythonRequest::parse(requested_version));
+
+    interpreter_request.as_ref()?; // = if interpreter_request is None -> return None
+
+    let cache = uv_cache();
+    let client = uv_offline_client();
+
+    // Locate the Python interpreter to use in the environment
+    let python = PythonInstallation::find_or_download(
+        interpreter_request,
+        EnvironmentPreference::OnlySystem,
+        PythonPreference::OnlySystem,
+        PythonDownloads::Never,
+        &client,
+        &cache,
+        None,
+    )
+    .await
+    .ok()?;
+
+    let interpreter = python.into_interpreter();
+
+    Some(interpreter.stdlib_as_string())
+}
+
 pub fn uv_get_installed_version(
     package_name: &PackageName,
     maybe_venv: Option<&PythonEnvironment>,
@@ -113,7 +151,17 @@ impl Helpers for PythonEnvironment {
     }
 
     fn stdlib_as_string(&self) -> String {
-        let stdlib = self.interpreter().stdlib().to_str();
+        self.interpreter().stdlib_as_string()
+    }
+}
+
+impl Helpers for Interpreter {
+    fn to_path_buf(&self) -> PathBuf {
+        self.stdlib().to_path_buf()
+    }
+
+    fn stdlib_as_string(&self) -> String {
+        let stdlib = self.stdlib().to_str();
         stdlib.unwrap_or_default().to_string()
     }
 }
