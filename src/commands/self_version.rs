@@ -67,7 +67,7 @@ impl Process for SelfVersionOptions {
         // uvenv version comes from Cargo.toml
         let version = uvenv_version();
         let to_track = ["uv", "patchelf"]; // + Python version
-        let versions = get_package_versions(&exe, &to_track).await;
+        let versions = get_package_versions(&exe, &to_track, "?").await;
 
         let uvenv_is_latest = is_latest(version, flatten_option_ref(latest.get("uvenv")));
         println!("- uvenv: {}", red_or_green(version, uvenv_is_latest));

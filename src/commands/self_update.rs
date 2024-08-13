@@ -1,4 +1,5 @@
 use anyhow::{bail, Context};
+use std::env;
 use std::path::{Path, PathBuf};
 
 use owo_colors::OwoColorize;
@@ -42,12 +43,13 @@ pub async fn get_package_version(
 pub async fn get_package_versions<S: AsRef<str>>(
     python: &Path,
     packages: &[S],
+    default: &str,
 ) -> Vec<String> {
     let output = pip_freeze(python).await.unwrap_or_default();
 
     packages
         .iter()
-        .map(|k| extract_version(&output, k.as_ref()).unwrap_or_default())
+        .map(|k| extract_version(&output, k.as_ref()).unwrap_or_else(|| default.to_string()))
         .collect()
 }
 
@@ -81,10 +83,11 @@ pub async fn self_update(
         "pip",
         "install",
         "--no-cache-dir",
-        "--break-system-packages",
+        // "--break-system-packages",
         "--upgrade",
         "uvenv",
     ];
+    env::set_var("PIP_BREAK_SYSTEM_PACKAGES", "1");
 
     let mut to_track = vec!["uvenv"];
     let mut msg = String::from("uvenv");
@@ -100,7 +103,7 @@ pub async fn self_update(
         msg.push_str(" and patchelf");
     }
 
-    let old = get_package_versions(&exe, &to_track).await;
+    let old = get_package_versions(&exe, &to_track, "?").await;
 
     let exe_str = exe.to_str().unwrap_or_default();
     let promise = run(&exe_str, &args, None);
@@ -112,7 +115,7 @@ pub async fn self_update(
     )
     .await?;
 
-    let new = get_package_versions(&exe, &to_track).await;
+    let new = get_package_versions(&exe, &to_track, "?").await;
 
     for (versions, package) in new.iter().zip(old.iter()).zip(to_track.iter()) {
         let (after, before) = versions;
