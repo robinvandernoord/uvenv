@@ -2,12 +2,17 @@
 
 <!--next-version-placeholder-->
 
+## 3.3.1 (2024-08-13)
+
+### Fix
+
+* replace --break-system-packages with environment variable for backwards compatibility
+
 ## 3.3.0 (2024-08-13)
 
 ### Feature
 
 * allow --python in `uvenv list` to filter installed packages by py version
-
 
 ## 3.2.2 (2024-08-07)
 
