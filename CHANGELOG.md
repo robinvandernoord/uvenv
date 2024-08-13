@@ -2,11 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## 3.3.0 (2024-08-13)
+
+### Feature
+
+* allow --python in `uvenv list` to filter installed packages by py version
+
+
 ## 3.2.2 (2024-08-07)
 
 ### Fix
 
-*  don't say uvenv is outdated when it's actually ahead of the pypi version (bc caching)
+* don't say uvenv is outdated when it's actually ahead of the pypi version (bc caching)
 
 ## 3.2.1 (2024-08-07)
 
