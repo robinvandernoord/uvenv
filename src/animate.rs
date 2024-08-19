@@ -61,8 +61,8 @@ pub async fn animation(
     }
 }
 
-pub async fn show_loading_indicator<T, S: Into<String>>(
-    promise: impl Future<Output = T>,
+pub async fn show_loading_indicator<T, S: Into<String>, P: Future<Output = T>>(
+    promise: P,
     message: S,
     style: AnimationSettings,
 ) -> T {
