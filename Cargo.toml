@@ -43,23 +43,23 @@ anstyle = "1.0" # color styling for clap
 owo-colors = "4.0" # color styling for strings
 
 # uv
-# uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.37" }
-uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.37" }
-uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.37" }
-uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.37" }
-uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.37" }
-# uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.37" }
-pep440_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.37" }
-pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.37" }
-# install-wheel-rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.37" }
-# distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.2.37" }
+# uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.3.0" }
+uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.3.0" }
+uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.3.0" }
+uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.3.0" }
+uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.3.0" }
+# uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.3.0" }
+pep440_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.3.0" }
+pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.3.0" }
+# install-wheel-rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.3.0" }
+# distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.3.0" }
 
 # security bumps/pins:
 rustls = "0.23"
 
 [patch.crates-io]
 # black magic fuckery, required after 0.2.18, otherwise uv-client won't compile
-reqwest-middleware = { git = "https://github.com/astral-sh/reqwest-middleware", rev = "21ceec9a5fd2e8d6f71c3ea2999078fecbd13cbe" }
+reqwest-middleware = { git = "https://github.com/astral-sh/reqwest-middleware", rev = "5e3eaf254b5bd481c75d2710eed055f95b756913" }
 
 
 [lints.clippy]
