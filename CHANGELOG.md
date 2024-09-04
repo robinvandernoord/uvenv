@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## 3.3.2 (2024-09-04)
+
+### Updates
+
+* bump dependencies (uv 0.4.4)
+
+
 ## 3.3.1 (2024-08-13)
 
 ### Fix
