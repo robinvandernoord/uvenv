@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## 3.3.3 (2024-09-04)
+
+### Fix
+
+* use `uv` for `self update` if possible, replaced pip_freeze with uv_freeze
+
 ## 3.3.2 (2024-09-04)
 
 ### Updates
