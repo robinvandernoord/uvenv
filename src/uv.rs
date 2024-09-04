@@ -89,14 +89,14 @@ pub async fn uv_search_python(python: Option<&String>) -> Option<String> {
     let interpreter_request =
         python.map(|requested_version| PythonRequest::parse(requested_version));
 
-    interpreter_request.as_ref()?; // = if interpreter_request is None -> return None
+    let interpreter_request = interpreter_request.as_ref()?; // exit early
 
     let cache = uv_cache();
     let client = uv_offline_client();
 
     // Locate the Python interpreter to use in the environment
     let python = PythonInstallation::find_or_download(
-        interpreter_request,
+        Some(interpreter_request),
         EnvironmentPreference::OnlySystem,
         PythonPreference::OnlySystem,
         PythonDownloads::Never,
