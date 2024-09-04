@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## 3.3.4 (2024-09-04)
+
+### Fix
+
+* rollback slightly: still use `pip freeze` as backup
+
 ## 3.3.3 (2024-09-04)
 
 ### Fix
@@ -13,7 +19,6 @@
 ### Updates
 
 * bump dependencies (uv 0.4.4)
-
 
 ## 3.3.1 (2024-08-13)
 
@@ -105,7 +110,7 @@
 ### Documentation
 
 - Updated documentation to reflect the changes and new features introduced in this version.
-- Started groundwork on automated testing 
+- Started groundwork on automated testing
 
 ## 2.5.1 (2024-07-20)
 
