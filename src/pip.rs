@@ -1,13 +1,10 @@
+use crate::animate::{show_loading_indicator, AnimationSettings};
+use crate::cmd::run;
 use anyhow::bail;
-use std::path::Path;
-use std::str::FromStr;
-
 use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
 use tempfile::NamedTempFile;
-
-use crate::animate::{show_loading_indicator, AnimationSettings};
-use crate::cmd::{run, run_get_output};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct PipDownloadInfo {
@@ -143,6 +140,4 @@ pub async fn parse_requirement(install_spec: &str) -> anyhow::Result<(Requiremen
     }
 }
 
-pub async fn pip_freeze(python: &Path) -> anyhow::Result<String> {
-    run_get_output(python, &["-m", "pip", "freeze"]).await
-}
+// `pip_freeze` is replaced with uv_freeze

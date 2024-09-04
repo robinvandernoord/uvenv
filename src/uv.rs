@@ -1,11 +1,13 @@
-use anyhow::{bail, Context};
-use std::ffi::OsStr;
-use std::{collections::HashSet, path::PathBuf};
-
 use crate::cmd::{find_sibling, run, run_print_output};
+use anyhow::{bail, Context};
 use directories::ProjectDirs;
+use distribution_types::{InstalledDist, Name};
+use itertools::Itertools;
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
+use std::ffi::OsStr;
+use std::path::Path;
+use std::{collections::HashSet, path::PathBuf};
 use uv_cache::Cache;
 use uv_client::{BaseClientBuilder, Connectivity};
 use uv_installer::SitePackages;
@@ -64,7 +66,7 @@ pub fn uv_cache() -> Cache {
     )
 }
 
-/// try to find an `PythonEnvironment` based on Cache or currently active virtualenv (`VIRTUAL_ENV`).
+/// try to find a `PythonEnvironment` based on Cache or currently active virtualenv (`VIRTUAL_ENV`).
 pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> {
     let cache = maybe_cache.unwrap_or_else(uv_cache);
     cache.environment()?; // set up the cache
@@ -76,6 +78,33 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> 
     )?;
 
     Ok(environ)
+}
+
+/// try to find a `PythonEnvironment` based on a specific Python path (as str)
+pub fn environment_from_path_str(path: &str) -> anyhow::Result<PythonEnvironment> {
+    let cache = uv_cache();
+
+    Ok(PythonEnvironment::find(
+        &PythonRequest::parse(path),
+        EnvironmentPreference::ExplicitSystem, // based on above python wishes
+        &cache,
+    )?)
+}
+
+/// try to find a `PythonEnvironment` based on a specific Python path (as Path)
+pub fn environment_from_path(path: &Path) -> anyhow::Result<PythonEnvironment> {
+    environment_from_path_str(path.to_str().unwrap_or_default())
+}
+
+/// try to find a `PythonEnvironment` based on the System python
+pub fn system_environment() -> anyhow::Result<PythonEnvironment> {
+    let cache = uv_cache();
+
+    Ok(PythonEnvironment::find(
+        &PythonRequest::Any, // just find me a python
+        EnvironmentPreference::OnlySystem,
+        &cache,
+    )?)
 }
 
 fn uv_offline_client() -> BaseClientBuilder<'static> {
@@ -138,6 +167,74 @@ pub fn uv_get_installed_version(
         "No version found for '{}'.",
         package_name.to_string().yellow()
     )
+}
+
+pub fn uv_freeze_environ(python: &PythonEnvironment) -> anyhow::Result<String> {
+    // variant with BTree return type is also possible, but everything is currently built on
+    // the `pip freeze` output string format, so use that for now:
+    let mut result = String::new();
+
+    // logic below was copied from the `uv pip freeze` command source code:
+    // https://github.com/astral-sh/uv/blob/c9787f9fd80c58f1242bee5123919eb16f4b05c1/crates/uv/src/commands/pip/freeze.rs
+
+    // Build the installed index.
+    let site_packages = SitePackages::from_environment(python)?;
+    for dist in site_packages
+        .iter()
+        // .filter() ?
+        .sorted_unstable_by(|a, b| a.name().cmp(b.name()).then(a.version().cmp(b.version())))
+    {
+        match dist {
+            InstalledDist::Registry(dist) => {
+                result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
+            },
+            InstalledDist::Url(dist) => {
+                if dist.editable {
+                    result.push_str(&format!("-e {}\n", dist.url));
+                } else {
+                    result.push_str(&format!("{} @ {}\n", dist.name(), dist.url));
+                }
+            },
+            InstalledDist::EggInfoFile(dist) => {
+                result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
+            },
+            InstalledDist::EggInfoDirectory(dist) => {
+                result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
+            },
+            InstalledDist::LegacyEditable(dist) => {
+                result.push_str(&format!("-e {}\n", dist.target.display()));
+            },
+        }
+    }
+
+    Ok(result)
+}
+
+#[allow(dead_code)]
+pub enum PythonSpecifier<'a> {
+    Path(&'a Path),
+    PathBuf(&'a PathBuf),
+    Str(&'a str),
+    String(String),
+    Environ(PythonEnvironment),
+}
+
+impl PythonSpecifier<'_> {
+    fn into_environment(self) -> anyhow::Result<PythonEnvironment> {
+        match self {
+            PythonSpecifier::Path(path) => environment_from_path(path),
+            PythonSpecifier::PathBuf(buf) => environment_from_path(buf.as_path()),
+            PythonSpecifier::Str(string) => environment_from_path_str(string),
+            PythonSpecifier::String(string) => environment_from_path_str(&string),
+            PythonSpecifier::Environ(env) => Ok(env),
+        }
+    }
+}
+
+pub async fn uv_freeze(python: PythonSpecifier<'_>) -> anyhow::Result<String> {
+    let environment = python.into_environment()?;
+
+    uv_freeze_environ(&environment)
 }
 
 pub trait Helpers {

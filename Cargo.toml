@@ -52,7 +52,7 @@ uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.4.4" }
 pep440_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.4.4" }
 pep508_rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.4.4" }
 # install-wheel-rs = { git = "https://github.com/astral-sh/uv.git", tag = "0.4.4" }
-# distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.4.4" }
+ distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.4.4" }
 
 # security bumps/pins:
 rustls = "0.23"

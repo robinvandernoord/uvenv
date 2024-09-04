@@ -3503,6 +3503,7 @@ dependencies = [
  "clap_complete",
  "configparser",
  "directories",
+ "distribution-types",
  "futures",
  "home",
  "itertools 0.13.0",
