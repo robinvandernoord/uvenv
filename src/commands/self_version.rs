@@ -6,7 +6,7 @@ use pep440_rs::Version;
 
 use crate::cli::{Process, SelfVersionOptions};
 use crate::cmd::run_get_output;
-use crate::commands::self_update::{find_python, get_package_versions};
+use crate::commands::self_update::{find_python, get_package_versions_pip};
 use crate::helpers::{flatten_option_ref, PathToString};
 use crate::pypi::get_latest_version;
 
@@ -67,7 +67,7 @@ impl Process for SelfVersionOptions {
         // uvenv version comes from Cargo.toml
         let version = uvenv_version();
         let to_track = ["uv", "patchelf"]; // + Python version
-        let versions = get_package_versions(&exe, &to_track, "?").await;
+        let versions = get_package_versions_pip(&exe, &to_track, "?").await;
 
         let uvenv_is_latest = is_latest(version, flatten_option_ref(latest.get("uvenv")));
         println!("- uvenv: {}", red_or_green(version, uvenv_is_latest));

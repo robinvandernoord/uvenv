@@ -6,6 +6,7 @@ use crate::animate::{show_loading_indicator, AnimationSettings};
 use crate::cli::{Process, SelfUpdateOptions};
 use crate::cmd::{find_sibling, run};
 use crate::helpers::PathToString;
+use crate::pip::pip_freeze;
 use crate::uv::{system_environment, uv_freeze, PythonSpecifier};
 use owo_colors::OwoColorize;
 use regex::Regex;
@@ -30,7 +31,7 @@ fn extract_version(
     None
 }
 
-pub async fn get_package_versions<S: AsRef<str>>(
+pub async fn get_package_versions_uv<S: AsRef<str>>(
     python: &Path,
     packages: &[S],
     default: &str,
@@ -38,6 +39,19 @@ pub async fn get_package_versions<S: AsRef<str>>(
     let output = uv_freeze(PythonSpecifier::Path(python))
         .await
         .unwrap_or_default();
+
+    packages
+        .iter()
+        .map(|k| extract_version(&output, k.as_ref()).unwrap_or_else(|| default.to_string()))
+        .collect()
+}
+
+pub async fn get_package_versions_pip<S: AsRef<str>>(
+    python: &Path,
+    packages: &[S],
+    default: &str,
+) -> Vec<String> {
+    let output = pip_freeze(python).await.unwrap_or_default();
 
     packages
         .iter()
@@ -104,7 +118,7 @@ pub async fn self_update_via_pip(
         msg.push_str(" and patchelf");
     }
 
-    let old = get_package_versions(&exe, &to_track, "?").await;
+    let old = get_package_versions_pip(&exe, &to_track, "?").await;
 
     let exe_str = exe.to_str().unwrap_or_default();
     let promise = run(&exe_str, &args, None);
@@ -116,7 +130,7 @@ pub async fn self_update_via_pip(
     )
     .await?;
 
-    let new = get_package_versions(&exe, &to_track, "?").await;
+    let new = get_package_versions_pip(&exe, &to_track, "?").await;
 
     handle_self_update_result(&to_track, &old, &new);
 
@@ -159,7 +173,7 @@ pub async fn self_update_via_uv(
         msg.push_str(" and patchelf");
     }
 
-    let old = get_package_versions(&python_exe, &to_track, "?").await;
+    let old = get_package_versions_uv(&python_exe, &to_track, "?").await;
 
     let promise = run(&uv, &args, None);
 
@@ -170,7 +184,7 @@ pub async fn self_update_via_uv(
     )
     .await?;
 
-    let new = get_package_versions(&python_exe, &to_track, "?").await;
+    let new = get_package_versions_uv(&python_exe, &to_track, "?").await;
 
     handle_self_update_result(&to_track, &old, &new);
 
@@ -206,6 +220,7 @@ pub async fn self_update(
     with_patchelf: bool,
 ) -> anyhow::Result<i32> {
     let result = self_update_via_uv(with_uv, with_patchelf).await;
+    // note: uv doesn't support --user, only --system
     if result.is_err() {
         // .or_else doesn't really work with async
         self_update_via_pip(with_uv, with_patchelf).await

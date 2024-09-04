@@ -1,8 +1,9 @@
 use crate::animate::{show_loading_indicator, AnimationSettings};
-use crate::cmd::run;
+use crate::cmd::{run, run_get_output};
 use anyhow::bail;
 use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 use std::str::FromStr;
 use tempfile::NamedTempFile;
 
@@ -140,4 +141,7 @@ pub async fn parse_requirement(install_spec: &str) -> anyhow::Result<(Requiremen
     }
 }
 
-// `pip_freeze` is replaced with uv_freeze
+pub async fn pip_freeze(python: &Path) -> anyhow::Result<String> {
+    // uv pip freeze doesn't work for system
+    run_get_output(python, &["-m", "pip", "freeze"]).await
+}
