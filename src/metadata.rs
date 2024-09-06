@@ -436,8 +436,10 @@ impl LoadMetadataConfig {
             updates_ignore_constraints: false,
         }
     }
+}
 
-    pub const fn default() -> Self {
+impl Default for LoadMetadataConfig {
+    fn default() -> Self {
         Self {
             recheck_scripts: true,
             updates_check: true,

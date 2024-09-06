@@ -124,8 +124,11 @@ pub async fn upgrade_package(
     // No virtualenv for '{package_name}', stopping. Use 'uvenv install' instead.
     let (requirement, environ) = setup_environ_from_requirement(install_spec).await?;
 
-    let mut config = LoadMetadataConfig::default();
-    config.updates_check = false;
+    // = LoadMetadataConfig::default with one change:
+    let config = LoadMetadataConfig {
+        updates_check: false,
+        ..Default::default()
+    };
 
     let mut metadata = Metadata::for_requirement(&requirement, &config).await;
 

@@ -6,30 +6,28 @@ use std::time::Duration;
 use tokio::task;
 
 #[allow(dead_code)]
+#[derive(Debug, Default)]
 pub enum AnimationStyle {
     Classic,
+    #[default]
     Modern,
 }
 
 #[allow(dead_code)]
+#[derive(Debug, Default)]
 pub enum AnimationOrder {
+    #[default]
     Before,
     After,
 }
 
+#[derive(Debug, Default)]
 pub struct AnimationSettings {
     pub style: AnimationStyle,
     pub order: AnimationOrder,
 }
 
 impl AnimationSettings {
-    pub const fn default() -> Self {
-        Self {
-            style: AnimationStyle::Modern,
-            order: AnimationOrder::Before,
-        }
-    }
-
     pub fn get_spinner_chars(&self) -> Cycle<std::slice::Iter<char>> {
         match self.style {
             AnimationStyle::Classic => ['|', '/', '-', '\\'].iter(),
