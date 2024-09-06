@@ -6,7 +6,7 @@ use std::time::Duration;
 use tokio::task;
 
 #[allow(dead_code)]
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Copy, Clone)]
 pub enum AnimationStyle {
     Classic,
     #[default]
@@ -14,7 +14,7 @@ pub enum AnimationStyle {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Copy, Clone)]
 pub enum AnimationOrder {
     #[default]
     Before,

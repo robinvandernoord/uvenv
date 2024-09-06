@@ -107,11 +107,9 @@ pub async fn fake_install(install_spec: &str) -> anyhow::Result<FakeInstallResul
         |extras| format!("{}[{}]", &install.metadata.name, extras.join(",")),
     );
 
-    let file_url = &install.download_info.url;
-
     Ok(FakeInstallResult {
         name: full_name,
-        file_url: file_url.into(),
+        file_url: install.download_info.url.clone(),
     })
 }
 

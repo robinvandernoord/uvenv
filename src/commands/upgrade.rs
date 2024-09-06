@@ -43,10 +43,9 @@ fn build_msg(
         ));
         if !metadata.requested_version.is_empty() {
             msg.push_str(&format!("\n💡 This package was installed with a version constraint ({}). If you want to ignore this constraint, use `{}`.",
-            &metadata.requested_version.cyan(),
-
-            format!("uvenv upgrade --force {}", &metadata.name).green()
-        ));
+                                  &metadata.requested_version.cyan(),
+                                  format!("uvenv upgrade --force {}", &metadata.name).green()
+            ));
         }
     } else {
         msg.push_str(&format!(

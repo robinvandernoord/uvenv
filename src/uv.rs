@@ -211,6 +211,7 @@ pub fn uv_freeze_environ(python: &PythonEnvironment) -> anyhow::Result<String> {
 }
 
 #[allow(dead_code)]
+#[derive(Debug, Clone)]
 pub enum PythonSpecifier<'a> {
     Path(&'a Path),
     PathBuf(&'a PathBuf),
