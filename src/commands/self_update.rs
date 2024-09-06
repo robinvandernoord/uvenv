@@ -137,6 +137,9 @@ pub async fn self_update_via_pip(
     Ok(0)
 }
 
+/// currently dead but kept here for documentation
+/// (+ so functions like `uv_freeze` don't cound as dead code, it could be useful later.)
+#[allow(dead_code)]
 pub async fn self_update_via_uv(
     with_uv: bool,
     with_patchelf: bool,
@@ -219,14 +222,9 @@ pub async fn self_update(
     with_uv: bool,
     with_patchelf: bool,
 ) -> anyhow::Result<i32> {
-    let result = self_update_via_uv(with_uv, with_patchelf).await;
-    // note: uv doesn't support --user, only --system
-    if result.is_err() {
-        // .or_else doesn't really work with async
-        self_update_via_pip(with_uv, with_patchelf).await
-    } else {
-        result
-    }
+    // note: uv doesn't work for --user (only --system, which is not allowed on ubuntu 24.04)
+    // so just using pip is most stable (although a bit slower):
+    self_update_via_pip(with_uv, with_patchelf).await
 }
 
 impl Process for SelfUpdateOptions {
