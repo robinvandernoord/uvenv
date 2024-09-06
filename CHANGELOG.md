@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## 3.3.5 (2024-09-06)
+
+### Fix
+
+* rollback to pip-only self update (but keep new functions for documentation purposes)
+* exclude yanked versions from 'latest' version
+
 ## 3.3.4 (2024-09-04)
 
 ### Fix
