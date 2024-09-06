@@ -3,7 +3,7 @@ use crate::uv::uv_cache;
 use pep440_rs::{Version, VersionSpecifier};
 use pep508_rs::{PackageName, Requirement};
 use pypi_types::Yanked;
-use rkyv::{de::deserializers::SharedDeserializeMap, Deserialize};
+use rkyv::{de::deserializers::SharedDeserializeMap, Archive, Archived, Deserialize};
 use std::collections::HashSet;
 use uv_client::{
     OwnedArchive, RegistryClient, RegistryClientBuilder, SimpleMetadata, SimpleMetadatum,
@@ -16,23 +16,21 @@ pub fn get_client() -> RegistryClient {
     RegistryClientBuilder::new(cache).build()
 }
 
-fn deserialize_files(datum: &rkyv::Archived<VersionFiles>) -> Option<VersionFiles> {
-    // for some reason, pycharm doesn't understand this type (but it compiles)
-    let version: Result<VersionFiles, _> = datum.deserialize(&mut SharedDeserializeMap::new());
-
-    version.ok()
-}
-
-fn deserialize_version(datum: &rkyv::Archived<Version>) -> Option<Version> {
-    // for some reason, pycharm doesn't understand this type (but it compiles)
-    let version: Option<Version> = datum.deserialize(&mut SharedDeserializeMap::new()).ok();
-    version
+/// usage: e.g. `let x: Option<VersionFiles> = deserialize(&metadatum.files);`
+/// Note: pycharm will probably complain, but it WILL work for `ArchivedSimpleMetadatum`!
+pub fn rkyv_deserialize<T>(archived: &Archived<T>) -> Option<T>
+where
+    T: Archive,
+    // Thanks to pplx.ai for this black magic fuckery typing (chatGPT or rkyv docs didn't help):
+    T::Archived: Deserialize<T, SharedDeserializeMap>,
+{
+    archived.deserialize(&mut SharedDeserializeMap::new()).ok()
 }
 
 #[allow(dead_code)]
-fn deserialize_metadata(datum: &rkyv::Archived<SimpleMetadatum>) -> Option<SimpleMetadatum> {
+fn deserialize_metadata(datum: &Archived<SimpleMetadatum>) -> Option<SimpleMetadatum> {
     // for some reason, pycharm doesn't understand this type (but it compiles)
-    let full: Option<SimpleMetadatum> = datum.deserialize(&mut SharedDeserializeMap::new()).ok();
+    let full: Option<SimpleMetadatum> = rkyv_deserialize(datum);
     full
 }
 
@@ -48,7 +46,7 @@ fn find_non_yanked_versions(metadata: &OwnedArchive<SimpleMetadata>) -> HashSet<
     // check yanked:
     let files_data: Vec<VersionFiles> = metadata
         .iter()
-        .filter_map(|metadatum| deserialize_files(&metadatum.files))
+        .filter_map(|metadatum| rkyv_deserialize(&metadatum.files))
         .collect();
 
     let mut valid_versions = HashSet::new();
@@ -91,7 +89,7 @@ pub async fn get_versions_for_packagename(
 
         versions = metadata
             .iter()
-            .filter_map(|metadatum| deserialize_version(&metadatum.version))
+            .filter_map(|metadatum| rkyv_deserialize(&metadatum.version))
             .filter(|version| not_yanked.contains(version))
             .collect();
     }
