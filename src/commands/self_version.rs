@@ -73,8 +73,22 @@ impl Process for SelfVersionOptions {
         println!("- uvenv: {}", red_or_green(version, uvenv_is_latest));
 
         for (package, version) in to_track.into_iter().zip(versions.iter()) {
-            let pkg_is_latest = is_latest(version, flatten_option_ref(latest.get(package)));
-            println!("  - {}: {}", package, red_or_green(version, pkg_is_latest));
+            let latest_version = flatten_option_ref(latest.get(package));
+
+            if is_latest(version, latest_version) {
+                println!("  - {}: {}", package, version.green());
+            } else if let Some(latest_version) = latest_version {
+                // show installed in red and latest in yellow:
+                println!(
+                    "  - {}: {} < {}",
+                    package,
+                    version.red(),
+                    latest_version.yellow()
+                );
+            } else {
+                // latest unknown - make it yellow
+                println!("  - {}: {}", package, version.yellow());
+            }
         }
 
         if let Some(py_version) = python_version {

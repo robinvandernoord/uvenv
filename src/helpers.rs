@@ -15,6 +15,12 @@ pub fn fmt_error(e: &anyhow::Error) -> String {
     format!("{e:?}")
 }
 
+/// Source: <https://users.rust-lang.org/t/how-to-print-the-type-of-a-variable/101947/2>
+#[allow(dead_code)]
+pub fn print_type<T>(_: &T) {
+    println!("{:?}", std::any::type_name::<T>());
+}
+
 // https://users.rust-lang.org/t/is-there-a-simple-way-to-give-a-default-string-if-the-string-variable-is-empty/100411
 
 pub trait StringExt {

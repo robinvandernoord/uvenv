@@ -1,10 +1,14 @@
-use pep440_rs::{Version, VersionSpecifier};
-use pep508_rs::{PackageName, Requirement};
-use rkyv::{de::deserializers::SharedDeserializeMap, Deserialize};
-use uv_client::{RegistryClient, RegistryClientBuilder, SimpleMetadatum};
-
 use crate::pip::parse_requirement;
 use crate::uv::uv_cache;
+use pep440_rs::{Version, VersionSpecifier};
+use pep508_rs::{PackageName, Requirement};
+use pypi_types::Yanked;
+use rkyv::{de::deserializers::SharedDeserializeMap, Deserialize};
+use std::collections::HashSet;
+use uv_client::{
+    OwnedArchive, RegistryClient, RegistryClientBuilder, SimpleMetadata, SimpleMetadatum,
+    VersionFiles,
+};
 
 pub fn get_client() -> RegistryClient {
     let cache = uv_cache();
@@ -12,17 +16,57 @@ pub fn get_client() -> RegistryClient {
     RegistryClientBuilder::new(cache).build()
 }
 
-pub fn deserialize_version(datum: &rkyv::Archived<Version>) -> Option<Version> {
+fn deserialize_files(datum: &rkyv::Archived<VersionFiles>) -> Option<VersionFiles> {
+    // for some reason, pycharm doesn't understand this type (but it compiles)
+    let version: Result<VersionFiles, _> = datum.deserialize(&mut SharedDeserializeMap::new());
+
+    version.ok()
+}
+
+fn deserialize_version(datum: &rkyv::Archived<Version>) -> Option<Version> {
     // for some reason, pycharm doesn't understand this type (but it compiles)
     let version: Option<Version> = datum.deserialize(&mut SharedDeserializeMap::new()).ok();
     version
 }
 
 #[allow(dead_code)]
-pub fn deserialize_metadata(datum: &rkyv::Archived<SimpleMetadatum>) -> Option<SimpleMetadatum> {
+fn deserialize_metadata(datum: &rkyv::Archived<SimpleMetadatum>) -> Option<SimpleMetadatum> {
     // for some reason, pycharm doesn't understand this type (but it compiles)
     let full: Option<SimpleMetadatum> = datum.deserialize(&mut SharedDeserializeMap::new()).ok();
     full
+}
+
+const fn is_yanked(yanked: &Option<Yanked>) -> bool {
+    match yanked {
+        None => false,
+        Some(Yanked::Reason(_)) => true,
+        Some(Yanked::Bool(bool)) => *bool,
+    }
+}
+
+fn find_non_yanked_versions(metadata: &OwnedArchive<SimpleMetadata>) -> HashSet<Version> {
+    // check yanked:
+    let files_data: Vec<VersionFiles> = metadata
+        .iter()
+        .filter_map(|metadatum| deserialize_files(&metadatum.files))
+        .collect();
+
+    let mut valid_versions = HashSet::new();
+
+    for file in &files_data {
+        for source_dist in &file.source_dists {
+            if !is_yanked(&source_dist.file.yanked) {
+                valid_versions.insert(source_dist.name.version.clone());
+            }
+        }
+        for wheel in &file.wheels {
+            if !is_yanked(&wheel.file.yanked) {
+                valid_versions.insert(wheel.name.version.clone());
+            }
+        }
+    }
+
+    valid_versions
 }
 
 pub async fn get_versions_for_packagename(
@@ -43,9 +87,12 @@ pub async fn get_versions_for_packagename(
     };
 
     if let Some((_, metadata)) = data.iter().next_back() {
+        let not_yanked = find_non_yanked_versions(metadata);
+
         versions = metadata
             .iter()
             .filter_map(|metadatum| deserialize_version(&metadatum.version))
+            .filter(|version| not_yanked.contains(version))
             .collect();
     }
 
