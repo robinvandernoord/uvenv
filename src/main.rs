@@ -32,7 +32,7 @@ pub fn print_completions<G: Generator>(
 pub async fn generate_bash(generator: Shell) {
     let mut cmd = Args::command();
 
-    let args = &cmd.clone().get_matches();
+    let args = cmd.clone().get_matches();
     match args.subcommand_name() {
         Some("activate") => {
             // generate code for uvenv activate

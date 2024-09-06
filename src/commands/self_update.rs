@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use crate::animate::{show_loading_indicator, AnimationSettings};
 use crate::cli::{Process, SelfUpdateOptions};
 use crate::cmd::{find_sibling, run};
-use crate::helpers::PathToString;
+use crate::helpers::PathAsStr;
 use crate::pip::pip_freeze;
 use crate::uv::{system_environment, uv_freeze, PythonSpecifier};
 use owo_colors::OwoColorize;
@@ -120,7 +120,7 @@ pub async fn self_update_via_pip(
 
     let old = get_package_versions_pip(&exe, &to_track, "?").await;
 
-    let exe_str = exe.to_str().unwrap_or_default();
+    let exe_str = exe.as_str();
     let promise = run(&exe_str, &args, None);
 
     show_loading_indicator(
@@ -150,13 +150,12 @@ pub async fn self_update_via_uv(
         .await
         .ok_or_else(|| anyhow!("Could not find uv!"))?;
 
-    let python_exe_str = python_exe.clone().to_string();
     let mut args = vec![
         "pip",
         "install",
         "--no-cache-dir",
         "--python",
-        &python_exe_str,
+        &python_exe.as_str(),
         "--upgrade",
         "uvenv",
     ];

@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub trait ResultToString<T, E> {
     #[allow(dead_code)]
@@ -38,17 +38,34 @@ impl<S: Into<String>> StringExt for S {
     }
 }
 
-pub trait PathToString {
+pub trait PathAsStr<'a> {
+    fn as_str(&'a self) -> &'a str;
+}
+
+impl<'a> PathAsStr<'a> for PathBuf {
+    fn as_str(&'a self) -> &'a str {
+        self.to_str().unwrap_or_default()
+    }
+}
+
+impl<'a> PathAsStr<'a> for Path {
+    fn as_str(&'a self) -> &'a str {
+        self.to_str().unwrap_or_default()
+    }
+}
+
+pub trait PathToString<'a>: PathAsStr<'a> {
     fn to_string(self) -> String;
 }
 
-impl PathToString for PathBuf {
+/// `PathToString` can't be implemented for Path because sizes need to be known at comptime
+impl<'a> PathToString<'a> for PathBuf {
     fn to_string(self) -> String {
         self.into_os_string().into_string().unwrap_or_default()
     }
 }
 
-/// Option<Option<T>> can be flattened with `.flatten()`
+/// `Option<Option<T>>` can be flattened with `.flatten()`
 /// but this can be used for Option<&Option<T>>
 pub const fn flatten_option_ref<T>(nested: Option<&Option<T>>) -> Option<&T> {
     match nested {

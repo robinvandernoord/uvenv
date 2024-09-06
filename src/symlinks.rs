@@ -4,6 +4,7 @@ use std::path::Path;
 use pep508_rs::Requirement;
 use uv_python::PythonEnvironment;
 
+use crate::helpers::PathAsStr;
 use crate::metadata::ensure_bin_dir;
 use configparser::ini::Ini;
 
@@ -21,7 +22,7 @@ pub async fn console_scripts(entry_points_path: &str) -> anyhow::Result<Vec<Stri
     };
 
     // extract script keys
-    return Ok(console_scripts.keys().map(ToString::to_string).collect());
+    Ok(console_scripts.keys().map(ToString::to_string).collect())
 }
 
 pub async fn find_symlinks(
@@ -40,7 +41,7 @@ pub async fn find_symlinks(
         .purelib()
         .join(dist_info_fname)
         .join("entry_points.txt");
-    let entrypoints_path = entrypoints_ini.to_str().unwrap_or_default();
+    let entrypoints_path = entrypoints_ini.as_str();
     let scripts = console_scripts(entrypoints_path).await.unwrap_or_default();
 
     if scripts.is_empty() {

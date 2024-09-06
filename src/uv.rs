@@ -270,7 +270,7 @@ pub trait ExtractInfo {
 
 impl ExtractInfo for Requirement {
     fn version(&self) -> String {
-        match self.version_or_url.clone() {
+        match &self.version_or_url {
             Some(pep508_rs::VersionOrUrl::VersionSpecifier(v)) => v.to_string(),
             _ => String::new(),
         }

@@ -8,6 +8,7 @@ use uv_python::PythonEnvironment;
 use crate::cli::{Process, RunOptions};
 use crate::commands::install::_install_package;
 use crate::commands::runpython::process_subprocess;
+use crate::helpers::PathAsStr;
 use crate::pip::parse_requirement;
 use crate::symlinks::find_symlinks;
 use crate::uv::uv_get_installed_version;
@@ -106,7 +107,7 @@ pub async fn run_package<S: AsRef<str>>(
     )
     .await?;
 
-    let venv_name = &venv_path.to_str().unwrap_or_default();
+    let venv_name = &venv_path.as_str();
 
     if keep {
         eprintln!("ℹ️ Using virtualenv {}", venv_name.blue());

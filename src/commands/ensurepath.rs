@@ -5,6 +5,7 @@ use chrono::Local;
 use owo_colors::OwoColorize;
 use tokio::{fs::OpenOptions, io::AsyncWriteExt};
 
+use crate::helpers::PathAsStr;
 use crate::{
     cli::{EnsurepathOptions, Process},
     metadata::{ensure_bin_dir, get_home_dir},
@@ -57,7 +58,7 @@ pub async fn add_to_bashrc(
 
 pub async fn ensure_path(force: bool) -> anyhow::Result<()> {
     let bin_path = ensure_bin_dir().await;
-    let bin_dir = bin_path.to_str().unwrap_or_default();
+    let bin_dir = bin_path.as_str();
 
     let path = std::env::var("PATH").unwrap_or_default();
 
@@ -78,7 +79,7 @@ pub async fn ensure_path(force: bool) -> anyhow::Result<()> {
 
 pub async fn ensure_path_generate() -> String {
     let bin_path = ensure_bin_dir().await;
-    let bin_dir = bin_path.to_str().unwrap_or_default();
+    let bin_dir = bin_path.as_str();
     format!("export PATH=\"$PATH:{bin_dir}\"")
 }
 
