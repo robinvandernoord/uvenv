@@ -3,34 +3,35 @@ use crate::cmd::{run, run_get_output};
 use anyhow::bail;
 use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
+use std::collections::VecDeque;
 use std::path::Path;
 use std::str::FromStr;
 use tempfile::NamedTempFile;
 
 #[derive(Debug, Serialize, Deserialize)]
-struct PipDownloadInfo {
-    url: String,
+pub struct PipDownloadInfo {
+    pub url: String,
     dir_info: serde_json::Value, // Since dir_info is an empty object, we can use serde_json::Value here
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct PipMetadata {
-    metadata_version: String,
-    name: String,
-    version: String,
-    classifier: Vec<String>,
-    requires_dist: Vec<String>,
-    requires_python: String,
+pub struct PipMetadata {
+    pub metadata_version: String,
+    pub name: String,
+    pub version: String,
+    pub classifier: Vec<String>,
+    pub requires_dist: Vec<String>,
+    pub requires_python: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct PipInstallItem {
-    download_info: PipDownloadInfo,
-    is_direct: bool,
-    is_yanked: bool,
-    requested: bool,
-    requested_extras: Option<Vec<String>>,
-    metadata: PipMetadata,
+pub struct PipInstallItem {
+    pub download_info: PipDownloadInfo,
+    pub is_direct: bool,
+    pub is_yanked: bool,
+    pub requested: bool,
+    pub requested_extras: Option<Vec<String>>,
+    pub metadata: PipMetadata,
 }
 
 // #[derive(Debug, Serialize, Deserialize)]
@@ -49,11 +50,11 @@ struct PipInstallItem {
 // }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct PipData {
-    version: String,
-    pip_version: String,
-    install: Vec<PipInstallItem>,
+pub struct PipData {
+    pub version: String,
+    pub pip_version: String,
     // environment: Environment,
+    pub install: VecDeque<PipInstallItem>, // we want to get .first() but owned -> pop_first
 }
 
 pub async fn pip(args: &[&str]) -> anyhow::Result<bool> {
@@ -95,22 +96,21 @@ pub async fn fake_install(install_spec: &str) -> anyhow::Result<FakeInstallResul
 
     let json_file = tempfile.reopen()?;
 
-    let pip_data: PipData = serde_json::from_reader(json_file)?;
+    let mut pip_data: PipData = serde_json::from_reader(json_file)?;
 
-    let Some(install) = pip_data.install.first() else {
+    let Some(install) = pip_data.install.pop_front() else {
         bail!("Failed to find package name for local install.",)
     };
 
     // if extras exist, the full name is name[extras]. Otherwise, it's just the name.
-    let full_name = install.requested_extras.as_ref().map_or_else(
+    let name = install.requested_extras.as_ref().map_or_else(
         || String::from(&install.metadata.name),
         |extras| format!("{}[{}]", &install.metadata.name, extras.join(",")),
     );
 
-    Ok(FakeInstallResult {
-        name: full_name,
-        file_url: install.download_info.url.clone(),
-    })
+    let PipDownloadInfo { url: file_url, .. } = install.download_info;
+
+    Ok(FakeInstallResult { name, file_url })
 }
 
 pub async fn try_parse_local_requirement(
