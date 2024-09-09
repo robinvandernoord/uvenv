@@ -31,7 +31,7 @@ classifiers = [
 dynamic = ["version"]
 
 dependencies = [
-    "uv==0.4.6", # obviously
+    "uv==0.4.7", # obviously
     "pip", # self-update
     "patchelf", # idk, but required
 ]
