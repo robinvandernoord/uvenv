@@ -20,14 +20,16 @@ async fn _find_executable(
     venv: &PythonEnvironment,
 ) -> anyhow::Result<String> {
     let installed_version = uv_get_installed_version(&requirement.name, Some(venv))?;
-    let symlinks = find_symlinks(requirement, &installed_version, venv).await;
+    let mut symlinks = find_symlinks(requirement, &installed_version, venv).await;
 
     match symlinks.len() {
         0 => {
             // just return the original name just as a last hope:
             Ok(requirement.name.to_string())
         },
-        1 => Ok(symlinks[0].clone()),
+        1 => Ok(
+            symlinks.pop().expect("Popping should alwyas work if len == 1!")
+        ),
         _ => {
             // too many choices, user should provide --binary <something>
             let mut related = String::new();
