@@ -12,18 +12,12 @@ type Changelogs = BTreeMap<String, BTreeMap<String, Vec<String>>>;
 fn parse_changelog(markdown: &str) -> Changelogs {
     // BTreeMap is like a HashMap but ordered
     let mut changelog: BTreeMap<String, BTreeMap<String, Vec<String>>> = BTreeMap::new();
-    let mut current_version = String::new();
-    let mut current_category = String::new();
+    let mut current_version = "";
+    let mut current_category = "";
 
-    let Ok(version_re) = Regex::new(r"^## v?(.+)") else {
-        return changelog;
-    };
-    let Ok(category_re) = Regex::new(r"^### (.+)") else {
-        return changelog;
-    };
-    let Ok(feature_re) = Regex::new(r"^[*-] (.+)") else {
-        return changelog;
-    };
+    let version_re = Regex::new(r"^## v?(.+)").expect("Invalid regex for version");
+    let category_re = Regex::new(r"^### (.+)").expect("Invalid regex for category");
+    let feature_re = Regex::new(r"^[*-] (.+)").expect("Invalid regex for feature");
 
     for line in markdown.lines() {
         if line.starts_with("# Changelog") {
@@ -31,36 +25,32 @@ fn parse_changelog(markdown: &str) -> Changelogs {
         }
 
         if let Some(version_caps) = version_re.captures(line) {
-            let version = version_caps[1].to_string();
-            changelog.insert(version.clone(), BTreeMap::new());
-            current_version = version;
+            current_version = version_caps.get(1).map_or("", |m| m.as_str());
+            changelog.entry(current_version.to_string()).or_default();
+            current_category = ""; // Reset current category for a new version
             continue;
         }
 
         if let Some(category_caps) = category_re.captures(line) {
-            let category = category_caps[1].to_string();
-            if let Some(map) = changelog.get_mut(&current_version) {
-                map.insert(category.clone(), Vec::new());
-                current_category = category;
+            current_category = category_caps.get(1).map_or("", |m| m.as_str());
+            if let Some(map) = changelog.get_mut(current_version) {
+                map.entry(current_category.to_string()).or_default();
             }
             continue;
         }
 
         if let Some(feature_caps) = feature_re.captures(line) {
-            let features = feature_caps[1].to_string();
-
-            if let Some(map) = changelog.get_mut(&current_version) {
-                if let Some(vec) = map.get_mut(&current_category) {
-                    vec.push(features);
+            let features = feature_caps.get(1).map_or("", |m| m.as_str());
+            if let Some(map) = changelog.get_mut(current_version) {
+                if let Some(vec) = map.get_mut(current_category) {
+                    vec.push(features.to_string());
                 }
             }
-            continue;
         }
     }
 
     changelog
 }
-
 async fn _get_changelog() -> reqwest::Result<String> {
     let resp = reqwest::get(CHANGELOG_URL).await?;
     let resp = resp.error_for_status()?;
