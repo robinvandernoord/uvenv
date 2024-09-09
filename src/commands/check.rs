@@ -8,12 +8,14 @@ use crate::commands::list::list_packages;
 use crate::metadata::LoadMetadataConfig;
 
 #[derive(Debug, PartialEq, Deserialize, Serialize)]
-struct Issues {
-    outdated: Vec<String>,
-    scripts: BTreeMap<String, Vec<String>>,
+struct Issues<'a> {
+    #[serde(borrow)]
+    outdated: Vec<&'a str>,
+    #[serde(borrow)]
+    scripts: BTreeMap<&'a str, Vec<String>>,
 }
 
-impl Issues {
+impl<'a> Issues<'a> {
     pub const fn new() -> Self {
         Self {
             outdated: Vec::new(),
@@ -102,16 +104,14 @@ impl Process for CheckOptions {
 
         let mut issues = Issues::new();
 
-        for metadata in items {
+        for metadata in &items {
             let invalid_scripts = metadata.invalid_scripts();
             if !self.skip_scripts && !invalid_scripts.is_empty() {
-                issues
-                    .scripts
-                    .insert(metadata.name.clone(), invalid_scripts);
+                issues.scripts.insert(&metadata.name, invalid_scripts);
             }
 
             if !self.skip_updates && metadata.outdated {
-                issues.outdated.push(metadata.name.clone());
+                issues.outdated.push(&metadata.name);
             }
         }
 
