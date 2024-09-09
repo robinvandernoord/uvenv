@@ -27,9 +27,9 @@ async fn _find_executable(
             // just return the original name just as a last hope:
             Ok(requirement.name.to_string())
         },
-        1 => Ok(
-            symlinks.pop().expect("Popping should alwyas work if len == 1!")
-        ),
+        1 => Ok(symlinks
+            .pop()
+            .expect("Popping should alwyas work if len == 1!")),
         _ => {
             // too many choices, user should provide --binary <something>
             let mut related = String::new();

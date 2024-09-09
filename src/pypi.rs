@@ -5,10 +5,7 @@ use pep508_rs::{PackageName, Requirement};
 use pypi_types::Yanked;
 use rkyv::{de::deserializers::SharedDeserializeMap, Archive, Archived, Deserialize};
 use std::collections::HashSet;
-use uv_client::{
-    OwnedArchive, RegistryClient, RegistryClientBuilder, SimpleMetadata, SimpleMetadatum,
-    VersionFiles,
-};
+use uv_client::{RegistryClient, RegistryClientBuilder, SimpleMetadatum, VersionFiles};
 
 pub fn get_client() -> RegistryClient {
     let cache = uv_cache();
@@ -42,24 +39,25 @@ const fn is_yanked(yanked: &Option<Yanked>) -> bool {
     }
 }
 
-fn find_non_yanked_versions(metadata: &OwnedArchive<SimpleMetadata>) -> HashSet<Version> {
+/// Usage:
+/// >     let files_data: Vec<VersionFiles> = metadata
+/// >     .iter()
+/// >     .filter_map(|metadatum| rkyv_deserialize(&metadatum.files))
+/// >     .collect();
+/// >     find_non_yanked_versions(&files_data)
+fn find_non_yanked_versions(files_data: &Vec<VersionFiles>) -> HashSet<&Version> {
     // check yanked:
-    let files_data: Vec<VersionFiles> = metadata
-        .iter()
-        .filter_map(|metadatum| rkyv_deserialize(&metadatum.files))
-        .collect();
-
     let mut valid_versions = HashSet::new();
 
-    for file in &files_data {
+    for file in files_data {
         for source_dist in &file.source_dists {
             if !is_yanked(&source_dist.file.yanked) {
-                valid_versions.insert(source_dist.name.version.clone());
+                valid_versions.insert(&source_dist.name.version);
             }
         }
         for wheel in &file.wheels {
             if !is_yanked(&wheel.file.yanked) {
-                valid_versions.insert(wheel.name.version.clone());
+                valid_versions.insert(&wheel.name.version);
             }
         }
     }
@@ -85,7 +83,13 @@ pub async fn get_versions_for_packagename(
     };
 
     if let Some((_, metadata)) = data.iter().next_back() {
-        let not_yanked = find_non_yanked_versions(metadata);
+        let files_data: Vec<VersionFiles> = metadata
+            .iter()
+            .filter_map(|metadatum| rkyv_deserialize(&metadatum.files))
+            .collect();
+        // the .collect above has to happen in this scope,
+        // otherwise `find_non_yanked_versions` can't return a reference to Version...
+        let not_yanked = find_non_yanked_versions(&files_data);
 
         versions = metadata
             .iter()
