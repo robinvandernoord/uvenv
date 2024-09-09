@@ -124,7 +124,7 @@ pub async fn install_symlinks(
             false
         });
 
-        results.insert(symlink.clone(), success);
+        results.insert(symlink, success);
     }
 
     meta.scripts = results;
