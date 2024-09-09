@@ -5,23 +5,23 @@ use std::iter::Cycle;
 use std::time::Duration;
 use tokio::task;
 
-#[allow(dead_code)]
-#[derive(Debug, Default, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Hash, Default)]
 pub enum AnimationStyle {
-    Classic,
     #[default]
     Modern,
+    #[allow(dead_code)]
+    Classic,
 }
 
-#[allow(dead_code)]
-#[derive(Debug, Default, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Hash, Default)]
 pub enum AnimationOrder {
     #[default]
     Before,
+    #[allow(dead_code)]
     After,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Hash, Default)]
 pub struct AnimationSettings {
     pub style: AnimationStyle,
     pub order: AnimationOrder,

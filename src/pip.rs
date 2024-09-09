@@ -8,13 +8,31 @@ use std::path::Path;
 use std::str::FromStr;
 use tempfile::NamedTempFile;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 pub struct PipDownloadInfo {
     pub url: String,
     dir_info: serde_json::Value, // Since dir_info is an empty object, we can use serde_json::Value here
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+impl PartialOrd for PipDownloadInfo {
+    fn partial_cmp(
+        &self,
+        other: &Self,
+    ) -> Option<std::cmp::Ordering> {
+        Some(String::cmp(&self.url, &other.url))
+    }
+}
+
+impl Ord for PipDownloadInfo {
+    fn cmp(
+        &self,
+        other: &Self,
+    ) -> std::cmp::Ordering {
+        String::cmp(&self.url, &other.url)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
 pub struct PipMetadata {
     pub metadata_version: String,
     pub name: String,
@@ -24,7 +42,7 @@ pub struct PipMetadata {
     pub requires_python: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
 pub struct PipInstallItem {
     pub download_info: PipDownloadInfo,
     pub is_direct: bool,
@@ -34,7 +52,7 @@ pub struct PipInstallItem {
     pub metadata: PipMetadata,
 }
 
-// #[derive(Debug, Serialize, Deserialize)]
+// #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default,  Serialize, Deserialize)]
 // struct Environment {
 //     implementation_name: String,
 //     implementation_version: String,
@@ -49,7 +67,7 @@ pub struct PipInstallItem {
 //     sys_platform: String,
 // }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
 pub struct PipData {
     pub version: String,
     pub pip_version: String,
@@ -63,7 +81,7 @@ pub async fn pip(args: &[&str]) -> anyhow::Result<bool> {
     run("pip", args, Some(err_prefix)).await
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
 pub struct FakeInstallResult {
     pub name: String,
     pub file_url: String,

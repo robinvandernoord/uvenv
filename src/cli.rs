@@ -43,7 +43,7 @@ pub trait Process {
     async fn process(self) -> anyhow::Result<i32>;
 }
 
-#[derive(Parser, Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Parser)]
 #[clap(version, styles=get_styles())]
 pub struct Args {
     #[arg(long = "generate", value_enum)]
@@ -62,7 +62,7 @@ pub struct Args {
 const PYTHON_HELP_TEXT: &str =
     "Python version or executable to use, e.g. `3.12`, `python3.12`, `/usr/bin/python3.12`";
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct SetupOptions {
     #[clap(long, help = "Don't update $PATH in .bashrc")]
     pub skip_ensurepath: bool,
@@ -78,7 +78,7 @@ pub struct SetupOptions {
     pub force: bool,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct ListOptions {
     #[clap(short, long, help = "Short output", conflicts_with_all = ["verbose"])]
     pub short: bool,
@@ -101,7 +101,7 @@ pub struct ListOptions {
     pub venv_names: Vec<String>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct InstallOptions {
     pub package_name: String,
     #[clap(
@@ -120,7 +120,7 @@ pub struct InstallOptions {
     pub with: Vec<String>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct CreateOptions {
     pub venv_name: String,
     #[clap(long, help = PYTHON_HELP_TEXT)]
@@ -131,12 +131,12 @@ pub struct CreateOptions {
     pub force: bool,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct ActivateOptions {
     pub venv_name: String,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct UpgradeOptions {
     pub package_name: String,
     #[clap(short = 'f', long, help = "Ignore previous version constraint")]
@@ -147,7 +147,7 @@ pub struct UpgradeOptions {
     pub no_cache: bool,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct UninstallOptions {
     pub package_name: String,
     #[clap(
@@ -158,7 +158,7 @@ pub struct UninstallOptions {
     pub force: bool,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct UninstallAllOptions {
     #[clap(
         short = 'f',
@@ -170,7 +170,7 @@ pub struct UninstallAllOptions {
     pub venv_names: Vec<String>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct ReinstallOptions {
     pub package: String,
     #[clap(long, help = PYTHON_HELP_TEXT)]
@@ -188,7 +188,7 @@ pub struct ReinstallOptions {
     pub editable: bool,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct ReinstallAllOptions {
     #[clap(long, help = PYTHON_HELP_TEXT)]
     pub python: Option<String>,
@@ -207,7 +207,7 @@ pub struct ReinstallAllOptions {
     pub venv_names: Vec<String>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct UpgradeAllOptions {
     #[clap(short = 'f', long, help = "Ignore previous version constraint")]
     pub force: bool,
@@ -219,7 +219,7 @@ pub struct UpgradeAllOptions {
     pub venv_names: Vec<String>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct RunOptions {
     pub package_name: String,
     #[clap(long, help = "Run without `uv` cache")]
@@ -238,31 +238,31 @@ pub struct RunOptions {
     pub args: Vec<String>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct RunuvOptions {
     pub venv: String,
     pub uv_args: Vec<String>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct RunpipOptions {
     pub venv: String,
     pub pip_args: Vec<String>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct RunpythonOptions {
     pub venv: String,
     pub python_args: Vec<String>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct EnsurepathOptions {
     #[clap(long, short, help = "Force update")]
     pub force: bool,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct InjectOptions {
     pub into: String,
     pub package_specs: Vec<String>,
@@ -270,13 +270,13 @@ pub struct InjectOptions {
     #[clap(long, help = "Run without `uv` cache")]
     pub no_cache: bool,
 }
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct UnInjectOptions {
     pub outof: String,
     pub package_specs: Vec<String>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct CheckOptions {
     #[clap(long, help = "Don't check if scripts are installed correctly.")]
     pub skip_scripts: bool,
@@ -293,14 +293,14 @@ pub struct CheckOptions {
     pub venv_names: Vec<String>,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct CompletionsOptions {
     #[clap(long, short, help = "Add to ~/.bashrc")]
     pub install: bool,
     // todo: support others than bash
 }
 
-#[derive(Subcommand, Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Parser)]
 pub enum Commands {
     #[clap(about = "Setup additional (bash-specific) functionality.")]
     Setup(SetupOptions),
@@ -385,7 +385,7 @@ impl Process for Commands {
     }
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct SelfUpdateOptions {
     #[clap(long, help = "Update without also updating uv")]
     pub without_uv: bool,
@@ -393,16 +393,16 @@ pub struct SelfUpdateOptions {
     pub without_patchelf: bool,
 }
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct SelfChangelogOptions {}
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct SelfMigrateOptions {}
 
-#[derive(Debug, Parser)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct SelfVersionOptions {}
 
-#[derive(Subcommand, Debug)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Subcommand)]
 pub enum SelfCommands {
     #[clap(about = "Update the current installation of uvenv (and optionally uv).")]
     Update(SelfUpdateOptions),

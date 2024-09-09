@@ -7,7 +7,7 @@ use crate::cli::{CheckOptions, Process};
 use crate::commands::list::list_packages;
 use crate::metadata::LoadMetadataConfig;
 
-#[derive(Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
 struct Issues<'a> {
     #[serde(borrow)]
     outdated: Vec<&'a str>,

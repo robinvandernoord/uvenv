@@ -7,6 +7,7 @@ use owo_colors::OwoColorize;
 use pep440_rs::{Version, VersionSpecifier};
 use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
+use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use std::fs::remove_dir_all;
 use std::path::{Path, PathBuf};
@@ -69,7 +70,7 @@ pub fn version_0() -> Version {
     Version::from_str("0.0.0").expect("Version 0.0.0 should be parseable.")
 }
 
-#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)] // dbg_pls::DebugPls
+#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub struct Metadata {
     // order is important!!
     pub name: String,
@@ -91,6 +92,24 @@ pub struct Metadata {
     pub available_version: String,
     #[serde(default)]
     pub outdated: bool,
+}
+
+impl PartialOrd for Metadata {
+    fn partial_cmp(
+        &self,
+        other: &Self,
+    ) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Metadata {
+    fn cmp(
+        &self,
+        other: &Self,
+    ) -> Ordering {
+        String::cmp(&self.name, &other.name)
+    }
 }
 
 impl Metadata {
@@ -410,6 +429,7 @@ pub async fn load_generic_msgpack<'a, T: serde::Deserialize<'a>>(
 }
 
 #[allow(clippy::struct_excessive_bools)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct LoadMetadataConfig {
     pub recheck_scripts: bool,
     pub updates_check: bool,

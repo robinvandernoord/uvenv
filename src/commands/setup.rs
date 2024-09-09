@@ -10,7 +10,7 @@ use crate::commands::ensurepath::ensure_path;
 use crate::helpers::fmt_error;
 use crate::metadata::{get_work_dir, load_generic_msgpack, store_generic_msgpack};
 
-#[derive(Debug, PartialEq, Eq, Deserialize, Serialize)] // dbg_pls::DebugPls
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
 pub struct SetupMetadata {
     // order is important, new features should go last!!
     #[serde(default)]
