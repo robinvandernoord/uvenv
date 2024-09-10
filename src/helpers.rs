@@ -1,3 +1,4 @@
+use core::any::type_name;
 use std::path::{Path, PathBuf};
 
 pub trait ResultToString<T, E> {
@@ -7,18 +8,18 @@ pub trait ResultToString<T, E> {
 
 impl<T, E: std::error::Error> ResultToString<T, E> for Result<T, E> {
     fn map_err_to_string(self) -> Result<T, String> {
-        self.map_err(|e| e.to_string())
+        self.map_err(|err| err.to_string())
     }
 }
 
-pub fn fmt_error(e: &anyhow::Error) -> String {
-    format!("{e:?}")
+pub fn fmt_error(err: &anyhow::Error) -> String {
+    format!("{err:?}")
 }
 
 /// Source: <https://users.rust-lang.org/t/how-to-print-the-type-of-a-variable/101947/2>
-#[allow(dead_code)]
+#[allow(dead_code, clippy::use_debug)]
 pub fn print_type<T>(_: &T) {
-    println!("{:?}", std::any::type_name::<T>());
+    println!("{:?}", type_name::<T>());
 }
 
 // https://users.rust-lang.org/t/is-there-a-simple-way-to-give-a-default-string-if-the-string-variable-is-empty/100411
@@ -36,11 +37,11 @@ impl<S: Into<String>> StringExt for S {
         dflt: &str,
     ) -> String {
         // Re-use a `String`s capacity, maybe
-        let mut s = self.into();
-        if s.is_empty() {
-            s.push_str(dflt);
+        let mut result_string = self.into();
+        if result_string.is_empty() {
+            result_string.push_str(dflt);
         }
-        s
+        result_string
     }
 }
 

@@ -1,4 +1,5 @@
 use anyhow::Context;
+use core::fmt::Write;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
@@ -36,25 +37,45 @@ fn build_msg(
 ) -> String {
     let mut msg = String::new();
     if old_version == new_version {
-        msg.push_str(&format!(
+        // msg.push_str(&format!(
+        //     "🌟 '{}' is already up to date at version {}!",
+        //     &metadata.name.green(),
+        //     &new_version.cyan()
+        // ));
+        let _ = write!(
+            msg,
             "🌟 '{}' is already up to date at version {}!",
             &metadata.name.green(),
             &new_version.cyan()
-        ));
+        );
+
         if !metadata.requested_version.is_empty() {
-            msg.push_str(&format!("\n💡 This package was installed with a version constraint ({}). If you want to ignore this constraint, use `{}`.",
-                                  &metadata.requested_version.cyan(),
-                                  format!("uvenv upgrade --force {}", &metadata.name).green()
-            ));
+            // msg.push_str(&format!("\n💡 This package was installed with a version constraint ({}). If you want to ignore this constraint, use `{}`.",
+            //                       &metadata.requested_version.cyan(),
+            //                       format!("uvenv upgrade --force {}", &metadata.name).green()
+            // ));
+            let _ = write!(
+                msg,
+                "\n💡 This package was installed with a version constraint ({}). If you want to ignore this constraint, use `{}`.",
+                &metadata.requested_version.cyan(),
+                format!("uvenv upgrade --force {}", &metadata.name).green()
+            );
         }
     } else {
-        msg.push_str(&format!(
+        // msg.push_str(&format!(
+        //     "🚀 Successfully updated '{}' from version {} to version {}!",
+        //     metadata.name.green(),
+        //     old_version.cyan(),
+        //     new_version.cyan()
+        // ));
+        let _ = write!(
+            msg,
             "🚀 Successfully updated '{}' from version {} to version {}!",
             metadata.name.green(),
             old_version.cyan(),
             new_version.cyan()
-        ));
-    }
+        );
+    };
 
     msg
 }
@@ -87,7 +108,8 @@ pub async fn _upgrade_package(
     extras.extend(requirement.extras());
 
     if !extras.is_empty() {
-        upgrade_spec.push_str(&format!("[{}]", extras.iter().join(",")));
+        // upgrade_spec.push_str(&format!("[{}]", extras.iter().join(",")));
+        write!(upgrade_spec, "[{}]", extras.iter().join(","))?;
     }
 
     if !version.is_empty() {

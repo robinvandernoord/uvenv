@@ -15,6 +15,6 @@ pub fn is_empty(some_dir: &Path) -> bool {
 pub fn cleanup() {
     // every get_home_dir should clean it up (in test mode)
     let home_dir = get_home_dir();
-    assert!(home_dir.exists());
-    assert!(is_empty(&home_dir));
+    assert!(home_dir.exists(), "Home should exist");
+    assert!(is_empty(&home_dir), "Home should be empty");
 }

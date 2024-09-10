@@ -1,5 +1,6 @@
 use crate::cmd::{find_sibling, run, run_print_output};
-use anyhow::{bail, Context};
+use anyhow::{anyhow, bail, Context};
+use core::fmt::Write;
 use directories::ProjectDirs;
 use distribution_types::{InstalledDist, Name};
 use itertools::Itertools;
@@ -15,6 +16,8 @@ use uv_python::{
     EnvironmentPreference, Interpreter, PythonDownloads, PythonEnvironment, PythonInstallation,
     PythonPreference, PythonRequest,
 };
+
+use pep508_rs::VersionOrUrl::VersionSpecifier;
 
 use crate::helpers::PathToString;
 
@@ -48,7 +51,12 @@ where
     // venv could be unavailable, use 'uv' from this library's requirement
     let script = get_uv_binary().await;
 
-    let subcommand = &args[0].as_ref().to_str().unwrap_or_default(); // cursed but makes it work with both &str and String
+    let subcommand = args
+        .first()
+        .ok_or_else(|| anyhow!("No subcommand passed"))?
+        .as_ref()
+        .to_str()
+        .unwrap_or_default(); // cursed but makes it work with both &str and String
     let err_prefix = format!("uv {subcommand}");
 
     run(&script, args, Some(err_prefix)).await
@@ -118,14 +126,14 @@ pub async fn uv_search_python(python: Option<&String>) -> Option<String> {
     let interpreter_request =
         python.map(|requested_version| PythonRequest::parse(requested_version));
 
-    let interpreter_request = interpreter_request.as_ref()?; // exit early
+    let python_request = interpreter_request.as_ref()?; // exit early
 
     let cache = uv_cache();
     let client = uv_offline_client();
 
     // Locate the Python interpreter to use in the environment
-    let python = PythonInstallation::find_or_download(
-        Some(interpreter_request),
+    let python_installation = PythonInstallation::find_or_download(
+        Some(python_request),
         EnvironmentPreference::OnlySystem,
         PythonPreference::OnlySystem,
         PythonDownloads::Never,
@@ -136,7 +144,7 @@ pub async fn uv_search_python(python: Option<&String>) -> Option<String> {
     .await
     .ok()?;
 
-    let interpreter = python.into_interpreter();
+    let interpreter = python_installation.into_interpreter();
 
     Some(interpreter.stdlib_as_string())
 }
@@ -179,30 +187,36 @@ pub fn uv_freeze_environ(python: &PythonEnvironment) -> anyhow::Result<String> {
 
     // Build the installed index.
     let site_packages = SitePackages::from_environment(python)?;
-    for dist in site_packages
+    for installed_dist in site_packages
         .iter()
         // .filter() ?
-        .sorted_unstable_by(|a, b| a.name().cmp(b.name()).then(a.version().cmp(b.version())))
+        .sorted_unstable_by(|one, two| one.name().cmp(two.name()).then(one.version().cmp(two.version())))
     {
-        match dist {
+        match installed_dist {
             InstalledDist::Registry(dist) => {
-                result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
+                // result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
+                writeln!(result, "{}=={}", dist.name(), dist.version)?;
             },
             InstalledDist::Url(dist) => {
                 if dist.editable {
-                    result.push_str(&format!("-e {}\n", dist.url));
+                    // result.push_str(&format!("-e {}\n", dist.url));
+                    writeln!(result, "-e {}", dist.url)?;
                 } else {
-                    result.push_str(&format!("{} @ {}\n", dist.name(), dist.url));
+                    // result.push_str(&format!("{} @ {}\n", dist.name(), dist.url));
+                    writeln!(result, "{} @ {}", dist.name(), dist.url)?;
                 }
             },
             InstalledDist::EggInfoFile(dist) => {
-                result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
+                // result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
+                writeln!(result, "{}=={}", dist.name(), dist.version)?;
             },
             InstalledDist::EggInfoDirectory(dist) => {
-                result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
+                // result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
+                writeln!(result, "{}=={}", dist.name(), dist.version)?;
             },
             InstalledDist::LegacyEditable(dist) => {
-                result.push_str(&format!("-e {}\n", dist.target.display()));
+                // result.push_str(&format!("-e {}\n", dist.target.display()));
+                writeln!(result, "-e {}", dist.target.display())?;
             },
         }
     }
@@ -212,10 +226,10 @@ pub fn uv_freeze_environ(python: &PythonEnvironment) -> anyhow::Result<String> {
 
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-pub enum PythonSpecifier<'a> {
-    Path(&'a Path),
-    PathBuf(&'a PathBuf),
-    Str(&'a str),
+pub enum PythonSpecifier<'src> {
+    Path(&'src Path),
+    PathBuf(&'src PathBuf),
+    Str(&'src str),
     String(String),
     Environ(PythonEnvironment),
 }
@@ -260,7 +274,7 @@ impl Helpers for Interpreter {
 
     fn stdlib_as_string(&self) -> String {
         let stdlib = self.stdlib().to_str();
-        stdlib.unwrap_or_default().to_string()
+        stdlib.unwrap_or_default().to_owned()
     }
 }
 
@@ -272,7 +286,7 @@ pub trait ExtractInfo {
 impl ExtractInfo for Requirement {
     fn version(&self) -> String {
         match &self.version_or_url {
-            Some(pep508_rs::VersionOrUrl::VersionSpecifier(v)) => v.to_string(),
+            Some(VersionSpecifier(version_specifier)) => version_specifier.to_string(),
             _ => String::new(),
         }
     }

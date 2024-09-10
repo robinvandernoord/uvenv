@@ -19,7 +19,7 @@ async fn get_latest_versions(package_names: Vec<&str>) -> BTreeMap<String, Optio
 
     let mut result = BTreeMap::new();
     for (package, version) in package_names.into_iter().zip(resolved.into_iter()) {
-        result.insert(package.to_string(), version);
+        result.insert(package.to_owned(), version);
     }
 
     result
@@ -72,22 +72,22 @@ impl Process for SelfVersionOptions {
         let uvenv_is_latest = is_latest(version, flatten_option_ref(latest.get("uvenv")));
         println!("- uvenv: {}", red_or_green(version, uvenv_is_latest));
 
-        for (package, version) in to_track.into_iter().zip(versions.iter()) {
-            let latest_version = flatten_option_ref(latest.get(package));
+        for (package_name, package_version) in to_track.into_iter().zip(versions.iter()) {
+            let maybe_latest_version = flatten_option_ref(latest.get(package_name));
 
-            if is_latest(version, latest_version) {
-                println!("  - {}: {}", package, version.green());
-            } else if let Some(latest_version) = latest_version {
+            if is_latest(package_version, maybe_latest_version) {
+                println!("  - {}: {}", package_name, package_version.green());
+            } else if let Some(latest_version) = maybe_latest_version {
                 // show installed in red and latest in yellow:
                 println!(
                     "  - {}: {} < {}",
-                    package,
-                    version.red(),
+                    package_name,
+                    package_version.red(),
                     latest_version.yellow()
                 );
             } else {
                 // latest unknown - make it yellow
-                println!("  - {}: {}", package, version.yellow());
+                println!("  - {}: {}", package_name, package_version.yellow());
             }
         }
 

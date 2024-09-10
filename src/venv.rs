@@ -5,10 +5,12 @@ use crate::uv::{uv, uv_venv};
 use anyhow::{bail, Context};
 use owo_colors::OwoColorize;
 use pep508_rs::{PackageName, Requirement};
+use std::env;
 use std::path::{Path, PathBuf};
 
 use uv_python::PythonEnvironment;
 
+/// Create a new virtualenv via `uv venv` at a Path
 pub async fn create_venv_raw(
     venv_path: &Path,
     python: Option<&String>,
@@ -35,6 +37,7 @@ pub async fn create_venv_raw(
     Ok(())
 }
 
+/// Create a new virtualenv from a parsed `PackageName`.
 pub async fn create_venv(
     package_name: &PackageName,
     python: Option<&String>,
@@ -52,13 +55,15 @@ pub async fn create_venv(
     Ok(venv_path)
 }
 
+/// activate a venv (from Path) by setting the `VIRTUAL_ENV` and loading the `PythonEnvironment`.
 pub async fn activate_venv(venv: &Path) -> anyhow::Result<PythonEnvironment> {
     let venv_str = venv.to_str().unwrap_or_default();
-    std::env::set_var("VIRTUAL_ENV", venv_str);
+    env::set_var("VIRTUAL_ENV", venv_str);
 
     uv_venv(None).with_context(|| format!("Could not properly activate venv '{venv_str}'!"))
 }
 
+/// Find the path to an existing venv for an install spec str.
 #[allow(dead_code)]
 pub async fn find_venv(install_spec: &str) -> Option<PathBuf> {
     let (requirement, _) = parse_requirement(install_spec).await.ok()?;
@@ -67,6 +72,7 @@ pub async fn find_venv(install_spec: &str) -> Option<PathBuf> {
     Some(venv_path(&requirement_name))
 }
 
+/// Parse an install spec str into a Requirement and create a new environment for it.
 pub async fn setup_environ_from_requirement(
     install_spec: &str
 ) -> anyhow::Result<(Requirement, PythonEnvironment)> {
@@ -80,11 +86,17 @@ pub async fn setup_environ_from_requirement(
     Ok((requirement, environ))
 }
 
+/// remove a venv directory
+
+// absolute path to make clear it's tokio fs and not std
 pub async fn remove_venv(venv: &PathBuf) -> anyhow::Result<()> {
-    tokio::fs::remove_dir_all(venv).await?;
-    Ok(())
+    Ok(
+        // ? + Ok for anyhow casting
+        tokio::fs::remove_dir_all(venv).await?,
+    )
 }
 
+/// Get the absolute path to a script in a venv.
 pub fn venv_script(
     venv: &PythonEnvironment,
     script: &str,

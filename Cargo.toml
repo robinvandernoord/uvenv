@@ -66,18 +66,41 @@ reqwest-middleware = { git = "https://github.com/astral-sh/reqwest-middleware", 
 
 [lints.clippy]
 # categories:
+correctness = { level = "deny", priority = 1 }
+suspicious = { level = "deny", priority = 1 }
+complexity = { level = "warn", priority = -1 }
+perf = { level = "warn", priority = -1 }
+style = { level = "warn", priority = -1 }
 pedantic = { level = "warn", priority = -1 }
+restriction = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
 cargo = { level = "warn", priority = -1 }
 # specific ones:
 ## deny
-unwrap_used = "deny"
+unwrap_used = "deny" # at least use .expect
+implicit_clone = "warn" # good to know when clones are happening
 
 ## allow
-module_name_repetitions = "allow"
-future_not_send = "allow"
-struct_excessive_bools = "allow"
-fn_params_excessive_bools = "allow"
-cast_possible_wrap = "allow"
-cast_possible_truncation = "allow"
-multiple_crate_versions = "allow"
+module_name_repetitions = "allow" # using venv_ in functions triggers this, annoying
+future_not_send = "allow" # idk how to fix this, tokio goes crazy
+struct_excessive_bools = "allow" # Clap args can just get lot of bools
+fn_params_excessive_bools = "allow" # Clap args can just get lot of bools
+cast_possible_wrap = "allow" #  the numbers in this program won't be very large so it's okay
+cast_possible_truncation = "allow" # the numbers in this program won't be very large so it's okay
+multiple_crate_versions = "allow" # some dependencies make this happen
+single_call_fn = "allow" # # not everything should be one big function
+print_stdout = "allow" # it's a cli tool, printing is fine
+print_stderr = "allow" # eprintln is nice even for prd
+implicit_return = "allow" # conflicts with needless_return
+default_numeric_fallback = "allow" # why do 1_i32 if it's fine to let Rust figure out the types?
+question_mark_used = "allow" # it's a nice operator?
+missing_docs_in_private_items = "allow" # only docs for pub items is fine for now
+pattern_type_mismatch = "allow"  # rust understands the pattern match so idk why I would complicate it
+absolute_paths = "allow" # it's probably with good reason (e.g. so it's explitly using tokio::fs instead of std)
+missing_trait_methods = "allow" # optional default implementations are nice
+std_instead_of_alloc = "allow" # false flag for VecDeque
+arithmetic_side_effects = "allow" # I trust the math will keep mathing
+expect_used = "allow" # expect is only used when absolutely sure panic will not happen!
+let_underscore_must_use = "allow" # doing `let _` already says I explicitly don't care about the result!
+let_underscore_untyped = "allow" # doing `let _` already says I explicitly don't care about the result!
+non_ascii_literal = "allow" # unicode is king

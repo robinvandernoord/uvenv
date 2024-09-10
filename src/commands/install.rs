@@ -9,7 +9,7 @@ use crate::venv::{activate_venv, create_venv, remove_venv};
 
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt::Display;
 
 use anyhow::{bail, Context};
@@ -115,7 +115,7 @@ pub async fn install_symlinks(
 
     let symlinks = find_symlinks(requirement, &meta.installed_version, venv).await;
 
-    let mut results = HashMap::new();
+    let mut results = BTreeMap::new();
     for symlink in symlinks {
         let result = create_symlink(&symlink, venv_root, force, binaries).await;
 

@@ -1,11 +1,12 @@
 use crate::animate::{show_loading_indicator, AnimationSettings};
 use crate::cmd::{run, run_get_output};
 use anyhow::bail;
+use core::cmp::Ordering;
+use core::str::FromStr;
 use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 use std::path::Path;
-use std::str::FromStr;
 use tempfile::NamedTempFile;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
@@ -18,7 +19,7 @@ impl PartialOrd for PipDownloadInfo {
     fn partial_cmp(
         &self,
         other: &Self,
-    ) -> Option<std::cmp::Ordering> {
+    ) -> Option<Ordering> {
         Some(String::cmp(&self.url, &other.url))
     }
 }
@@ -27,7 +28,7 @@ impl Ord for PipDownloadInfo {
     fn cmp(
         &self,
         other: &Self,
-    ) -> std::cmp::Ordering {
+    ) -> Ordering {
         String::cmp(&self.url, &other.url)
     }
 }
@@ -76,7 +77,8 @@ pub struct PipData {
 }
 
 pub async fn pip(args: &[&str]) -> anyhow::Result<bool> {
-    let err_prefix = format!("pip {}", args[0]);
+    // unwrap_or_default doesn't work on &&str :(
+    let err_prefix = format!("pip {}", args.first().unwrap_or(&""));
 
     run("pip", args, Some(err_prefix)).await
 }

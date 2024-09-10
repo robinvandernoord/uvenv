@@ -72,6 +72,7 @@ pub async fn create_symlink(
                 "Script {symlink} already exists in {bin_dir:?}. Use --force to ignore this warning.",
             )
         }
+
         tokio::fs::remove_file(&target_path)
             .await
             .with_context(|| format!("Failed to create symlink {:?}", &target_path))?;

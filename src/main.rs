@@ -21,12 +21,14 @@ use crate::cli::{Args, Process};
 use crate::commands::activate::generate_activate;
 use crate::commands::ensurepath::ensure_path_generate;
 use crate::helpers::fmt_error;
+use std::process::exit;
 
 pub fn print_completions<G: Generator>(
     gen: G,
     cmd: &mut Command,
 ) {
-    generate(gen, cmd, cmd.get_name().to_string(), &mut io::stdout());
+    // get_name returns a str, to_owned = to_string (but restriction::str_to_string)
+    generate(gen, cmd, cmd.get_name().to_owned(), &mut io::stdout());
 }
 
 pub async fn generate_bash(generator: Shell) {
@@ -76,5 +78,5 @@ async fn main() {
     // If bundled via an entrypoint, the first argument is 'python' so skip it:
     // let args = Args::parse_from_python();
 
-    std::process::exit(exit_code);
+    exit(exit_code);
 }

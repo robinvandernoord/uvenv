@@ -2,16 +2,17 @@ use crate::pypi::get_latest_version;
 use crate::symlinks::check_symlink;
 use crate::uv::{uv_get_installed_version, uv_venv, Helpers};
 use anyhow::anyhow;
+use core::cmp::Ordering;
+use core::fmt::Write;
+use core::str::FromStr;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
 use pep440_rs::{Version, VersionSpecifier};
 use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
-use std::cmp::Ordering;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashSet};
 use std::fs::remove_dir_all;
 use std::path::{Path, PathBuf};
-use std::str::FromStr;
 use tokio::fs::{create_dir_all, File};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
@@ -26,6 +27,7 @@ const INDENT: &str = "    ";
 const MAGIC_HEADER: &[u8] = &[0x55, 0x56, 0x58, 0x01, 0x32, 0x04, 0x00]; // hex, 7 bytes
 
 pub fn get_home_dir() -> PathBuf {
+    #[allow(clippy::dbg_macro)]
     if cfg!(test) {
         let test_dir = std::env::temp_dir().join("uvenv-test");
         // fixme:
@@ -46,6 +48,7 @@ pub async fn ensure_bin_dir() -> PathBuf {
     let bin_dir = get_bin_dir();
 
     if !bin_dir.exists() {
+        // may fail I guess:
         let _ = create_dir_all(&bin_dir).await;
     }
 
@@ -75,7 +78,7 @@ pub struct Metadata {
     // order is important!!
     pub name: String,
     #[serde(default)]
-    pub scripts: HashMap<String, bool>,
+    pub scripts: BTreeMap<String, bool>,
     pub install_spec: String,
     #[serde(default)]
     pub extras: HashSet<String>,
@@ -115,9 +118,9 @@ impl Ord for Metadata {
 impl Metadata {
     pub fn new(name: &str) -> Self {
         Self {
-            name: name.to_string(),
-            scripts: HashMap::new(),
-            install_spec: name.to_string(),
+            name: name.to_owned(),
+            scripts: BTreeMap::new(),
+            install_spec: name.to_owned(),
             extras: HashSet::new(),
             requested_version: String::new(),
             installed_version: String::new(),
@@ -178,7 +181,7 @@ impl Metadata {
         }
 
         let venv = match maybe_venv {
-            Some(v) => v,
+            Some(venv) => venv,
             None => match uv_venv(None) {
                 Ok(venv) => {
                     // black magic fuckery to
@@ -288,7 +291,7 @@ impl Metadata {
             .scripts
             .iter()
             //                                if True, the script is valid -> skip from filter_map
-            .filter_map(|(k, v)| if *v { None } else { Some(k.to_owned()) })
+            .filter_map(|(key, val)| if *val { None } else { Some(key.to_owned()) })
             .collect()
     }
 
@@ -316,52 +319,70 @@ impl Metadata {
     pub fn format_extras(&self) -> String {
         self.extras
             .iter()
-            .map(|k| format!("'{}'", k.green()))
+            .map(|extra| format!("'{}'", extra.green()))
             .join(",")
     }
 
     pub fn format_injected(&self) -> String {
         self.injected
             .iter()
-            .map(|k| format!("'{}'", k.green()))
+            .map(|dep| format!("'{}'", dep.green()))
             .join(", ")
     }
 
-    pub fn format_human(&self) -> String {
+    pub fn format_human(&self) -> anyhow::Result<String> {
         let mut result = format!("- {}", self.name);
 
         if !self.extras.is_empty() {
-            result.push_str(&format!("[{}]", self.format_extras()));
+            // result.push_str(&format!("[{}]", self.format_extras()));
+            write!(result, "[{}]", self.format_extras())?;
         }
 
         if !self.requested_version.is_empty() {
-            result.push_str(&format!(" {}", self.requested_version.cyan()));
+            // result.push_str(&format!(" {}", self.requested_version.cyan()));
+            write!(result, " {}", self.requested_version.cyan())?;
         }
 
         if self.editable {
-            result.push_str(&format!(" {}", "--editable".yellow()));
+            // result.push_str(&format!(" {}", "--editable".yellow()));
+            write!(result, " {}", "--editable".yellow())?;
         }
 
         result.push('\n');
 
-        result.push_str(&format!(
-            "{}Installed Version: {} on {}.\n",
+        // result.push_str(&format!(
+        //     "{}Installed Version: {} on {}.\n",
+        //     INDENT,
+        //     self.format_installed_version(),
+        //     self.python.bright_blue()
+        // ));
+        writeln!(
+            result,
+            "{}Installed Version: {} on {}.",
             INDENT,
             self.format_installed_version(),
             self.python.bright_blue()
-        ));
+        )?;
 
         if self.outdated && !self.available_version.is_empty() {
-            result.push_str(&format!(
-                "{}Available Version: {}.\n",
+            // result.push_str(&format!(
+            //     "{}Available Version: {}.\n",
+            //     INDENT,
+            //     self.available_version.green(),
+            // ));
+
+            writeln!(
+                result,
+                "{}Available Version: {}.",
                 INDENT,
                 self.available_version.green(),
-            ));
+            )?;
         }
 
         if !self.injected.is_empty() {
             let formatted_injects = self.format_injected();
-            result.push_str(&format!("{INDENT}Injected Packages: {formatted_injects}\n"));
+            // result.push_str(&format!("{INDENT}Injected Packages: {formatted_injects}\n"));
+            writeln!(result, "{INDENT}Injected Packages: {formatted_injects}")?;
         }
 
         let formatted_scripts = self
@@ -375,9 +396,10 @@ impl Metadata {
                 }
             })
             .join(" | ");
-        result.push_str(&format!("{INDENT}Scripts: {formatted_scripts}"));
+        // result.push_str(&format!("{INDENT}Scripts: {formatted_scripts}"));
+        writeln!(result, "{INDENT}Scripts: {formatted_scripts}")?;
 
-        result
+        Ok(result)
     }
 }
 
@@ -423,7 +445,7 @@ pub async fn load_generic_msgpack<'a, T: serde::Deserialize<'a>>(
     strip_header(buf);
 
     // Read the contents of the file into a Metadata struct
-    let metadata: T = rmp_serde::decode::from_slice(&buf[..])?;
+    let metadata: T = rmp_serde::decode::from_slice(buf)?;
 
     Ok(metadata)
 }

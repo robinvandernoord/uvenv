@@ -92,8 +92,6 @@ pub async fn get_versions_for_packagename(
                 rkyv_deserialize(&metadatum.version).filter(|version| not_yanked.contains(version))
             })
             .collect();
-
-        dbg!(&versions);
     }
 
     if stable {

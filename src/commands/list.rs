@@ -126,7 +126,7 @@ impl Process for ListOptions {
             } else if self.short {
                 println!("{}", &metadata.format_short());
             } else {
-                println!("{}", &metadata.format_human());
+                println!("{}", &metadata.format_human()?);
             }
         }
 

@@ -1,6 +1,6 @@
 use crate::helpers::fmt_error;
+use core::future::Future;
 use futures::future;
-use std::future::Future;
 
 pub async fn handle_promises<T, F: Future<Output = anyhow::Result<T>>>(promises: Vec<F>) -> Vec<T> {
     future::join_all(promises)

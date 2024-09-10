@@ -66,7 +66,7 @@ pub async fn setup_for_bash(
     do_activate: bool,
     force: bool,
 ) -> anyhow::Result<i32> {
-    let mut any_warnings: bool = false;
+    let mut any_warnings = false;
 
     let mut metadata = load_setup_metadata().await;
 
