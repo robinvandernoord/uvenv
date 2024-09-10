@@ -10,7 +10,7 @@ use crate::commands::self_update::{find_python, get_package_versions_pip};
 use crate::helpers::{flatten_option_ref, PathToString};
 use crate::pypi::get_latest_version;
 
-async fn get_latest_versions(package_names: Vec<&str>) -> BTreeMap<String, Option<Version>> {
+async fn get_latest_versions(package_names: Vec<&str>) -> BTreeMap<&str, Option<Version>> {
     let promises: Vec<_> = package_names
         .iter()
         .map(|it| get_latest_version(it, true, None))
@@ -19,7 +19,7 @@ async fn get_latest_versions(package_names: Vec<&str>) -> BTreeMap<String, Optio
 
     let mut result = BTreeMap::new();
     for (package, version) in package_names.into_iter().zip(resolved.into_iter()) {
-        result.insert(package.to_owned(), version);
+        result.insert(package, version);
     }
 
     result
