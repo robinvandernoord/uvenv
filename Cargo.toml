@@ -67,7 +67,7 @@ reqwest-middleware = { git = "https://github.com/astral-sh/reqwest-middleware", 
 [lints.clippy]
 # categories:
 correctness = { level = "deny", priority = 1 }
-suspicious = { level = "deny", priority = 1 }
+suspicious = { level = "deny", priority = -1 }
 complexity = { level = "warn", priority = -1 }
 perf = { level = "warn", priority = -1 }
 style = { level = "warn", priority = -1 }
@@ -88,6 +88,8 @@ fn_params_excessive_bools = "allow" # Clap args can just get lot of bools
 cast_possible_wrap = "allow" #  the numbers in this program won't be very large so it's okay
 cast_possible_truncation = "allow" # the numbers in this program won't be very large so it's okay
 multiple_crate_versions = "allow" # some dependencies make this happen
+
+blanket_clippy_restriction_lints = "allow" # we'll disable everything we don't want below:
 single_call_fn = "allow" # # not everything should be one big function
 print_stdout = "allow" # it's a cli tool, printing is fine
 print_stderr = "allow" # eprintln is nice even for prd
@@ -104,3 +106,4 @@ expect_used = "allow" # expect is only used when absolutely sure panic will not 
 let_underscore_must_use = "allow" # doing `let _` already says I explicitly don't care about the result!
 let_underscore_untyped = "allow" # doing `let _` already says I explicitly don't care about the result!
 non_ascii_literal = "allow" # unicode is king
+mod_module_files = "allow" # grouping mods like tests and 'commands' is useful

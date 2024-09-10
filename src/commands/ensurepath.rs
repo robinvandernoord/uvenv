@@ -2,6 +2,7 @@ use anyhow::bail;
 use std::path::PathBuf;
 
 use chrono::Local;
+use core::fmt::Write;
 use owo_colors::OwoColorize;
 use tokio::{fs::OpenOptions, io::AsyncWriteExt};
 
@@ -16,15 +17,15 @@ pub fn now() -> String {
 
     match dt.to_string().split_once('.') {
         None => String::new(),
-        Some((datetime, _)) => datetime.to_string(),
+        Some((datetime, _)) => datetime.to_owned(),
     }
 }
 
 pub async fn append(
-    file: &PathBuf,
+    file_path: &PathBuf,
     text: &str,
 ) -> anyhow::Result<()> {
-    let mut file = OpenOptions::new().append(true).open(file).await?;
+    let mut file = OpenOptions::new().append(true).open(file_path).await?;
 
     file.write_all(text.as_bytes()).await?;
 
@@ -35,19 +36,13 @@ pub async fn add_to_bashrc(
     text: &str,
     with_comment: bool,
 ) -> anyhow::Result<()> {
-    /*    with (Path.home() / ".bashrc").resolve().open("a") as f:
-           now = str(datetime.now()).split(".")[0]
-           final_text = "\n"
-           final_text += f"# Added by `uvenv` at {now}\n" if with_comment else ""
-           final_text += text + "\n"
-           f.write(final_text)
-    */
     let path = get_home_dir().join(".bashrc");
 
     let now = now();
     let mut final_text = String::from("\n");
     if with_comment {
-        final_text.push_str(&format!("# Added by `uvenv` at {now}\n"));
+        // final_text.push_str(&format!("# Added by `uvenv` at {now}\n"));
+        writeln!(final_text, "# Added by `uvenv` at {now}")?;
     }
 
     final_text.push_str(text);

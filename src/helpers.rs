@@ -45,28 +45,28 @@ impl<S: Into<String>> StringExt for S {
     }
 }
 
-pub trait PathAsStr<'a> {
-    fn as_str(&'a self) -> &'a str;
+pub trait PathAsStr<'path> {
+    fn as_str(&'path self) -> &'path str;
 }
 
-impl<'a> PathAsStr<'a> for PathBuf {
-    fn as_str(&'a self) -> &'a str {
+impl<'path> PathAsStr<'path> for PathBuf {
+    fn as_str(&'path self) -> &'path str {
         self.to_str().unwrap_or_default()
     }
 }
 
-impl<'a> PathAsStr<'a> for Path {
-    fn as_str(&'a self) -> &'a str {
+impl<'path> PathAsStr<'path> for Path {
+    fn as_str(&'path self) -> &'path str {
         self.to_str().unwrap_or_default()
     }
 }
 
-pub trait PathToString<'a>: PathAsStr<'a> {
+pub trait PathToString<'path>: PathAsStr<'path> {
     fn to_string(self) -> String;
 }
 
 /// `PathToString` can't be implemented for Path because sizes need to be known at comptime
-impl<'a> PathToString<'a> for PathBuf {
+impl<'path> PathToString<'path> for PathBuf {
     fn to_string(self) -> String {
         self.into_os_string().into_string().unwrap_or_default()
     }

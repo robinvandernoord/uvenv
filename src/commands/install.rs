@@ -7,10 +7,10 @@ use crate::symlinks::{create_symlink, find_symlinks};
 use crate::uv::{uv, uv_get_installed_version, ExtractInfo, Helpers};
 use crate::venv::{activate_venv, create_venv, remove_venv};
 
+use core::fmt::Display;
 use owo_colors::OwoColorize;
 use pep508_rs::Requirement;
 use std::collections::BTreeMap;
-use std::fmt::Display;
 
 use anyhow::{bail, Context};
 use std::path::{Path, PathBuf};
@@ -147,10 +147,10 @@ pub async fn install_package<S: AsRef<str> + Display>(
     let venv_path = ensure_venv(maybe_venv, &requirement, python, force).await?;
     let uv_venv = activate_venv(&venv_path).await?;
 
-    if let Err(e) = _install_package(install_spec, inject, no_cache, force, editable).await {
+    if let Err(err) = _install_package(install_spec, inject, no_cache, force, editable).await {
         let _ = remove_venv(&venv_path).await;
 
-        return Err(e);
+        return Err(err);
     }
 
     let requirement_name = requirement.name.to_string();

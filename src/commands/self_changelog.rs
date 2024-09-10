@@ -15,9 +15,9 @@ fn parse_changelog(markdown: &str) -> Changelogs {
     let mut current_version = "";
     let mut current_category = "";
 
-    let version_re = Regex::new(r"^## v?(.+)").expect("Invalid regex for version");
-    let category_re = Regex::new(r"^### (.+)").expect("Invalid regex for category");
-    let feature_re = Regex::new(r"^[*-] (.+)").expect("Invalid regex for feature");
+    let version_re = Regex::new("^## v?(.+)").expect("Invalid regex for version");
+    let category_re = Regex::new("^### (.+)").expect("Invalid regex for category");
+    let feature_re = Regex::new("^[*-] (.+)").expect("Invalid regex for feature");
 
     for line in markdown.lines() {
         if line.starts_with("# Changelog") {
@@ -25,25 +25,31 @@ fn parse_changelog(markdown: &str) -> Changelogs {
         }
 
         if let Some(version_caps) = version_re.captures(line) {
-            current_version = version_caps.get(1).map_or("", |m| m.as_str());
-            changelog.entry(current_version.to_string()).or_default();
+            current_version = version_caps
+                .get(1)
+                .map_or("", |version_match| version_match.as_str());
+            changelog.entry(current_version.to_owned()).or_default();
             current_category = ""; // Reset current category for a new version
             continue;
         }
 
         if let Some(category_caps) = category_re.captures(line) {
-            current_category = category_caps.get(1).map_or("", |m| m.as_str());
+            current_category = category_caps
+                .get(1)
+                .map_or("", |cat_match| cat_match.as_str());
             if let Some(map) = changelog.get_mut(current_version) {
-                map.entry(current_category.to_string()).or_default();
+                map.entry(current_category.to_owned()).or_default();
             }
             continue;
         }
 
         if let Some(feature_caps) = feature_re.captures(line) {
-            let features = feature_caps.get(1).map_or("", |m| m.as_str());
+            let features = feature_caps
+                .get(1)
+                .map_or("", |feat_match| feat_match.as_str());
             if let Some(map) = changelog.get_mut(current_version) {
                 if let Some(vec) = map.get_mut(current_category) {
-                    vec.push(features.to_string());
+                    vec.push(features.to_owned());
                 }
             }
         }
@@ -52,8 +58,7 @@ fn parse_changelog(markdown: &str) -> Changelogs {
     changelog
 }
 async fn _get_changelog() -> reqwest::Result<String> {
-    let resp = reqwest::get(CHANGELOG_URL).await?;
-    let resp = resp.error_for_status()?;
+    let resp = reqwest::get(CHANGELOG_URL).await?.error_for_status()?;
 
     let body = resp.text().await?;
 
@@ -61,7 +66,7 @@ async fn _get_changelog() -> reqwest::Result<String> {
 }
 
 pub async fn get_changelog() -> anyhow::Result<String> {
-    _get_changelog().await.map_err(|e| anyhow!(e)) // reqwest to anyhow
+    _get_changelog().await.map_err(|err| anyhow!(err)) // reqwest to anyhow
 }
 
 fn color(category: &str) -> String {
@@ -115,6 +120,6 @@ impl Process for SelfChangelogOptions {
     async fn process(self) -> anyhow::Result<i32> {
         changelog()
             .await
-            .with_context(|| "Something went wrong while loading the changelog;".to_string())
+            .with_context(|| "Something went wrong while loading the changelog;")
     }
 }

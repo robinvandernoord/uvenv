@@ -8,14 +8,14 @@ use crate::commands::list::list_packages;
 use crate::metadata::LoadMetadataConfig;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
-struct Issues<'a> {
+struct Issues<'metadata> {
     #[serde(borrow)]
-    outdated: Vec<&'a str>,
+    outdated: Vec<&'metadata str>,
     #[serde(borrow)]
-    scripts: BTreeMap<&'a str, Vec<String>>,
+    scripts: BTreeMap<&'metadata str, Vec<String>>,
 }
 
-impl<'a> Issues<'a> {
+impl<'metadata> Issues<'metadata> {
     pub const fn new() -> Self {
         Self {
             outdated: Vec::new(),
@@ -23,9 +23,11 @@ impl<'a> Issues<'a> {
         }
     }
 
+    #[allow(clippy::as_conversions)]
     pub fn count_outdated(&self) -> i32 {
         self.outdated.len() as i32
     }
+    #[allow(clippy::as_conversions)]
     pub fn count_scripts(&self) -> i32 {
         self.scripts
             .values()

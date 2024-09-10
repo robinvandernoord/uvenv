@@ -1,8 +1,9 @@
+use core::future::Future;
+use core::iter::Cycle;
+use core::slice::Iter;
+use core::time::Duration;
 use scopeguard::defer;
-use std::future::Future;
 use std::io::{self, Write};
-use std::iter::Cycle;
-use std::time::Duration;
 use tokio::task;
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Hash, Default)]
@@ -28,7 +29,7 @@ pub struct AnimationSettings {
 }
 
 impl AnimationSettings {
-    pub fn get_spinner_chars(&self) -> Cycle<std::slice::Iter<char>> {
+    pub fn get_spinner_chars(&self) -> Cycle<Iter<char>> {
         match self.style {
             AnimationStyle::Classic => ['|', '/', '-', '\\'].iter(),
             AnimationStyle::Modern => ['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'].iter(),

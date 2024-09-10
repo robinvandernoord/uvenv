@@ -87,8 +87,6 @@ pub async fn setup_environ_from_requirement(
 }
 
 /// remove a venv directory
-
-// absolute path to make clear it's tokio fs and not std
 pub async fn remove_venv(venv: &PathBuf) -> anyhow::Result<()> {
     Ok(
         // ? + Ok for anyhow casting

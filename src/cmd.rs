@@ -22,11 +22,8 @@ pub async fn find_sibling(name: &str) -> Option<PathBuf> {
 
     let binary = parent.join(name);
 
-    if binary.exists() {
-        Some(binary)
-    } else {
-        None
-    }
+    // .then(|| binary) is the same:
+    binary.exists().then_some(binary) // else None
 }
 
 pub async fn run_print_output<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
@@ -46,14 +43,14 @@ pub async fn run_get_output<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
     command: S1,
     args: &[S2],
 ) -> anyhow::Result<String> {
-    let result = Command::new(command).args(args).output().await;
+    let command_result = Command::new(command).args(args).output().await;
 
-    match result {
+    match command_result {
         Ok(result) => match result.status.code() {
             Some(0) => Ok(String::from_utf8(result.stdout).unwrap_or_default()),
             Some(_) | None => Err(anyhow!(String::from_utf8(result.stderr).unwrap_or_default())),
         },
-        Err(result) => Err(result)?,
+        Err(result_err) => Err(result_err.into()),
     }
 }
 
@@ -62,10 +59,10 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
     args: &[S2],
     err_prefix: Option<String>,
 ) -> anyhow::Result<bool> {
-    let result = Command::new(script).args(args).output().await;
+    let command_result = Command::new(script).args(args).output().await;
 
     #[allow(clippy::option_if_let_else)]
-    match result {
+    match command_result {
         Ok(result) => match result.status.code() {
             Some(0) => Ok(true),
             Some(_) | None => {
@@ -76,9 +73,9 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
                 }
             },
         },
-        Err(result) => match err_prefix {
-            Some(prefix) => Err(anyhow!("{prefix} | {}", result.to_string())),
-            None => Err(result)?,
+        Err(result_err) => match err_prefix {
+            Some(prefix) => Err(anyhow!("{prefix} | {}", result_err.to_string())),
+            None => Err(result_err.into()),
         },
     }
 }

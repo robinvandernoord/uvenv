@@ -13,6 +13,7 @@ use crate::pip::parse_requirement;
 use crate::symlinks::find_symlinks;
 use crate::uv::uv_get_installed_version;
 use crate::venv::{activate_venv, create_venv, remove_venv};
+use core::fmt::Write;
 
 async fn _find_executable(
     requirement: &Requirement,
@@ -29,7 +30,7 @@ async fn _find_executable(
         },
         1 => Ok(symlinks
             .pop()
-            .expect("Popping should alwyas work if len == 1!")),
+            .expect("Popping should always work if len == 1!")),
         _ => {
             // too many choices, user should provide --binary <something>
             let mut related = String::new();
@@ -41,7 +42,8 @@ async fn _find_executable(
                 }
 
                 let code = format!("uvenv run {package_spec} --binary {option} ...");
-                related.push_str(&format!("\t- {} | `{}` \n", option.green(), code.blue()));
+                // related.push_str(&format!("\t- {} | `{}` \n", option.green(), code.blue()));
+                writeln!(related, "\t- {} | `{}` ", option.green(), code.blue())?;
             }
 
             bail!("'{}' executable not found for install spec '{}'.\nMultiple related scripts were found:\n{}",

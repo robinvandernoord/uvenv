@@ -303,6 +303,11 @@ impl Metadata {
         }
     }
 
+    #[allow(clippy::use_debug)]
+    pub fn format_debug(&self) -> String {
+        format!("{:#?}", &self)
+    }
+
     pub fn format_short(&self) -> String {
         format!("- {} {}", self.name, self.format_installed_version())
     }
@@ -433,9 +438,9 @@ fn add_header(buf: &mut Vec<u8>) {
 ///
 ///       Ok(metadata)
 ///     }
-pub async fn load_generic_msgpack<'a, T: serde::Deserialize<'a>>(
+pub async fn load_generic_msgpack<'buf, T: serde::Deserialize<'buf>>(
     filename: &Path,
-    buf: &'a mut Vec<u8>,
+    buf: &'buf mut Vec<u8>,
 ) -> anyhow::Result<T> {
     // Open the msgpack file
     let mut file = File::open(filename).await?;

@@ -21,11 +21,11 @@ fn extract_version(
     };
 
     // for version in re.captures_iter(freeze_output) {
-    if let Some(version) = re.captures_iter(freeze_output).next() {
-        let (_, [_, version]) = version.extract();
+    if let Some(version_cap) = re.captures_iter(freeze_output).next() {
+        let (_, [_, version]) = version_cap.extract();
         // group 1 is {package}==
         // group 2 is the version (or path/uri)
-        return Some(version.to_string());
+        return Some(version.to_owned());
     }
 
     None
@@ -42,7 +42,9 @@ pub async fn get_package_versions_uv<S: AsRef<str>>(
 
     packages
         .iter()
-        .map(|k| extract_version(&output, k.as_ref()).unwrap_or_else(|| default.to_string()))
+        .map(|pkg_name| {
+            extract_version(&output, pkg_name.as_ref()).unwrap_or_else(|| default.to_owned())
+        })
         .collect()
 }
 
@@ -55,7 +57,9 @@ pub async fn get_package_versions_pip<S: AsRef<str>>(
 
     packages
         .iter()
-        .map(|k| extract_version(&output, k.as_ref()).unwrap_or_else(|| default.to_string()))
+        .map(|pkg_name| {
+            extract_version(&output, pkg_name.as_ref()).unwrap_or_else(|| default.to_owned())
+        })
         .collect()
 }
 

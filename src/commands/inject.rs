@@ -7,8 +7,8 @@ use crate::{
     venv::setup_environ_from_requirement,
 };
 use anyhow::Context;
+use core::fmt::Display;
 use owo_colors::OwoColorize;
-use std::fmt::Display;
 
 pub async fn inject_package<S: AsRef<str> + Display>(
     venv_spec: &str,
@@ -25,12 +25,12 @@ pub async fn inject_package<S: AsRef<str> + Display>(
     }
 
     // &[&str] -> Vec<&str>
-    let to_inject_specs: Vec<&str> = to_inject_specs.iter().map(AsRef::as_ref).collect();
-    args.extend(&to_inject_specs);
+    let to_inject_specs_vec: Vec<&str> = to_inject_specs.iter().map(AsRef::as_ref).collect();
+    args.extend(&to_inject_specs_vec);
 
     let promise = uv(&args);
 
-    let to_inject_str = &to_inject_specs.join(", ");
+    let to_inject_str = &to_inject_specs_vec.join(", ");
     show_loading_indicator(
         promise,
         format!("injecting {} into {}", &to_inject_str, &metadata.name),
@@ -41,7 +41,7 @@ pub async fn inject_package<S: AsRef<str> + Display>(
     metadata
         .injected
         // Vec<&str> -> Vec<String>
-        .extend(to_inject_specs.iter().map(ToString::to_string));
+        .extend(to_inject_specs_vec.iter().map(ToString::to_string));
 
     metadata.save(&environ.to_path_buf()).await?;
 

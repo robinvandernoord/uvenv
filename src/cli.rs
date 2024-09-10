@@ -394,13 +394,13 @@ pub struct SelfUpdateOptions {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
-pub struct SelfChangelogOptions {}
+pub struct SelfChangelogOptions;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
-pub struct SelfMigrateOptions {}
+pub struct SelfMigrateOptions;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
-pub struct SelfVersionOptions {}
+pub struct SelfVersionOptions;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Subcommand)]
 pub enum SelfCommands {

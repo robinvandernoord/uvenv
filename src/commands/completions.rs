@@ -28,8 +28,8 @@ pub async fn completions(install: bool) -> anyhow::Result<i32> {
 
 impl Process for CompletionsOptions {
     async fn process(self) -> anyhow::Result<i32> {
-        completions(self.install).await.with_context(|| {
-            "Something went wrong trying to generate or install completions;".to_string()
-        })
+        completions(self.install)
+            .await
+            .with_context(|| "Something went wrong trying to generate or install completions;")
     }
 }
