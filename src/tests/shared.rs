@@ -1,5 +1,5 @@
 use crate::metadata::get_home_dir;
-use std::error::Error;
+use core::error::Error;
 use std::path::Path;
 
 pub type TestResult = Result<(), Box<dyn Error>>;

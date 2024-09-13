@@ -143,7 +143,10 @@ pub async fn self_update_via_pip(
 
 /// currently dead but kept here for documentation
 /// (+ so functions like `uv_freeze` don't cound as dead code, it could be useful later.)
-#[allow(dead_code)]
+#[expect(
+    dead_code,
+    reason = "It took so much work to make this kind of work I don't want to remove it now."
+)]
 pub async fn self_update_via_uv(
     with_uv: bool,
     with_patchelf: bool,

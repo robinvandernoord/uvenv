@@ -8,7 +8,11 @@ use crate::{
     venv::setup_environ_from_requirement,
 };
 
-#[allow(clippy::cast_lossless, clippy::as_conversions)]
+#[expect(
+    clippy::cast_lossless,
+    clippy::as_conversions,
+    reason = "The numbers wont be that big."
+)]
 pub fn process_subprocess<S: AsRef<OsStr>>(
     exec_path: &Path,
     args: &[S],

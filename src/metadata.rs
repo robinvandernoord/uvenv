@@ -27,7 +27,7 @@ const INDENT: &str = "    ";
 const MAGIC_HEADER: &[u8] = &[0x55, 0x56, 0x58, 0x01, 0x32, 0x04, 0x00]; // hex, 7 bytes
 
 pub fn get_home_dir() -> PathBuf {
-    #[allow(clippy::dbg_macro)]
+    #[expect(clippy::dbg_macro, reason="Testing purposes")]
     if cfg!(test) {
         let test_dir = std::env::temp_dir().join("uvenv-test");
         // fixme:
@@ -133,7 +133,7 @@ impl Metadata {
         }
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code, reason="Useful variant of `installed_version_parsed`")]
     pub fn requested_version_parsed(&self) -> Version {
         Version::from_str(&self.requested_version).unwrap_or_else(|_| version_0())
     }
@@ -303,7 +303,7 @@ impl Metadata {
         }
     }
 
-    #[allow(clippy::use_debug)]
+    // #[expect(clippy::use_debug, reason = "Print the struct on --verbose")]
     pub fn format_debug(&self) -> String {
         format!("{:#?}", &self)
     }
@@ -312,7 +312,7 @@ impl Metadata {
         format!("- {} {}", self.name, self.format_installed_version())
     }
 
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "Useful variant of `vec_injected`")]
     pub fn vec_extras(&self) -> Vec<&str> {
         self.extras.iter().map(AsRef::as_ref).collect()
     }
@@ -455,7 +455,7 @@ pub async fn load_generic_msgpack<'buf, T: serde::Deserialize<'buf>>(
     Ok(metadata)
 }
 
-#[allow(clippy::struct_excessive_bools)]
+#[expect(clippy::struct_excessive_bools, reason = "...")]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct LoadMetadataConfig {
     pub recheck_scripts: bool,
@@ -465,7 +465,7 @@ pub struct LoadMetadataConfig {
 }
 
 impl LoadMetadataConfig {
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "Useful variant in addition to `none()`")]
     pub const fn all() -> Self {
         Self {
             recheck_scripts: true,

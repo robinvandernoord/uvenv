@@ -23,7 +23,7 @@ fn test_0_custom_home_dir() {
     assert!(shared::is_empty(&home_dir_path), "Home should be empty!");
 }
 
-#[allow(clippy::panic_in_result_fn)]
+#[expect(clippy::panic_in_result_fn, reason="This is a test file.")]
 fn test_1_write_file() -> shared::TestResult {
     let home = get_home_dir();
     let file_path = home.join("assert_write_file");

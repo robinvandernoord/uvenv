@@ -27,7 +27,6 @@ where
     archived.deserialize(&mut SharedDeserializeMap::new()).ok()
 }
 
-#[allow(dead_code)]
 fn deserialize_metadata(datum: &Archived<SimpleMetadatum>) -> Option<SimpleMetadatum> {
     // for some reason, pycharm doesn't understand this type (but it compiles)
     let full: Option<SimpleMetadatum> = rkyv_deserialize(datum);
@@ -114,7 +113,10 @@ pub async fn get_latest_version_for_packagename(
 
     versions.last().cloned()
 }
-#[allow(dead_code)]
+#[expect(
+    dead_code,
+    reason = "More generic than the used code above (which only looks at version info)"
+)]
 pub async fn get_pypi_data_for_packagename(package_name: &PackageName) -> Option<SimpleMetadatum> {
     let client = get_client();
 

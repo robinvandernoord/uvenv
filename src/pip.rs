@@ -10,7 +10,7 @@ use std::path::Path;
 use tempfile::NamedTempFile;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
-#[allow(clippy::partial_pub_fields)]
+#[expect(clippy::partial_pub_fields, reason="Only the url should be public.")]
 pub struct PipDownloadInfo {
     pub url: String,
     dir_info: serde_json::Value, // Since dir_info is an empty object, we can use serde_json::Value here

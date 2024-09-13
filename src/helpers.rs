@@ -2,11 +2,11 @@ use core::any::type_name;
 use std::path::{Path, PathBuf};
 
 pub trait ResultToString<T, E> {
-    #[allow(dead_code)]
+    #[expect(dead_code, reason="Could still be useful sometimes")]
     fn map_err_to_string(self) -> Result<T, String>;
 }
 
-impl<T, E: std::error::Error> ResultToString<T, E> for Result<T, E> {
+impl<T, E: core::error::Error> ResultToString<T, E> for Result<T, E> {
     fn map_err_to_string(self) -> Result<T, String> {
         self.map_err(|err| err.to_string())
     }
@@ -17,7 +17,7 @@ pub fn fmt_error(err: &anyhow::Error) -> String {
 }
 
 /// Source: <https://users.rust-lang.org/t/how-to-print-the-type-of-a-variable/101947/2>
-#[allow(dead_code, clippy::use_debug)]
+#[expect(dead_code, clippy::use_debug, reason="Debugging reasons.")]
 pub fn print_type<T>(_: &T) {
     println!("{:?}", type_name::<T>());
 }

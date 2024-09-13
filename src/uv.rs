@@ -224,7 +224,7 @@ pub fn uv_freeze_environ(python: &PythonEnvironment) -> anyhow::Result<String> {
     Ok(result)
 }
 
-#[allow(dead_code)]
+#[expect(dead_code, reason = "Required for `uv_freeze` (but that function is currently unused)")]
 #[derive(Debug, Clone)]
 pub enum PythonSpecifier<'src> {
     Path(&'src Path),

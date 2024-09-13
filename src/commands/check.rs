@@ -23,11 +23,11 @@ impl<'metadata> Issues<'metadata> {
         }
     }
 
-    #[allow(clippy::as_conversions)]
+    #[expect(clippy::as_conversions, reason = "The number won't be that big")]
     pub fn count_outdated(&self) -> i32 {
         self.outdated.len() as i32
     }
-    #[allow(clippy::as_conversions)]
+    #[expect(clippy::as_conversions, reason = "The number won't be that big")]
     pub fn count_scripts(&self) -> i32 {
         self.scripts
             .values()
