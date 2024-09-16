@@ -2,13 +2,23 @@
 
 <!--next-version-placeholder-->
 
+## 3.4.0 (2024-09-16)
+
+### Feature
+
+* `uvenv self link` to create a symlink to `~/.local/bin/uvenv` - which is useful when you installed `uvenv` in a
+  separate virtualenv.
+
+### Docs
+
+* Described multiple ways of installing `uvenv` in Ubuntu 24.04 (for `externally-managed-environment` errors)
+
 ## 3.3.6 (2024-09-16)
 
 ### Fix
 
 * improved error messages for `ensurepath`
 * bump dependencies (uv to 0.4.10)
-
 
 ## 3.3.5 (2024-09-06)
 
