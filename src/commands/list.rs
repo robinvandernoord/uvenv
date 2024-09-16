@@ -122,11 +122,11 @@ impl Process for ListOptions {
         for metadata in items {
             if self.verbose {
                 // println!("{}", dbg_pls::color(&metadata));
-                println!("{}", &metadata.format_debug());
+                print!("{}", &metadata.format_debug());
             } else if self.short {
-                println!("{}", &metadata.format_short());
+                print!("{}", &metadata.format_short());
             } else {
-                println!("{}", &metadata.format_human()?);
+                print!("{}", &metadata.format_human()?);
             }
         }
 

@@ -1,4 +1,4 @@
-use anyhow::bail;
+use anyhow::Context;
 use std::path::PathBuf;
 
 use chrono::Local;
@@ -48,28 +48,29 @@ pub async fn add_to_bashrc(
     final_text.push_str(text);
     final_text.push('\n');
 
-    append(&path, &final_text).await
+    append(&path, &final_text).await.with_context(|| "Trying to append text to your .bashrc")
 }
 
-pub async fn ensure_path(force: bool) -> anyhow::Result<()> {
+pub async fn ensure_path(force: bool) -> anyhow::Result<i32> {
     let bin_path = ensure_bin_dir().await;
     let bin_dir = bin_path.as_str();
 
     let path = std::env::var("PATH").unwrap_or_default();
-
-    // let parts: Vec<&str> = path.split(':').collect();
-    // if parts.contains(&bin_dir) && !force {
+    
     if !force && path.split(':').any(|x| x == bin_dir) {
-        bail!("{}: {} is already added to your path. Use '--force' to add it to your .bashrc file anyway.",
+        eprintln!("{}: {} is already added to your path. Use '--force' to add it to your .bashrc file anyway.",
                 "Warning".yellow(),
                 bin_dir.green()
         );
+        // don't bail/Err because it's just a warning.
+        // still exit with code > 0
+        return Ok(2); // missing -f
     }
 
     add_to_bashrc(&format!("export PATH=\"$PATH:{bin_dir}\""), true).await?;
 
     println!("Added '{}' to ~/.bashrc", bin_dir.green());
-    Ok(())
+    Ok(0)
 }
 
 pub async fn ensure_path_generate() -> String {
@@ -81,8 +82,7 @@ pub async fn ensure_path_generate() -> String {
 impl Process for EnsurepathOptions {
     async fn process(self) -> anyhow::Result<i32> {
         if let Err(msg) = ensure_path(self.force).await {
-            Err(msg)
-            // .with_context(|| format!("Something went wrong trying to ensure a proper PATH;"))
+            Err(msg).with_context(|| "Something went wrong trying to ensure a proper PATH;")
         } else {
             Ok(0)
         }
