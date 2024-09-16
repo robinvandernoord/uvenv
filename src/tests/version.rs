@@ -1,6 +1,6 @@
-#[expect(unused_imports, reason="This is a test file.")]
+#[expect(unused_imports, reason = "This is a test file.")]
 use crate::commands::self_version::_compare_versions;
-#[expect(unused_imports, reason="This is a test file.")]
+#[expect(unused_imports, reason = "This is a test file.")]
 use crate::tests::shared::TestResult;
 
 #[test]

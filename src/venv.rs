@@ -64,7 +64,10 @@ pub async fn activate_venv(venv: &Path) -> anyhow::Result<PythonEnvironment> {
 }
 
 /// Find the path to an existing venv for an install spec str.
-#[expect(dead_code, reason = "It can be useful to find a venv for an install spec later.")]
+#[expect(
+    dead_code,
+    reason = "It can be useful to find a venv for an install spec later."
+)]
 pub async fn find_venv(install_spec: &str) -> Option<PathBuf> {
     let (requirement, _) = parse_requirement(install_spec).await.ok()?;
     let requirement_name = requirement.name.to_string();

@@ -10,7 +10,7 @@ use tokio::task;
 pub enum AnimationStyle {
     #[default]
     Modern,
-    #[expect(dead_code, reason="Nice to have")]
+    #[expect(dead_code, reason = "Nice to have")]
     Classic,
 }
 
@@ -18,7 +18,7 @@ pub enum AnimationStyle {
 pub enum AnimationOrder {
     #[default]
     Before,
-    #[expect(dead_code, reason="Nice to have")]
+    #[expect(dead_code, reason = "Nice to have")]
     After,
 }
 

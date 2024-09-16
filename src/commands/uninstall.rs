@@ -18,7 +18,7 @@ pub async fn uninstall_package(
     let venv_dir = venv_path(&requirement_name);
 
     if !venv_dir.exists() {
-        #[expect(clippy::redundant_else, reason="Clarity")]
+        #[expect(clippy::redundant_else, reason = "Clarity")]
         if force {
             remove_symlink(&requirement_name).await?;
             bail!(

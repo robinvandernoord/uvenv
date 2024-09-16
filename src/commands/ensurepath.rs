@@ -48,7 +48,9 @@ pub async fn add_to_bashrc(
     final_text.push_str(text);
     final_text.push('\n');
 
-    append(&path, &final_text).await.with_context(|| "Trying to append text to your .bashrc")
+    append(&path, &final_text)
+        .await
+        .with_context(|| "Trying to append text to your .bashrc")
 }
 
 pub async fn ensure_path(force: bool) -> anyhow::Result<i32> {
@@ -56,7 +58,7 @@ pub async fn ensure_path(force: bool) -> anyhow::Result<i32> {
     let bin_dir = bin_path.as_str();
 
     let path = std::env::var("PATH").unwrap_or_default();
-    
+
     if !force && path.split(':').any(|x| x == bin_dir) {
         eprintln!("{}: {} is already added to your path. Use '--force' to add it to your .bashrc file anyway.",
                 "Warning".yellow(),

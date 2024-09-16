@@ -27,7 +27,7 @@ const INDENT: &str = "    ";
 const MAGIC_HEADER: &[u8] = &[0x55, 0x56, 0x58, 0x01, 0x32, 0x04, 0x00]; // hex, 7 bytes
 
 pub fn get_home_dir() -> PathBuf {
-    #[expect(clippy::dbg_macro, reason="Testing purposes")]
+    #[expect(clippy::dbg_macro, reason = "Testing purposes")]
     if cfg!(test) {
         let test_dir = std::env::temp_dir().join("uvenv-test");
         // fixme:
@@ -133,7 +133,7 @@ impl Metadata {
         }
     }
 
-    #[expect(dead_code, reason="Useful variant of `installed_version_parsed`")]
+    #[expect(dead_code, reason = "Useful variant of `installed_version_parsed`")]
     pub fn requested_version_parsed(&self) -> Version {
         Version::from_str(&self.requested_version).unwrap_or_else(|_| version_0())
     }
