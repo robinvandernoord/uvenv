@@ -66,13 +66,13 @@ pub async fn ensure_path(force: bool) -> anyhow::Result<i32> {
         );
         // don't bail/Err because it's just a warning.
         // still exit with code > 0
-        return Ok(2); // missing -f
+        Ok(2) // missing -f
+    } else {
+        add_to_bashrc(&format!("export PATH=\"$PATH:{bin_dir}\""), true).await?;
+
+        println!("Added '{}' to ~/.bashrc", bin_dir.green());
+        Ok(0)
     }
-
-    add_to_bashrc(&format!("export PATH=\"$PATH:{bin_dir}\""), true).await?;
-
-    println!("Added '{}' to ~/.bashrc", bin_dir.green());
-    Ok(0)
 }
 
 pub async fn ensure_path_generate() -> String {

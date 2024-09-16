@@ -14,6 +14,7 @@ pub mod runpip;
 pub mod runpython;
 pub mod runuv;
 pub mod self_changelog;
+pub mod self_link;
 pub mod self_migrate;
 pub mod self_update;
 pub mod self_version;

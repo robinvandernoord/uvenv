@@ -7,6 +7,7 @@ use crate::cmd::run_if_bash_else_warn;
 use crate::commands::activate::install_activate;
 use crate::commands::completions::completions;
 use crate::commands::ensurepath::ensure_path;
+use crate::commands::self_link::self_link;
 use crate::helpers::fmt_error;
 use crate::metadata::{get_work_dir, load_generic_msgpack, store_generic_msgpack};
 
@@ -98,6 +99,9 @@ pub async fn setup_for_bash(
         any_warnings = true;
         eprintln!("{}", fmt_error(&msg));
     }
+
+    // ignore result/output:
+    let _ = self_link(false, true).await;
 
     println!("Setup finished, you may want to run `{}` now in order to apply these changes to your shell.", "exec bash".green());
     // bool to int

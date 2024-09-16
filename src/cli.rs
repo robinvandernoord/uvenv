@@ -384,8 +384,15 @@ impl Process for Commands {
         }
     }
 }
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
+pub struct SelfLinkOptions {
+    #[clap(long, help = "Overwrite current symlink?")]
+    pub force: bool,
+    #[clap(long, help = "Don't produce output")]
+    pub quiet: bool,
+}
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct SelfUpdateOptions {
     #[clap(long, help = "Update without also updating uv")]
     pub without_uv: bool,
@@ -407,6 +414,9 @@ pub enum SelfCommands {
     #[clap(about = "Update the current installation of uvenv (and optionally uv).")]
     Update(SelfUpdateOptions),
 
+    #[clap(about = "Create a symlink for the current location of `uvenv` to ~/.local/bin/uvenv.")]
+    Link(SelfLinkOptions),
+
     #[clap(about = "Show the uvenv changelog")]
     Changelog(SelfChangelogOptions),
 
@@ -421,6 +431,7 @@ impl Process for SelfCommands {
     async fn process(self) -> anyhow::Result<i32> {
         match self {
             Self::Update(opts) => opts.process().await,
+            Self::Link(opts) => opts.process().await,
             Self::Changelog(opts) => opts.process().await,
             Self::Migrate(opts) => opts.process().await,
             Self::Version(opts) => opts.process().await,
