@@ -1,14 +1,12 @@
 # Installing uvenv on Ubuntu 24.04
 
-Explore three different methods to install `uvenv` on Ubuntu 24.04, each with its own approach, advantages, and steps.
+Explore four different methods to install `uvenv` on Ubuntu 24.04, each with its own approach, advantages, and steps.
 
-## 1. Installing by Allowing System Package Modifications
+## 1. System Package Method
 
-You can install `uvenv` directly using `pip` with the `--break-system-packages` option. This will also install `uv` and
-`patchelf`, which typically don't interfere with system packages. Alternatively, you can set the environment variable
-`PIP_BREAK_SYSTEM_PACKAGES=1` to avoid issues with bash scripts from older Ubuntu versions such as 22.04.
+Install `uvenv` directly using `pip` with the `--break-system-packages` option.
 
-**Why Choose This Method:**
+**Advantages:**
 
 - Quick and straightforward setup without additional tools.
 
@@ -16,25 +14,24 @@ You can install `uvenv` directly using `pip` with the `--break-system-packages` 
 
 - Minor risk of package conflicts, though unlikely with `uvenv`.
 
-**How to Install:**
+**Installation Steps:**
 
 ```bash
 pip install --break-system-packages uvenv
 ```
 
-## 2. Installing with pipx
+## 2. Pipx Installation Method
 
-If you prefer managing `uvenv` in an isolated environment and you already use `pipx` (`apt install pipx`), this can also
-be a viable option. This approach keeps `uvenv` separate from your system’s Python packages.
+Use `pipx` to manage `uvenv` in an isolated environment.
 
-**Benefits:**
+**Advantages:**
 
-- Keeps `uvenv` neatly isolated.
-- Simplifies updates and removals without impacting other packages.
+- Keeps `uvenv` isolated from system packages.
+- Simplifies updates and removals.
 
-**Requirements:**
+**Prerequisites:**
 
-- `pipx` needs to be installed prior to this setup.
+- `pipx` must be installed (`apt install pipx`).
 
 **Installation Steps:**
 
@@ -42,24 +39,43 @@ be a viable option. This approach keeps `uvenv` separate from your system’s Py
 pipx install uvenv
 ```
 
-## 3. Installing Inside a Virtual Environment
+## 3. Virtual Environment Method
 
-Creating a virtual environment specifically for `uvenv` ensures full isolation from system Python packages. This method
-involves setting up a dedicated virtual environment and linking `uvenv` for easier access.
+Create a dedicated virtual environment for `uvenv`.
 
-**Ideal For:**
+**Advantages:**
 
-- Those who want complete isolation from system Python packages.
-- Users comfortable managing virtual environments.
-- If you don't want to rely on `pipx` for management of `uvenv`
+- Complete isolation from system Python packages.
+- Suitable for users comfortable with virtual environments.
 
-**Steps to Follow:**
+**Installation Steps:**
 
 ```bash
-python -m venv ~/.virtualenvs/uvenv  # Create the virtual environment
-source ~/.virtualenvs/uvenv/bin/activate  # Activate the virtual environment
-pip install uvenv  # Install uvenv within the virtual environment
-uvenv setup  # Link uvenv to ~/.local/bin and ensure it’s in PATH
-# Alternatively, for a simpler setup:
-uvenv self link  # Create a symlink at ~/.local/bin/uvenv pointing to the current uvenv binary
+python -m venv ~/.virtualenvs/uvenv
+source ~/.virtualenvs/uvenv/bin/activate
+pip install uvenv
+uvenv self link  # or `uvenv setup` for all additional features
+```
+
+## 4. Self-Managed uvenv Method
+
+Use `uvenv` to manage its own installation and updates.
+
+**Advantages:**
+
+- Streamlines `uvenv` management through its own features.
+- Simplifies long-term maintenance.
+
+**Considerations:**
+
+- Caution needed with commands like `uvenv uninstall-all`.
+
+**Installation Steps:**
+
+```bash
+python -m venv /tmp/initial-uvenv
+source /tmp/initial-uvenv/bin/activate
+pip install uvenv
+uvenv install uvenv
+uvenv ensurepath  # or uvenv setup
 ```
