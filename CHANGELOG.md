@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## 3.3.6 (2024-09-16)
+
+### Fix
+
+* improved error messages for `ensurepath`
+* bump dependencies (uv to 0.4.10)
+
+
 ## 3.3.5 (2024-09-06)
 
 ### Fix
