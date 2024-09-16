@@ -17,6 +17,9 @@ Inspired by:
    # or `uv install uvenv`, `pipx install uvenv`
     ```
 
+> Note: Ubuntu 24.04+ does not allow global installation via pip by default. 
+> See [docs/ubuntu_2404.md](./docs/ubuntu_2404.md) if you encounter `externally-managed-environment` errors.
+
 2. Optional (for bash users):
       ```bash
       uvenv setup
