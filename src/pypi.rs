@@ -3,7 +3,9 @@ use crate::uv::uv_cache;
 use pep440_rs::{Version, VersionSpecifier};
 use pep508_rs::{PackageName, Requirement};
 use pypi_types::Yanked;
-use rkyv::{de::deserializers::SharedDeserializeMap, Archive, Archived, Deserialize};
+use rkyv::{deserialize, Archive, Archived, Deserialize};
+
+use rkyv::api::high::HighDeserializer;
 use std::collections::HashSet;
 use uv_client::{
     OwnedArchive, RegistryClient, RegistryClientBuilder, SimpleMetadata, SimpleMetadatum,
@@ -21,10 +23,9 @@ pub fn get_client() -> RegistryClient {
 pub fn rkyv_deserialize<T>(archived: &Archived<T>) -> Option<T>
 where
     T: Archive,
-    // Thanks to pplx.ai for this black magic fuckery typing (chatGPT or rkyv docs didn't help):
-    T::Archived: Deserialize<T, SharedDeserializeMap>,
+    T::Archived: Deserialize<T, HighDeserializer<rkyv::rancor::Error>>,
 {
-    archived.deserialize(&mut SharedDeserializeMap::new()).ok()
+    deserialize(archived).ok()
 }
 
 fn deserialize_metadata(datum: &Archived<SimpleMetadatum>) -> Option<SimpleMetadatum> {
