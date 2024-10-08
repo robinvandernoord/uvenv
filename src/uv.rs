@@ -2,22 +2,22 @@ use crate::cmd::{find_sibling, run, run_print_output};
 use anyhow::{anyhow, bail, Context};
 use core::fmt::Write;
 use directories::ProjectDirs;
-use distribution_types::{InstalledDist, Name};
 use itertools::Itertools;
 use owo_colors::OwoColorize;
-use pep508_rs::{PackageName, Requirement};
 use std::ffi::OsStr;
 use std::path::Path;
 use std::{collections::HashSet, path::PathBuf};
 use uv_cache::Cache;
 use uv_client::{BaseClientBuilder, Connectivity};
+use uv_distribution_types::{InstalledDist, Name};
 use uv_installer::SitePackages;
+use uv_pep508::{PackageName, Requirement};
 use uv_python::{
     EnvironmentPreference, Interpreter, PythonDownloads, PythonEnvironment, PythonInstallation,
     PythonPreference, PythonRequest,
 };
 
-use pep508_rs::VersionOrUrl::VersionSpecifier;
+use uv_pep508::VersionOrUrl::VersionSpecifier;
 
 use crate::helpers::PathToString;
 

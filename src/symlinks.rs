@@ -1,7 +1,7 @@
 use anyhow::{anyhow, bail, Context};
 use std::path::Path;
 
-use pep508_rs::Requirement;
+use uv_pep508::Requirement;
 use uv_python::PythonEnvironment;
 
 use crate::helpers::PathAsStr;

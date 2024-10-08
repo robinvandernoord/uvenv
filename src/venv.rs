@@ -4,9 +4,9 @@ use crate::pip::parse_requirement;
 use crate::uv::{uv, uv_venv};
 use anyhow::{bail, Context};
 use owo_colors::OwoColorize;
-use pep508_rs::{PackageName, Requirement};
 use std::env;
 use std::path::{Path, PathBuf};
+use uv_pep508::{PackageName, Requirement};
 
 use uv_python::PythonEnvironment;
 

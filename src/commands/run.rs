@@ -1,7 +1,7 @@
 use anyhow::{bail, Context};
 use owo_colors::OwoColorize;
-use pep508_rs::Requirement;
 use std::path::{Path, PathBuf};
+use uv_pep508::Requirement;
 
 use uv_python::PythonEnvironment;
 

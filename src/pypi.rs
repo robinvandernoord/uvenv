@@ -1,9 +1,9 @@
 use crate::pip::parse_requirement;
 use crate::uv::uv_cache;
-use pep440_rs::{Version, VersionSpecifier};
-use pep508_rs::{PackageName, Requirement};
-use pypi_types::Yanked;
 use rkyv::{deserialize, Archive, Archived, Deserialize};
+use uv_pep440::{Version, VersionSpecifier};
+use uv_pep508::{PackageName, Requirement};
+use uv_pypi_types::Yanked;
 
 use rkyv::api::high::HighDeserializer;
 use std::collections::HashSet;

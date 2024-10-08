@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use futures::future;
 use owo_colors::OwoColorize;
-use pep440_rs::Version;
+use uv_pep440::Version;
 
 use crate::cli::{Process, SelfVersionOptions};
 use crate::cmd::run_get_output;

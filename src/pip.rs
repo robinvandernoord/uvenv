@@ -3,11 +3,11 @@ use crate::cmd::{run, run_get_output};
 use anyhow::bail;
 use core::cmp::Ordering;
 use core::str::FromStr;
-use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 use std::path::Path;
 use tempfile::NamedTempFile;
+use uv_pep508::Requirement;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Default, Serialize, Deserialize)]
 #[expect(clippy::partial_pub_fields, reason = "Only the url should be public.")]

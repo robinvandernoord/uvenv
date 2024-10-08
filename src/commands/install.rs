@@ -9,8 +9,8 @@ use crate::venv::{activate_venv, create_venv, remove_venv};
 
 use core::fmt::Display;
 use owo_colors::OwoColorize;
-use pep508_rs::Requirement;
 use std::collections::BTreeMap;
+use uv_pep508::Requirement;
 
 use anyhow::{bail, Context};
 use std::path::{Path, PathBuf};

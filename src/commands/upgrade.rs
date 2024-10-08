@@ -2,7 +2,7 @@ use anyhow::Context;
 use core::fmt::Write;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
-use pep508_rs::Requirement;
+use uv_pep508::Requirement;
 use uv_python::PythonEnvironment;
 
 use crate::helpers::StringExt;

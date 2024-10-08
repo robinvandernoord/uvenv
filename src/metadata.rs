@@ -7,8 +7,6 @@ use core::fmt::Write;
 use core::str::FromStr;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
-use pep440_rs::{Version, VersionSpecifier};
-use pep508_rs::Requirement;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashSet};
 use std::fs::remove_dir_all;
@@ -16,6 +14,8 @@ use std::path::{Path, PathBuf};
 use tokio::fs::{create_dir_all, File};
 use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
+use uv_pep440::{Version, VersionSpecifier};
+use uv_pep508::Requirement;
 use uv_python::PythonEnvironment;
 
 const BIN_DIR: &str = ".local/bin";
