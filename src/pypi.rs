@@ -11,11 +11,34 @@ use uv_client::{
     OwnedArchive, RegistryClient, RegistryClientBuilder, SimpleMetadata, SimpleMetadatum,
     VersionFiles,
 };
+use uv_distribution_types::{IndexCapabilities, IndexUrl};
 
-pub fn get_client() -> RegistryClient {
-    let cache = uv_cache();
+/// Shadow `RegistryClient` to hide new complexity of .simple
+struct SimplePypi(RegistryClient);
 
-    RegistryClientBuilder::new(cache).build()
+impl SimplePypi {
+    /// Use RegistryClient.simple to lookup a package on default package index
+    async fn lookup<'index>(
+        &'index self,
+        package_name: &PackageName,
+    ) -> anyhow::Result<Vec<(&'index IndexUrl, OwnedArchive<SimpleMetadata>)>> {
+        let res = self
+            .0
+            .simple(package_name, None, &IndexCapabilities::default())
+            .await?;
+
+        Ok(res)
+    }
+}
+
+impl Default for SimplePypi {
+    /// Create a (default) Registry
+    fn default() -> Self {
+        let cache = uv_cache();
+        let inner = RegistryClientBuilder::new(cache).build();
+
+        Self(inner)
+    }
 }
 
 /// usage: e.g. `let x: Option<VersionFiles> = deserialize(&metadatum.files);`
@@ -73,9 +96,9 @@ pub async fn get_versions_for_packagename(
 ) -> Vec<Version> {
     let mut versions: Vec<Version> = vec![];
 
-    let client = get_client();
+    let client = SimplePypi::default();
 
-    let data = match client.simple(package_name).await {
+    let data = match client.lookup(package_name).await {
         Err(err) => {
             eprintln!("Something went wrong: {err};");
             return versions;
@@ -119,9 +142,9 @@ pub async fn get_latest_version_for_packagename(
     reason = "More generic than the used code above (which only looks at version info)"
 )]
 pub async fn get_pypi_data_for_packagename(package_name: &PackageName) -> Option<SimpleMetadatum> {
-    let client = get_client();
+    let client = SimplePypi::default();
 
-    let data = client.simple(package_name).await.ok()?;
+    let data = client.lookup(package_name).await.ok()?;
 
     if let Some((_, metadata)) = data.iter().next_back() {
         if let Some(latest) = metadata.iter().next_back() {
