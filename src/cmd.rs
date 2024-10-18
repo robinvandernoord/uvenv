@@ -2,7 +2,7 @@ use anyhow::anyhow;
 use std::env;
 use std::ffi::OsStr;
 use std::path::PathBuf;
-use std::process::Stdio;
+use std::process::{Output, Stdio};
 
 use owo_colors::OwoColorize;
 use tokio::fs::canonicalize;
@@ -61,23 +61,27 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
 ) -> anyhow::Result<bool> {
     let command_result = Command::new(script).args(args).output().await;
 
-    #[expect(clippy::option_if_let_else, reason = "Readability")]
+    #[expect(
+        clippy::option_if_let_else,
+        reason = "map_or_else complains about moved 'err'"
+    )]
     match command_result {
-        Ok(result) => match result.status.code() {
-            Some(0) => Ok(true),
-            Some(_) | None => {
-                let err = String::from_utf8(result.stderr).unwrap_or_default();
-                match err_prefix {
-                    Some(prefix) => Err(anyhow!("{prefix} | {err}")),
-                    None => Err(anyhow!(err)),
-                }
-            },
+        Ok(Output { status, stderr, .. }) => {
+            if status.success() {
+                Ok(true)
+            } else {
+                Err(String::from_utf8(stderr).unwrap_or_default())
+            }
         },
-        Err(result_err) => match err_prefix {
-            Some(prefix) => Err(anyhow!("{prefix} | {}", result_err.to_string())),
-            None => Err(result_err.into()),
-        },
-    }
+        Err(result) => Err(result.to_string()),
+    } // if err, add prefix:
+    .map_err(|err| {
+        if let Some(prefix) = err_prefix {
+            anyhow!("{prefix} | {err}")
+        } else {
+            anyhow!(err)
+        }
+    })
 }
 
 /// Given a target shell (e.g. 'bash'), run a positive or negative callback function.
