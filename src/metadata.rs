@@ -214,6 +214,15 @@ impl Metadata {
         }
     }
 
+    /// When using uvenv's install.sh, the installation is done via bash
+    /// so the metadata msgpack is not stored. This function works as a fallback.
+    fn for_self_install() -> Self {
+        Self {
+            name: "uvenv".to_owned(),
+            ..Default::default()
+        }
+    }
+
     /// return `PythonEnvironment` (if available) for this metadata
     pub fn venv(&self) -> Option<PythonEnvironment> {
         let venv_dir = venv_path(&self.name);
@@ -314,10 +323,15 @@ impl Metadata {
                     .and_then(|fname| fname.to_str())
                     .unwrap_or_default();
 
-                Err(anyhow!(
-                    "Metadata for '{}' could not be loaded.",
-                    venv_name.red()
-                ))
+                if venv_name == "uvenv" {
+                    // special case for uvenv itself
+                    Ok(Self::for_self_install())
+                } else {
+                    Err(anyhow!(
+                        "Metadata for '{}' could not be loaded.",
+                        venv_name.red()
+                    ))
+                }
             },
             Ok,
         )
