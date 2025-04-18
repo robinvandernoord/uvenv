@@ -65,7 +65,7 @@ link_executable() {
 }
 
 get_shell() {
-  SHELL_NAME=$(ps -p $$ -o comm=)
+  SHELL_NAME=$(ps -p $$ -o comm= | sed 's/^-//')
   echo "$SHELL_NAME"
 }
 
