@@ -380,11 +380,11 @@ fn validate_version(value: &str) -> Result<String, String> {
 /// Options for the thaw command.
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct ThawOptions {
-    /// The filename of the lockfile to use. Defaults to `uvenv.lock`.
+    /// The filename of the lockfile to use..
     #[clap(
         long,
-        default_value = "uvenv.lock",
-        help = "The filename of the lockfile to use"
+        default_value = "",
+        help = "The filename of the lockfile to use (default: search in uvenv.lock, uvenv.toml, uvenv.json)"
     )]
     pub filename: String,
     /// A list of dependencies to include when thawing. Conflicts with `exclude`.

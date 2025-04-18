@@ -24,9 +24,34 @@ pub trait Thaw {
         Self: Sized + Debug + DeserializeOwned;
 }
 
+async fn search_default_files() -> std::io::Result<Vec<u8>> {
+    // 1. uvenv.lock
+    // 2. uvenv.toml
+    // 3. uvenv.json
+    let possible_files = ["uvenv.lock", "uvenv.toml", "uvenv.json"];
+
+    let mut last_err = None;
+    for filename in possible_files {
+        match tokio::fs::read(filename).await {
+            Ok(contents) => return Ok(contents),
+            Err(err) => last_err = Some(err),
+        }
+    }
+
+    Err(last_err
+        .unwrap_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "No lockfile found")))
+}
+
 impl Process for ThawOptions {
     async fn process(self) -> anyhow::Result<i32> {
-        let contents = tokio::fs::read(&self.filename).await.with_context(|| {
+        let maybe_contents = if self.filename.is_empty() {
+            // try to find file instead:
+            search_default_files().await
+        } else {
+            tokio::fs::read(&self.filename).await
+        };
+
+        let contents = maybe_contents.with_context(|| {
             format!(
                 "Failed to determine lockfile version in {}",
                 self.filename.red()
