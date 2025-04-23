@@ -46,10 +46,10 @@ Inspired by:
 uvenv
 ```
 
-Most `pipx` commands are supported, such as `install`, `upgrade` `inject`, `run`, `runpip`.
+Most `pipx` commands are supported, such as `install`, `upgrade` `inject`, `run`, `runpip`.  
 Run `uvenv` without any arguments to see all possible subcommands.
 
-### Freeze and Thaw
+### 🆕 Freeze and Thaw
 
 You can snapshot your current setup into a `uvenv.lock` file using:
 
