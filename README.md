@@ -20,8 +20,12 @@ Inspired by:
    # or `uv install uvenv`, `pipx install uvenv`
     ```
 
-> Note: Ubuntu 24.04+ does not allow global installation via pip by default. 
-> See [docs/ubuntu_2404.md](./docs/ubuntu_2404.md) if you encounter `externally-managed-environment` errors.
+> Note: Some systems (e.g. Ubuntu 24.04+) not allow global installation via pip by default. 
+> The recommended way to install `uvenv` for these systems is to use the `install.sh` script:
+> ```bash
+> bash -c "$(curl -fsSL https://raw.githubusercontent.com/robinvandernoord/uvenv/install-script/install.sh)"
+> ```
+> For more installation alternatives, see [docs/ubuntu_2404.md](./docs/ubuntu_2404.md) if you encounter `externally-managed-environment` errors.
 
 2. Optional (for bash users):
       ```bash

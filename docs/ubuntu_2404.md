@@ -2,7 +2,20 @@
 
 Explore four different methods to install `uvenv` on Ubuntu 24.04, each with its own approach, advantages, and steps.
 
-## 1. System Package Method
+## 1. via `install.sh`
+
+The easiest way to install `uvenv` is to use the [`install.sh`](https://github.com/robinvandernoord/uvenv/blob/uvenv/install.sh) script.
+
+```bash
+# download/read the script:
+curl -fsSL https://raw.githubusercontent.com/robinvandernoord/uvenv/install-script/install.sh
+
+# run it:
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/robinvandernoord/uvenv/install-script/install.sh)"
+```
+
+
+## 2. System Package Method
 
 Install `uvenv` directly using `pip` with the `--break-system-packages` option.
 
@@ -20,7 +33,7 @@ Install `uvenv` directly using `pip` with the `--break-system-packages` option.
 pip install --break-system-packages uvenv
 ```
 
-## 2. Pipx Installation Method
+## 3. Pipx Installation Method
 
 Use `pipx` to manage `uvenv` in an isolated environment.
 
@@ -39,7 +52,7 @@ Use `pipx` to manage `uvenv` in an isolated environment.
 pipx install uvenv
 ```
 
-## 3. Virtual Environment Method
+## 4. Virtual Environment Method
 
 Create a dedicated virtual environment for `uvenv`.
 
@@ -57,7 +70,7 @@ pip install uvenv
 uvenv self link  # or `uvenv setup` for all additional features
 ```
 
-## 4. Self-Managed uvenv Method
+## 5. Self-Managed uvenv Method
 
 Use `uvenv` to manage its own installation and updates.
 
