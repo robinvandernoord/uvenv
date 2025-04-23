@@ -1,7 +1,7 @@
 [package]
 name = "uvenv"
 description = "uvenv: pipx for uv (🦀)"
-version = "3.8.1"
+version = "3.8.2"
 edition = "2024"
 categories = ["development-tools", "development-tools::build-utils", "virtualization", "external-ffi-bindings", "command-line-interface"]
 keywords = ["Python", "uv", "pip", "packaging"]
