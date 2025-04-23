@@ -25,7 +25,7 @@ Inspired by:
 > ```bash
 > bash -c "$(curl -fsSL https://raw.githubusercontent.com/robinvandernoord/uvenv/install-script/install.sh)"
 > ```
-> For more installation alternatives, see [docs/ubuntu_2404.md](./docs/ubuntu_2404.md) if you encounter `externally-managed-environment` errors.
+> For more installation alternatives, see [docs/installation.md](docs/installation.md) if you encounter `externally-managed-environment` errors.
 
 2. Optional (for bash users):
       ```bash

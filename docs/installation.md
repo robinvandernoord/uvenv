@@ -1,6 +1,7 @@
-# Installing uvenv on Ubuntu 24.04
+# Advanced Installation Options
 
-Explore four different methods to install `uvenv` on Ubuntu 24.04, each with its own approach, advantages, and steps.
+Explore multiple alternative ways to install `uvenv` on systems where global pip installs are restricted (e.g., Ubuntu 24.04+).
+Each method offers a different approach, with its own benefits and setup steps.
 
 ## 1. via `install.sh`
 
@@ -92,3 +93,7 @@ pip install uvenv
 uvenv install uvenv
 uvenv ensurepath  # or uvenv setup
 ```
+
+## 6. via Snap
+
+See [snap installation](./snap.md) for installation instructions and caveats.
