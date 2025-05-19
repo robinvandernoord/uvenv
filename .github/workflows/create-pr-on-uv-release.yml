@@ -49,7 +49,7 @@ jobs:
         run: |
           latest_tag="${{ steps.get_tag.outputs.tag }}"
           # For each uv* dependency, update its tag in Cargo.toml
-          sed -i 's/\(uv\(-[a-z0-9]\+\)\?\s*=\s*{[^}]*tag\s*=\s*"\)[^"]*\(".*\)/\1'"$latest_tag"'\3/' Cargo.toml
+          sed -i 's/\(uv\(-[a-z0-9]\+\)*\s*=\s*{[^}]*tag\s*=\s*"\)[^"]*\(".*\)/\1'"$latest_tag"'\3/' Cargo.toml
 
       - name: Update uv in pyproject.toml
         if: steps.check_update.outputs.update_needed == 'true'
@@ -62,9 +62,23 @@ jobs:
         if: steps.check_update.outputs.update_needed == 'true'
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Cache Rust dependencies
+        if: steps.check_update.outputs.update_needed == 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo
+          restore-keys: |
+            ${{ runner.os }}-cargo
+
       - name: Run cargo check
         if: steps.check_update.outputs.update_needed == 'true'
-        run: cargo check
+        run: |
+          cargo update
+          cargo check
 
       - name: Create Pull Request
         if: steps.check_update.outputs.update_needed == 'true'
