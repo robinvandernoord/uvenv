@@ -5,6 +5,10 @@ on:
     - cron: '0 6 * * *'    # Runs daily at 6 AM UTC
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update-uv:
     runs-on: ubuntu-22.04
