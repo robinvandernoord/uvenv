@@ -61,18 +61,18 @@ anstyle = "1.0" # color styling for clapcargo update
 owo-colors = "4.1" # color styling for strings
 
 # uv
-uv = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
-uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
-uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
-uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
-uv-distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
-uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
-uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
-uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
-uv-pep440 = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
-uv-pep508 = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
-uv-pypi-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
-uv-tool = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.9" }
+uv = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
+uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
+uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
+uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
+uv-distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
+uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
+uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
+uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
+uv-pep440 = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
+uv-pep508 = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
+uv-pypi-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
+uv-tool = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.10" }
 
 [patch.crates-io]
 # black magic fuckery, required after 0.2.18 and before 0.5.2, otherwise uv-client won't compile; https://github.com/astral-sh/reqwest-middleware
