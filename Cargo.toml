@@ -61,18 +61,18 @@ anstyle = "1.0" # color styling for clapcargo update
 owo-colors = "4.1" # color styling for strings
 
 # uv
-uv = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
-uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
-uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
-uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
-uv-distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
-uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
-uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
-uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
-uv-pep440 = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
-uv-pep508 = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
-uv-pypi-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
-uv-tool = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.12" }
+uv = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
+uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
+uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
+uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
+uv-distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
+uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
+uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
+uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
+uv-pep440 = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
+uv-pep508 = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
+uv-pypi-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
+uv-tool = { git = "https://github.com/astral-sh/uv.git", tag = "0.7.13" }
 pushd = "0.0.2"
 
 [patch.crates-io]
