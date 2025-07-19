@@ -2,6 +2,21 @@
 
 <!--next-version-placeholder-->
 
+## 3.9.15 (2025-07-19)
+
+## Fixes (snap-release)
+
+* make uv install python versions in a common (instead of revision-specific) snap folder
+  by default, uv in snap would install at
+  `~/snap/uvenv/<revision>/.local/share/uv/python/`
+  meaning it would be moved after each update;
+  leading to longer update times and breaking symlinks.
+  so, we set the install dir to a fixed location (`~/snap/uvenv/common/python`)
+
+### Updates
+
+* update other dependencies (toml)
+
 ## 3.9.15 (2025-07-18)
 
 ### Updates
