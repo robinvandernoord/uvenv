@@ -21,7 +21,7 @@ use uv_python::{
 
 use uv_pep508::VersionOrUrl::VersionSpecifier;
 
-use crate::helpers::PathToString;
+use crate::helpers::{PathToString, set_env_var};
 use crate::metadata::get_work_dir;
 
 pub async fn maybe_get_uv_binary() -> Option<String> {
@@ -35,12 +35,27 @@ pub async fn get_uv_binary() -> String {
     )
 }
 
+fn apply_uv_env_settings() {
+    if cfg!(feature = "snap") {
+        let work_dir = get_work_dir();
+        let python_dir = work_dir.join("python");
+
+        // by default, uv in snap would install at
+        // ~/snap/uvenv/<revision>/.local/share/uv/python/
+        // meaning it would be moved after each update;
+        // leading to longer update times and breaking symlinks.
+        // so, we set the install dir to a fixed location (~/snap/uvenv/common/python)
+        set_env_var("UV_PYTHON_INSTALL_DIR", python_dir.to_string());
+    }
+}
+
 /// Start `uv` in a subprocess and handle its output
 /// Note: while `uv::main` exists, it's not recommended to use as an entrypoint.
 /// It also calls `exit`, stopping `uvenv` instead of returning an exit code.
 pub async fn uv<S: AsRef<OsStr>>(args: &[S]) -> anyhow::Result<bool> {
     // venv could be unavailable, use 'uv' from this library's requirement
     let script = get_uv_binary().await;
+    apply_uv_env_settings();
 
     let subcommand = args
         .first()
