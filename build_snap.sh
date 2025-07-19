@@ -10,4 +10,4 @@ cp ./venv/bin/uv target/release/uv
 
 snapcraft
 
-snapcraft upload --release=stable *.snap
+# snapcraft upload --release=stable *.snap
