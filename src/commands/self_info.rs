@@ -12,11 +12,14 @@ use uv_pep440::Version;
 use crate::cli::{Process, SelfInfoOptions};
 use crate::cmd::run_get_output;
 use crate::commands::self_update::{find_python, get_package_versions_pip};
-use crate::helpers::{PathAsStr, PathToString, flatten_option_ref};
+use crate::helpers::{PathAsStr, PathToString};
 use crate::metadata::{get_bin_dir, get_work_dir};
 use crate::pypi::get_latest_version;
 use crate::uv::get_uv_binary;
 
+pub const CURRENT_UVENV_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+#[expect(dead_code, reason = "Could still be useful in the future.")]
 async fn get_latest_versions(package_names: Vec<&str>) -> BTreeMap<&str, Option<Version>> {
     let promises: Vec<_> = package_names
         .iter()
@@ -74,10 +77,6 @@ pub fn is_latest(
     let Some(version) = latest else { return false };
 
     compare_versions(current, &version.to_string())
-}
-
-pub const fn uvenv_version() -> &'static str {
-    env!("CARGO_PKG_VERSION")
 }
 
 /// Check if path exists and is executable (Result variant)
@@ -173,6 +172,53 @@ pub struct SelfInfo {
     environment: EnvironmentPaths,
 }
 
+async fn uvenv_version_info(_: &Path) -> PackageVersionInfo {
+    let latest = get_latest_version("uvenv", true, None).await;
+
+    PackageVersionInfo {
+        is_latest: is_latest(CURRENT_UVENV_VERSION, latest.as_ref()),
+        current: CURRENT_UVENV_VERSION.to_owned(),
+        latest,
+    }
+}
+
+async fn patchelf_version_info(python_exe: &Path) -> PackageVersionInfo {
+    let current = get_package_versions_pip(python_exe, &["patchelf"], "?")
+        .await
+        .pop()
+        .unwrap_or_default();
+    let latest = get_latest_version("patchelf", true, None).await;
+
+    PackageVersionInfo {
+        is_latest: is_latest(&current, latest.as_ref()),
+        current,
+        latest,
+    }
+}
+
+async fn uv_version_info(_: &Path) -> PackageVersionInfo {
+    let uv = get_uv_binary().await;
+    let output = run_get_output(uv, &["--version"]).await.unwrap_or_default();
+    let (_, version) = output.trim().split_once(' ').unwrap_or_default();
+
+    let current = version.to_owned();
+    let latest = get_latest_version("uv", true, None).await;
+
+    PackageVersionInfo {
+        is_latest: is_latest(&current, latest.as_ref()),
+        current,
+        latest,
+    }
+}
+
+async fn package_version_info(python_exe: &Path) -> PackageVersions {
+    PackageVersions {
+        uvenv: uvenv_version_info(python_exe).await,
+        uv: uv_version_info(python_exe).await,
+        patchelf: patchelf_version_info(python_exe).await,
+    }
+}
+
 pub async fn collect_self_info() -> anyhow::Result<SelfInfo> {
     // Find Python and get its version
     let python_exe = find_python().await?;
@@ -182,37 +228,6 @@ pub async fn collect_self_info() -> anyhow::Result<SelfInfo> {
         .trim()
         .to_owned();
     let python_is_executable = is_executable(&python_exe);
-
-    // Get package versions
-    let latest_versions = get_latest_versions(vec!["uvenv", "uv", "patchelf"]).await;
-    let to_track = ["uv", "patchelf"];
-    let installed_versions = get_package_versions_pip(&python_exe, &to_track, "?").await;
-
-    // uvenv version from Cargo.toml
-    let uvenv_version = uvenv_version().to_owned();
-    let uvenv_latest = flatten_option_ref(latest_versions.get("uvenv")).cloned();
-    let uvenv_is_latest = is_latest(
-        &uvenv_version,
-        flatten_option_ref(latest_versions.get("uvenv")),
-    );
-
-    // uv and patchelf versions
-    let uv_version = installed_versions
-        .first()
-        .expect("Should have at least 1 item")
-        .clone();
-    let uv_latest = flatten_option_ref(latest_versions.get("uv")).cloned();
-    let uv_is_latest = is_latest(&uv_version, flatten_option_ref(latest_versions.get("uv")));
-
-    let patchelf_version = installed_versions
-        .get(1)
-        .expect("Should have at least 2 items")
-        .clone();
-    let patchelf_latest = flatten_option_ref(latest_versions.get("patchelf")).cloned();
-    let patchelf_is_latest = is_latest(
-        &patchelf_version,
-        flatten_option_ref(latest_versions.get("patchelf")),
-    );
 
     // Environment paths
     let me = env::current_exe().unwrap_or_default();
@@ -226,23 +241,7 @@ pub async fn collect_self_info() -> anyhow::Result<SelfInfo> {
     let work_ok = dir_is_writable(&work_dir).await;
 
     let info = SelfInfo {
-        package_versions: PackageVersions {
-            uvenv: PackageVersionInfo {
-                current: uvenv_version,
-                latest: uvenv_latest,
-                is_latest: uvenv_is_latest,
-            },
-            uv: PackageVersionInfo {
-                current: uv_version,
-                latest: uv_latest,
-                is_latest: uv_is_latest,
-            },
-            patchelf: PackageVersionInfo {
-                current: patchelf_version,
-                latest: patchelf_latest,
-                is_latest: patchelf_is_latest,
-            },
-        },
+        package_versions: package_version_info(&python_exe).await,
         python: Python {
             version: python_version,
             path: python_exe.to_string(),

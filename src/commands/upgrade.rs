@@ -5,8 +5,7 @@ use owo_colors::OwoColorize;
 use uv_pep508::Requirement;
 use uv_python::PythonEnvironment;
 
-use crate::commands::list::list_packages;
-use crate::commands::self_update;
+use crate::commands::list::{is_uvenv_outdated, list_packages};
 use crate::commands::upgrade_all::upgrade_all;
 use crate::helpers::StringExt;
 use crate::metadata::LoadMetadataConfig;
@@ -185,7 +184,7 @@ async fn find_outdated() -> Vec<String> {
 
 impl Process for UpgradeOptions {
     async fn process(self) -> anyhow::Result<i32> {
-        let self_outdated = self_update::uvenv_is_outdated().await;
+        let self_outdated = is_uvenv_outdated(true).await;
 
         let package_names = if self.package_names.is_empty() {
             let outdated = find_outdated().await;

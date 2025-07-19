@@ -4,7 +4,7 @@ use owo_colors::OwoColorize;
 use std::fs::ReadDir;
 
 use crate::cli::{ListOptions, Process};
-use crate::commands::self_info::{is_latest, uvenv_version};
+use crate::commands::self_info::{CURRENT_UVENV_VERSION, is_latest};
 use crate::metadata::{LoadMetadataConfig, Metadata, get_venv_dir};
 use crate::pypi::get_latest_version;
 use crate::uv::uv_search_python;
@@ -63,20 +63,23 @@ impl ListOptions {
     }
 }
 
-async fn is_uvenv_outdated(silent: bool) -> bool {
+pub async fn is_uvenv_outdated(silent: bool) -> bool {
+    if cfg!(feature = "snap") {
+        // updates managed by snapcraft
+        return false;
+    }
+
     let latest = get_latest_version("uvenv", true, None).await;
 
     // uvenv version comes from Cargo.toml
-    let version = uvenv_version();
-
-    let is_outdated = !is_latest(version, latest.as_ref());
+    let is_outdated = !is_latest(CURRENT_UVENV_VERSION, latest.as_ref());
 
     if is_outdated && !silent {
         if let Some(latest_version) = latest {
             eprintln!(
                 "{} ({} < {})",
                 "uvenv is outdated!".yellow(),
-                version.red(),
+                CURRENT_UVENV_VERSION.red(),
                 latest_version.to_string().green()
             );
         }
