@@ -1,14 +1,18 @@
-use anyhow::{Context, anyhow, bail};
-use std::path::{Path, PathBuf};
-
 use crate::animate::{AnimationSettings, show_loading_indicator};
 use crate::cli::{Process, SelfUpdateOptions};
 use crate::cmd::{find_sibling, run};
 use crate::helpers::{PathAsStr, set_env_var};
 use crate::pip::pip_freeze;
+use crate::pypi::get_latest_version;
 use crate::uv::{PythonSpecifier, system_environment, uv_freeze};
+use anyhow::{Context, anyhow, bail};
+use core::str::FromStr;
 use owo_colors::OwoColorize;
 use regex::Regex;
+use std::path::{Path, PathBuf};
+use uv_pep440::Version;
+
+const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 pub fn extract_version(
     freeze_output: &str,
@@ -227,6 +231,24 @@ fn handle_self_update_result(
                 after.green(),
             );
         }
+    }
+}
+
+/// Check if `uvenv` is outdated.
+async fn uvenv_installation_is_outdated() -> Option<bool> {
+    let current = Version::from_str(CURRENT_VERSION).ok()?;
+    let latest = get_latest_version("uvenv", true, None).await?;
+
+    Some(current < latest)
+}
+
+/// Check if `uvenv` is outdated.
+pub async fn uvenv_is_outdated() -> bool {
+    if cfg!(feature = "snap") {
+        // we don't know if the snap is outdated, so just return false:
+        false
+    } else {
+        uvenv_installation_is_outdated().await.unwrap_or_default()
     }
 }
 

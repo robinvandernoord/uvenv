@@ -6,6 +6,7 @@ use uv_pep508::Requirement;
 use uv_python::PythonEnvironment;
 
 use crate::commands::list::list_packages;
+use crate::commands::self_update;
 use crate::commands::upgrade_all::upgrade_all;
 use crate::helpers::StringExt;
 use crate::metadata::LoadMetadataConfig;
@@ -184,10 +185,23 @@ async fn find_outdated() -> Vec<String> {
 
 impl Process for UpgradeOptions {
     async fn process(self) -> anyhow::Result<i32> {
+        let self_outdated = self_update::uvenv_is_outdated().await;
+
         let package_names = if self.package_names.is_empty() {
             let outdated = find_outdated().await;
 
-            if outdated.is_empty() {
+            #[expect(
+                clippy::else_if_without_else,
+                reason = "If I put the return value in the `else` it still complains about unnecessary `else`"
+            )]
+            if self_outdated {
+                eprintln!(
+                    "{} Use {} to get the latest version.",
+                    "A newer version of uvenv is available.".yellow(),
+                    "uvenv self update".blue()
+                );
+                bail!("{}", "All regular packages are already up to date.".blue());
+            } else if outdated.is_empty() {
                 bail!("{}", "No packages are outdated.".blue());
             }
 
