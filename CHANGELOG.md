@@ -2,7 +2,13 @@
 
 <!--next-version-placeholder-->
 
-## 3.9.15 (2025-07-19)
+## 3.9.17 (2025-07-25)
+
+### Updates
+
+* update uv dependencies to 0.8.3
+
+## 3.9.16 (2025-07-19)
 
 ## Fixes (snap-release)
 
