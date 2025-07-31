@@ -5011,7 +5011,7 @@ dependencies = [
 
 [[package]]
 name = "uvenv"
-version = "3.9.17"
+version = "3.9.18"
 dependencies = [
  "anstyle",
  "anyhow",
