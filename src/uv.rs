@@ -10,7 +10,7 @@ use std::path::Path;
 use std::{collections::HashSet, path::PathBuf};
 use uv_cache::Cache;
 use uv_client::{BaseClientBuilder, Connectivity};
-use uv_configuration::PreviewMode;
+use uv_configuration::Preview;
 use uv_distribution_types::{InstalledDist, Name};
 use uv_installer::SitePackages;
 use uv_pep508::{PackageName, Requirement};
@@ -87,6 +87,10 @@ pub fn uv_cache() -> Cache {
     )
 }
 
+fn uv_featureflags() -> Preview {
+    Preview::default()
+}
+
 /// try to find a `PythonEnvironment` based on Cache or currently active virtualenv (`VIRTUAL_ENV`).
 pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> {
     let cache = maybe_cache.unwrap_or_else(uv_cache);
@@ -96,7 +100,7 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> 
         &PythonRequest::Any,                // just find me a python
         EnvironmentPreference::OnlyVirtual, // venv is always virtual
         &cache,
-        PreviewMode::Disabled,
+        uv_featureflags(),
     )?;
 
     Ok(environ)
@@ -110,7 +114,7 @@ pub fn environment_from_path_str(path: &str) -> anyhow::Result<PythonEnvironment
         &PythonRequest::parse(path),
         EnvironmentPreference::ExplicitSystem, // based on above python wishes
         &cache,
-        PreviewMode::Disabled,
+        uv_featureflags(),
     )?)
 }
 
@@ -127,7 +131,7 @@ pub fn system_environment() -> anyhow::Result<PythonEnvironment> {
         &PythonRequest::Any, // just find me a python
         EnvironmentPreference::OnlySystem,
         &cache,
-        PreviewMode::Disabled,
+        uv_featureflags(),
     )?)
 }
 
@@ -158,7 +162,7 @@ pub async fn uv_search_python(python: Option<&str>) -> Option<String> {
         None,
         None,
         None,
-        PreviewMode::Disabled,
+        uv_featureflags(),
     )
     .await
     .ok()?;
