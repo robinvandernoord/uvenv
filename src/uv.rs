@@ -99,6 +99,7 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> 
     let environ = PythonEnvironment::find(
         &PythonRequest::Any,                // just find me a python
         EnvironmentPreference::OnlyVirtual, // venv is always virtual
+        PythonPreference::Managed,
         &cache,
         uv_featureflags(),
     )?;
@@ -113,6 +114,7 @@ pub fn environment_from_path_str(path: &str) -> anyhow::Result<PythonEnvironment
     Ok(PythonEnvironment::find(
         &PythonRequest::parse(path),
         EnvironmentPreference::ExplicitSystem, // based on above python wishes
+        PythonPreference::Managed,
         &cache,
         uv_featureflags(),
     )?)
@@ -130,6 +132,7 @@ pub fn system_environment() -> anyhow::Result<PythonEnvironment> {
     Ok(PythonEnvironment::find(
         &PythonRequest::Any, // just find me a python
         EnvironmentPreference::OnlySystem,
+        PythonPreference::OnlySystem,
         &cache,
         uv_featureflags(),
     )?)
