@@ -45,22 +45,6 @@ jobs:
           name: wheels-x64-linux-musl
           path: target/wheels/
 
-  x64-macos:
-    runs-on: macos-13
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-      - uses: astral-sh/setup-uv@v5
-      - run: uv pip install maturin
-      - run: rustup update
-      - run: maturin build --release --strip --target x86_64-apple-darwin
-      - uses: actions/upload-artifact@v4
-        with:
-          name: wheels-x64-macos
-          path: target/wheels/
-
   arm64-linux-gnu:
     runs-on: ubuntu-24.04-arm
     steps:
