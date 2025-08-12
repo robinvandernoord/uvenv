@@ -100,7 +100,6 @@ jobs:
     needs:
       - x64-linux-gnu
       - x64-linux-musl
-      - x64-macos
       - arm64-linux-gnu
       - arm64-linux-musl
       - arm64-macos
