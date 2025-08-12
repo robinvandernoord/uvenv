@@ -2,6 +2,18 @@
 
 <!--next-version-placeholder-->
 
+## 3.10.0 (2025-08-12)
+
+### Deprecations
+
+**macOS (x64) build removed**  
+Due to decreasing support for Intel-based (x64) macOS builds from GitHub and the Rust project, the `x86_64-apple-darwin` target has been removed from our build pipeline.
+
+- [Rust announcement](https://blog.rust-lang.org/2025/08/07/Rust-1.89.0/#demoting-x86-64-apple-darwin-to-tier-2-with-host-tools)
+- [Rust RFC 3841](https://github.com/rust-lang/rfcs/pull/3841)
+- [GitHub macOS runner changes](https://github.blog/changelog/2025-07-11-upcoming-changes-to-macos-hosted-runners-macos-latest-migration-and-xcode-support-policy-updates/#macos-13-is-closing-down)
+
+
 ## 3.9.20 (2025-08-12)
 
 ### Updates
