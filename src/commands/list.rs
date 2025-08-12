@@ -74,15 +74,16 @@ pub async fn is_uvenv_outdated(silent: bool) -> bool {
     // uvenv version comes from Cargo.toml
     let is_outdated = !is_latest(CURRENT_UVENV_VERSION, latest.as_ref());
 
-    if is_outdated && !silent {
-        if let Some(latest_version) = latest {
-            eprintln!(
-                "{} ({} < {})",
-                "uvenv is outdated!".yellow(),
-                CURRENT_UVENV_VERSION.red(),
-                latest_version.to_string().green()
-            );
-        }
+    if is_outdated
+        && !silent
+        && let Some(latest_version) = latest
+    {
+        eprintln!(
+            "{} ({} < {})",
+            "uvenv is outdated!".yellow(),
+            CURRENT_UVENV_VERSION.red(),
+            latest_version.to_string().green()
+        );
     }
 
     is_outdated

@@ -29,7 +29,7 @@ pub struct AnimationSettings {
 }
 
 impl AnimationSettings {
-    pub fn get_spinner_chars(&self) -> Cycle<Iter<char>> {
+    pub fn get_spinner_chars(&self) -> Cycle<Iter<'_, char>> {
         match self.style {
             AnimationStyle::Classic => ['|', '/', '-', '\\'].iter(),
             AnimationStyle::Modern => ['⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽', '⣾'].iter(),

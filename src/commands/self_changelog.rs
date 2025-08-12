@@ -47,10 +47,10 @@ fn parse_changelog(markdown: &str) -> Changelogs {
             let features = feature_caps
                 .get(1)
                 .map_or("", |feat_match| feat_match.as_str());
-            if let Some(map) = changelog.get_mut(current_version) {
-                if let Some(vec) = map.get_mut(current_category) {
-                    vec.push(features.to_owned());
-                }
+            if let Some(map) = changelog.get_mut(current_version)
+                && let Some(vec) = map.get_mut(current_category)
+            {
+                vec.push(features.to_owned());
             }
         }
     }

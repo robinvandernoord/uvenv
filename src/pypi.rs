@@ -167,10 +167,10 @@ pub async fn get_pypi_data_for_packagename(package_name: &PackageName) -> Option
 
     let data = client.lookup(package_name).await.ok()?;
 
-    if let Some(metadata) = data.iter().next_back() {
-        if let Some(latest) = metadata.iter().next_back() {
-            return deserialize_metadata(latest);
-        }
+    if let Some(metadata) = data.iter().next_back()
+        && let Some(latest) = metadata.iter().next_back()
+    {
+        return deserialize_metadata(latest);
     }
 
     None
