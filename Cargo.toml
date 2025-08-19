@@ -58,7 +58,7 @@ scopeguard = "1.2" # for defer!
 pushd = "0.0.2"
 
 # fancy
-anstyle = "1.0" # color styling for clapcargo update
+anstyle = "1.0" # color styling for clap
 owo-colors = "4.2" # color styling for strings
 
 # uv
