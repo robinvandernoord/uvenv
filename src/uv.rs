@@ -10,10 +10,11 @@ use std::path::Path;
 use std::{collections::HashSet, path::PathBuf};
 use uv_cache::Cache;
 use uv_client::{BaseClientBuilder, Connectivity};
-use uv_configuration::Preview;
-use uv_distribution_types::{InstalledDist, Name};
+use uv_distribution_types::{InstalledDistKind, Name};
 use uv_installer::SitePackages;
-use uv_pep508::{PackageName, Requirement};
+use uv_normalize::PackageName;
+use uv_pep508::Requirement;
+use uv_preview::Preview;
 use uv_python::{
     EnvironmentPreference, Interpreter, PythonDownloads, PythonEnvironment, PythonInstallation,
     PythonPreference, PythonRequest,
@@ -218,12 +219,12 @@ pub fn uv_freeze(python: &PythonEnvironment) -> anyhow::Result<String> {
         // .filter() ?
         .sorted_unstable_by(|one, two| one.name().cmp(two.name()).then(one.version().cmp(two.version())))
     {
-        match installed_dist {
-            InstalledDist::Registry(dist) => {
+        match &installed_dist.kind {
+            InstalledDistKind::Registry(dist) => {
                 // result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
                 writeln!(result, "{}=={}", dist.name(), dist.version)?;
             },
-            InstalledDist::Url(dist) => {
+            InstalledDistKind::Url(dist) => {
                 if dist.editable {
                     // result.push_str(&format!("-e {}\n", dist.url));
                     writeln!(result, "-e {}", dist.url)?;
@@ -232,15 +233,15 @@ pub fn uv_freeze(python: &PythonEnvironment) -> anyhow::Result<String> {
                     writeln!(result, "{} @ {}", dist.name(), dist.url)?;
                 }
             },
-            InstalledDist::EggInfoFile(dist) => {
+            InstalledDistKind::EggInfoFile(dist) => {
                 // result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
                 writeln!(result, "{}=={}", dist.name(), dist.version)?;
             },
-            InstalledDist::EggInfoDirectory(dist) => {
+            InstalledDistKind::EggInfoDirectory(dist) => {
                 // result.push_str(&format!("{}=={}\n", dist.name(), dist.version));
                 writeln!(result, "{}=={}", dist.name(), dist.version)?;
             },
-            InstalledDist::LegacyEditable(dist) => {
+            InstalledDistKind::LegacyEditable(dist) => {
                 // result.push_str(&format!("-e {}\n", dist.target.display()));
                 writeln!(result, "-e {}", dist.target.display())?;
             },

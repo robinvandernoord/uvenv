@@ -1,8 +1,9 @@
 use crate::pip::parse_requirement;
 use crate::uv::uv_cache;
 use rkyv::{Archive, Archived, Deserialize, deserialize};
+use uv_normalize::PackageName;
 use uv_pep440::{Version, VersionSpecifier};
-use uv_pep508::{PackageName, Requirement};
+use uv_pep508::Requirement;
 use uv_pypi_types::Yanked;
 
 use rkyv::api::high::HighDeserializer;

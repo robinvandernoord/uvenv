@@ -5,7 +5,8 @@ use crate::uv::{uv, uv_venv};
 use anyhow::{Context, bail};
 use owo_colors::OwoColorize;
 use std::path::{Path, PathBuf};
-use uv_pep508::{PackageName, Requirement};
+use uv_normalize::PackageName;
+use uv_pep508::Requirement;
 
 use uv_python::PythonEnvironment;
 
