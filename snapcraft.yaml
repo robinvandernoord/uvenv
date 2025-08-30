@@ -42,6 +42,8 @@ apps:
   uvenv:
     command: usr/bin/uvenv
     extensions: []
+    environment:
+      UV_CACHE_DIR: "$SNAP_USER_COMMON/.uv-cache"
     plugs:
       - network
 

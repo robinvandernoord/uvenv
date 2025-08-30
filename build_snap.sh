@@ -8,6 +8,6 @@ cargo build --release --features snap
 
 cp ./venv/bin/uv target/release/uv
 
-snapcraft
+snapcraft pack
 
 # snapcraft upload --release=stable *.snap
