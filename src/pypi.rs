@@ -10,8 +10,8 @@ use rkyv::api::high::HighDeserializer;
 use std::collections::HashSet;
 use tokio::sync::Semaphore;
 use uv_client::{
-    MetadataFormat, OwnedArchive, RegistryClient, RegistryClientBuilder, SimpleMetadata,
-    SimpleMetadatum, VersionFiles,
+    BaseClientBuilder, MetadataFormat, OwnedArchive, RegistryClient, RegistryClientBuilder,
+    SimpleMetadata, SimpleMetadatum, VersionFiles,
 };
 use uv_distribution_types::IndexCapabilities;
 
@@ -53,7 +53,8 @@ impl Default for SimplePypi {
     /// Create a (default) Registry
     fn default() -> Self {
         let cache = uv_cache();
-        let inner = RegistryClientBuilder::new(cache).build();
+        let base_client = BaseClientBuilder::default();
+        let inner = RegistryClientBuilder::new(base_client, cache).build();
 
         Self(inner)
     }
