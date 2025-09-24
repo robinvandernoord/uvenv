@@ -114,7 +114,8 @@ pub async fn create_symlink(
     if target_path.exists() {
         if !force {
             bail!(
-                "Script {symlink} already exists in {bin_dir:?}. Use --force to ignore this warning.",
+                "Script {symlink} already exists in {}. Use --force to ignore this warning.",
+                bin_dir.display()
             )
         }
 
@@ -125,7 +126,10 @@ pub async fn create_symlink(
 
     let symlink_path = venv.join("bin").join(symlink);
     if !symlink_path.exists() {
-        bail!("Could not symlink {symlink_path:?} because the script didn't exist.",);
+        bail!(
+            "Could not symlink {} because the script didn't exist.",
+            symlink_path.display()
+        );
     }
 
     tokio::fs::symlink(&symlink_path, &target_path)

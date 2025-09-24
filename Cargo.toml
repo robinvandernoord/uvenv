@@ -2,7 +2,7 @@
 name = "uvenv"
 description = "uvenv: pipx for uv (🦀)"
 version = "3.10.4"
-rust-version = "1.89"
+rust-version = "1.90"
 edition = "2024"
 categories = ["development-tools", "development-tools::build-utils", "virtualization", "external-ffi-bindings", "command-line-interface"]
 keywords = ["Python", "uv", "pip", "packaging"]
