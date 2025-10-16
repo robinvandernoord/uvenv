@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## 3.10.7 (2025-10-16)
+
+### Updates
+
+* update uv dependencies to 0.9.3
+
 ## 3.10.6 (2025-10-08)
 
 ### Updates
