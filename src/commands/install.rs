@@ -12,6 +12,7 @@ use owo_colors::OwoColorize;
 use std::collections::BTreeMap;
 use uv_pep508::Requirement;
 
+use crate::helpers::PathToString;
 use anyhow::{Context, bail};
 use core::fmt::Write;
 use std::path::{Path, PathBuf};
@@ -38,7 +39,20 @@ pub async fn uv_install_package<S: AsRef<str>>(
         // -e should go right before package name!
         args.push("--editable");
     }
-    args.push(package_name);
+
+    let mut normalized_package_name = package_name.to_owned();
+
+    // current dir will be changed in 'uv' so `install .`
+    // or other relative paths will break, resolve that here
+    if package_name.starts_with('.') {
+        let package_path = PathBuf::from(package_name);
+
+        if let Ok(package_path_abs) = std::fs::canonicalize(&package_path) {
+            normalized_package_name = package_path_abs.to_string();
+        }
+    }
+
+    args.push(&normalized_package_name);
 
     let promise = uv(&args);
 
