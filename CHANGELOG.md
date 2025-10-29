@@ -2,6 +2,12 @@
 
 <!--next-version-placeholder-->
 
+## 3.10.9 (2025-10-29)
+
+### Fix
+
+* allow `uvenv install -e .` again
+
 ## 3.10.8 (2025-10-22)
 
 ### Updates
