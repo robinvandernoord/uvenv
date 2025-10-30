@@ -2,6 +2,13 @@
 
 <!--next-version-placeholder-->
 
+## 3.10.9 (2025-10-30)
+
+### Updates
+
+* update uv dependencies to 0.9.6
+* update Rust version to 1.91
+
 ## 3.10.9 (2025-10-29)
 
 ### Fix
