@@ -290,10 +290,6 @@ pub enum OutputFormat {
 
 // includes to_string:
 impl Display for OutputFormat {
-    #[expect(
-        clippy::min_ident_chars,
-        reason = "The argument is called `f` in the trait."
-    )]
     fn fmt(
         &self,
         f: &mut Formatter<'_>,

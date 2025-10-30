@@ -99,10 +99,6 @@ impl SupportedShell {
 }
 
 impl Display for SupportedShell {
-    #[expect(
-        clippy::min_ident_chars,
-        reason = "It's also called 'f' in std::Display::fmt"
-    )]
     fn fmt(
         &self,
         f: &mut Formatter<'_>,
