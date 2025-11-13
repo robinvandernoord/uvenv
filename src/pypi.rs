@@ -1,17 +1,15 @@
 use crate::pip::parse_requirement;
 use crate::uv::uv_cache;
-use rkyv::{Archive, Archived, Deserialize, deserialize};
 use uv_normalize::PackageName;
 use uv_pep440::{Version, VersionSpecifier};
 use uv_pep508::Requirement;
 use uv_pypi_types::Yanked;
 
-use rkyv::api::high::HighDeserializer;
 use std::collections::HashSet;
 use tokio::sync::Semaphore;
 use uv_client::{
     BaseClientBuilder, MetadataFormat, OwnedArchive, RegistryClient, RegistryClientBuilder,
-    SimpleMetadata, SimpleMetadatum, VersionFiles,
+    SimpleDetailMetadata,
 };
 use uv_distribution_types::IndexCapabilities;
 
@@ -23,13 +21,13 @@ impl SimplePypi {
     async fn lookup(
         &self,
         package_name: &PackageName,
-    ) -> anyhow::Result<Vec<OwnedArchive<SimpleMetadata>>> {
+    ) -> anyhow::Result<Vec<OwnedArchive<SimpleDetailMetadata>>> {
         // 1 permit is sufficient
         let download_concurrency = Semaphore::new(1);
 
         let response = self
             .0
-            .package_metadata(
+            .simple_detail(
                 package_name,
                 None,
                 &IndexCapabilities::default(),
@@ -60,51 +58,33 @@ impl Default for SimplePypi {
     }
 }
 
-/// usage: e.g. `let x: Option<VersionFiles> = deserialize(&metadatum.files);`
-/// Note: pycharm will probably complain, but it WILL work for `ArchivedSimpleMetadatum`!
-pub fn rkyv_deserialize<T: Archive>(archived: &Archived<T>) -> Option<T>
-where
-    T::Archived: Deserialize<T, HighDeserializer<rkyv::rancor::Error>>,
-{
-    deserialize(archived).ok()
-}
-
-fn deserialize_metadata(datum: &Archived<SimpleMetadatum>) -> Option<SimpleMetadatum> {
-    // for some reason, pycharm doesn't understand this type (but it compiles)
-    let full: Option<SimpleMetadatum> = rkyv_deserialize(datum);
-    full
-}
-
-fn is_yanked(yanked: Option<Box<Yanked>>) -> bool {
-    let Some(boxed) = yanked else {
-        // early return if yanked is None
-        return false;
-    };
-
-    // dereference to get value out of box:
-    match *boxed {
-        Yanked::Reason(_) => true,
-        Yanked::Bool(status) => status,
+#[expect(
+    clippy::borrowed_box,
+    reason = "If we remove the Box<> then Rust complains that we pass in the wrong type"
+)]
+fn is_yanked(maybe_yanked_box: Option<&Box<Yanked>>) -> bool {
+    if let Some(yanked_box) = maybe_yanked_box.as_ref()
+        && yanked_box.is_yanked()
+    {
+        true
+    } else {
+        false
     }
 }
 
-fn find_non_yanked_versions(metadata: &OwnedArchive<SimpleMetadata>) -> HashSet<Version> {
-    let files_data: Vec<VersionFiles> = metadata
-        .iter()
-        .filter_map(|metadatum| rkyv_deserialize(&metadatum.files))
-        .collect();
-
+fn find_non_yanked_versions(metadata: &SimpleDetailMetadata) -> HashSet<&Version> {
     let mut valid_versions = HashSet::new();
 
-    for file in files_data {
-        for source_dist in file.source_dists {
-            if !is_yanked(source_dist.file.yanked) {
-                valid_versions.insert(source_dist.name.version);
+    for metadatum in metadata.iter() {
+        for source_dist in &metadatum.files.source_dists {
+            if !is_yanked(source_dist.file.yanked.as_ref()) {
+                valid_versions.insert(&source_dist.name.version);
             }
         }
-        for wheel in file.wheels {
-            if !is_yanked(wheel.file.yanked) {
-                valid_versions.insert(wheel.name.version);
+
+        for wheel in &metadatum.files.wheels {
+            if !is_yanked(wheel.file.yanked.as_ref()) {
+                valid_versions.insert(&wheel.name.version);
             }
         }
     }
@@ -129,13 +109,16 @@ pub async fn get_versions_for_packagename(
         Ok(data) => data,
     };
 
-    if let Some(metadata) = data.iter().next_back() {
-        let not_yanked = find_non_yanked_versions(metadata);
+    if let Some(metadata_archived) = data.iter().next_back() {
+        let metadata = OwnedArchive::deserialize(metadata_archived);
+        let not_yanked = find_non_yanked_versions(&metadata);
 
         versions = metadata
             .iter()
             .filter_map(|metadatum| {
-                rkyv_deserialize(&metadatum.version).filter(|version| not_yanked.contains(version))
+                let version = metadatum.version.clone();
+
+                not_yanked.contains(&version).then_some(version)
             })
             .collect();
     }
@@ -164,18 +147,20 @@ pub async fn get_latest_version_for_packagename(
     dead_code,
     reason = "More generic than the used code above (which only looks at version info)"
 )]
-pub async fn get_pypi_data_for_packagename(package_name: &PackageName) -> Option<SimpleMetadatum> {
+pub async fn get_pypi_data_for_packagename(
+    package_name: &PackageName
+) -> Option<SimpleDetailMetadata> {
     let client = SimplePypi::default();
 
     let data = client.lookup(package_name).await.ok()?;
 
-    if let Some(metadata) = data.iter().next_back()
-        && let Some(latest) = metadata.iter().next_back()
-    {
-        return deserialize_metadata(latest);
-    }
-
-    None
+    data.iter().next_back().map_or_else(
+        || None,
+        |metadata_archived| {
+            let metadata = OwnedArchive::deserialize(metadata_archived);
+            Some(metadata)
+        },
+    )
 }
 
 pub async fn get_latest_version_for_requirement(
