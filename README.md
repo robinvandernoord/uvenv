@@ -82,6 +82,8 @@ Choose the format using the `--format` flag:
 uvenv freeze --format json
 ```
 
+See [docs/lockfile_v1.md](./docs/lockfile_v1.md) for details on the file format, including all supported options and examples.
+
 #### Selective freeze/thaw
 
 Use `--include` or `--exclude` to control which apps get recorded or restored:
