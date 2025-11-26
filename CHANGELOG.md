@@ -2,6 +2,22 @@
 
 <!--next-version-placeholder-->
 
+## 3.10.13 (2025-11-26)
+
+### Updates
+
+* update uv dependencies to 0.9.12
+
+## 3.10.12 (2025-11-21)
+
+### Updates
+
+* update uv dependencies to 0.9.11
+
+### Documentation
+
+* explained lockfile (v1) specification
+
 ## 3.10.11 (2025-11-13)
 
 ### Updates
