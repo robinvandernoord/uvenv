@@ -80,8 +80,8 @@ uv-tool = { git = "https://github.com/astral-sh/uv.git", tag = "0.9.15" }
 
 [patch.crates-io]
 # black magic fuckery, see https://github.com/astral-sh/uv/blob/main/Cargo.toml#L300
-reqwest-middleware = { git = "https://github.com/astral-sh/reqwest-middleware", rev = "7650ed76215a962a96d94a79be71c27bffde7ab2" }
-reqwest-retry = { git = "https://github.com/astral-sh/reqwest-middleware", rev = "7650ed76215a962a96d94a79be71c27bffde7ab2" }
+# reqwest-middleware = { git = "https://github.com/astral-sh/reqwest-middleware", rev = "7650ed76215a962a96d94a79be71c27bffde7ab2" }
+# reqwest-retry = { git = "https://github.com/astral-sh/reqwest-middleware", rev = "7650ed76215a962a96d94a79be71c27bffde7ab2" }
 
 [lints.clippy]
 # categories:
