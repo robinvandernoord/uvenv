@@ -356,7 +356,7 @@ impl Metadata {
 
         Self::for_dir(&venv_dir, config)
             .await
-            .map_or_else(|| Self::find(requirement), |meta| meta)
+            .unwrap_or_else(|| Self::find(requirement))
     }
 
     pub async fn for_file(
