@@ -48,7 +48,7 @@ home = "0.5" # ~ resolving
 directories = "6.0"
 itertools = "0.14" # more .iter magic
 configparser = "3.1"
-tempfile = "3.23"
+tempfile = "3.24"
 chrono = "0.4"
 subprocess = "0.2"
 reqwest = { version = "0.12", default-features = false, features = ["json", "gzip", "brotli", "stream", "rustls-tls", "rustls-tls-native-roots"] }
