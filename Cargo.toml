@@ -2,7 +2,7 @@
 name = "uvenv"
 description = "uvenv: pipx for uv (🦀)"
 version = "3.10.15"
-rust-version = "1.91"
+rust-version = "1.92"
 edition = "2024"
 categories = ["development-tools", "development-tools::build-utils", "virtualization", "external-ffi-bindings", "command-line-interface"]
 keywords = ["Python", "uv", "pip", "packaging"]
@@ -33,14 +33,14 @@ clap_complete = "4.5"
 anyhow = { version = "1.0", features = ["default", "backtrace"] }
 
 # async
-tokio = { version = "1.48", features = ["default", "process", "rt-multi-thread"] }
+tokio = { version = "1.49", features = ["default", "process", "rt-multi-thread"] }
 
 # serialize
 rmp-serde = "1.3"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 toml = "0.9"
-toml_edit = { version = "0.23", features = ["serde"] }
+toml_edit = { version = "0.24", features = ["serde"] }
 rkyv = "0.8"
 
 # helpers
