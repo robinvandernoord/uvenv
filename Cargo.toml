@@ -51,7 +51,7 @@ configparser = "3.1"
 tempfile = "3.24"
 chrono = "0.4"
 subprocess = "0.2"
-reqwest = { version = "0.12", default-features = false, features = ["json", "gzip", "brotli", "stream", "rustls-tls", "rustls-tls-native-roots"] }
+reqwest = { version = "0.13", default-features = false, features = ["json", "gzip", "brotli", "stream", "rustls", "rustls-native-certs"] }
 regex = "1.12"
 futures = "0.3"
 scopeguard = "1.2" # for defer!
