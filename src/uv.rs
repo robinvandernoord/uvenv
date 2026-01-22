@@ -108,7 +108,7 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> 
     Ok(environ)
 }
 
-/// try to find a `PythonEnvironment` based on a specific Python path (as str)
+/// try to find a `PythonEnvironment` based on a specific Python path (as str).
 pub fn environment_from_path_str(path: &str) -> anyhow::Result<PythonEnvironment> {
     let cache = uv_cache();
 
@@ -121,12 +121,12 @@ pub fn environment_from_path_str(path: &str) -> anyhow::Result<PythonEnvironment
     )?)
 }
 
-/// try to find a `PythonEnvironment` based on a specific Python path (as Path)
+/// try to find a `PythonEnvironment` based on a specific Python path (as Path).
 pub fn environment_from_path(path: &Path) -> anyhow::Result<PythonEnvironment> {
     environment_from_path_str(path.to_str().unwrap_or_default())
 }
 
-/// try to find a `PythonEnvironment` based on the System python
+/// try to find a `PythonEnvironment` based on the System python.
 pub fn system_environment() -> anyhow::Result<PythonEnvironment> {
     let cache = uv_cache();
 
@@ -145,7 +145,7 @@ fn uv_offline_client() -> BaseClientBuilder<'static> {
         .native_tls(false)
 }
 
-/// e.g. 3.12 -> /usr/lib/python3.12, to match with `metadata.python_raw`
+/// e.g. 3.12 -> /usr/lib/python3.12, to match with `metadata.python_raw`.
 pub async fn uv_search_python(python: Option<&str>) -> Option<String> {
     let interpreter_request = python.map(PythonRequest::parse);
 

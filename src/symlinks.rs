@@ -29,7 +29,7 @@ pub async fn console_scripts(entry_points_path: &str) -> anyhow::Result<Vec<Stri
     Ok(console_scripts.keys().map(ToString::to_string).collect())
 }
 
-/// Source: `https://github.com/astral-sh/uv/blob/ee2bdc21fab077aaef17c94242b4cf6a10c013e1/crates/uv/src/commands/tool/run.rs#L281`
+/// Source: `https://github.com/astral-sh/uv/blob/ee2bdc21fab077aaef17c94242b4cf6a10c013e1/crates/uv/src/commands/tool/run.rs#L281`.
 fn get_entrypoints(
     from: &PackageName,
     site_packages: &SitePackages,

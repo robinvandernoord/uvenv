@@ -79,7 +79,7 @@ pub fn is_latest(
     compare_versions(current, &version.to_string())
 }
 
-/// Check if path exists and is executable (Result variant)
+/// Check if path exists and is executable (Result variant).
 fn try_is_executable(path: &Path) -> anyhow::Result<bool> {
     if !path.try_exists()? {
         bail!("path doesn't exist");
@@ -96,12 +96,12 @@ fn try_is_executable(path: &Path) -> anyhow::Result<bool> {
     Ok(is_executable)
 }
 
-/// Check if path exists and is executable (bool variant)
+/// Check if path exists and is executable (bool variant).
 fn is_executable(path: &Path) -> bool {
     try_is_executable(path).unwrap_or_default()
 }
 
-/// Check if path exists and is writable (Result variant)
+/// Check if path exists and is writable (Result variant).
 async fn try_dir_is_writable(path: &Path) -> anyhow::Result<bool> {
     if !path.is_dir() {
         bail!("path is not a directory");
@@ -116,7 +116,7 @@ async fn try_dir_is_writable(path: &Path) -> anyhow::Result<bool> {
     Ok(true)
 }
 
-/// Check if path exists and is writable (bool variant)
+/// Check if path exists and is writable (bool variant).
 async fn dir_is_writable(path: &Path) -> bool {
     try_dir_is_writable(path).await.unwrap_or_default()
 }
@@ -471,7 +471,7 @@ pub fn simple_self_info(info: &SelfInfo) -> anyhow::Result<String> {
     Ok(output)
 }
 
-/// Basic variant for use by `self_version`
+/// Basic variant for use by `self_version`.
 pub async fn self_info() -> anyhow::Result<i32> {
     let info = collect_self_info().await?;
     print!("{}", simple_self_info(&info)?);

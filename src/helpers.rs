@@ -5,7 +5,7 @@ use std::ffi::OsStr;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
-/// Wrapper for unsafe `env::set_var`
+/// Wrapper for unsafe `env::set_var`.
 pub fn set_env_var<K: AsRef<OsStr>, V: AsRef<OsStr>>(
     key: K,
     value: V,
@@ -33,7 +33,7 @@ pub fn fmt_error(err: &anyhow::Error) -> String {
     format!("{err:?}")
 }
 
-/// Source: <https://users.rust-lang.org/t/how-to-print-the-type-of-a-variable/101947/2>
+/// Source: <https://users.rust-lang.org/t/how-to-print-the-type-of-a-variable/101947/2>.
 #[expect(dead_code, clippy::use_debug, reason = "Debugging reasons.")]
 pub fn print_type<T>(_: &T) {
     println!("{:?}", type_name::<T>());
@@ -82,7 +82,7 @@ pub trait PathToString<'path>: PathAsStr<'path> {
     fn to_string(self) -> String;
 }
 
-/// `PathToString` can't be implemented for Path because sizes need to be known at comptime
+/// `PathToString` can't be implemented for Path because sizes need to be known at comptime.
 impl PathToString<'_> for PathBuf {
     fn to_string(self) -> String {
         self.into_os_string().into_string().unwrap_or_default()
@@ -90,7 +90,7 @@ impl PathToString<'_> for PathBuf {
 }
 
 /// `Option<Option<T>>` can be flattened with `.flatten()`
-/// but this can be used for Option<&Option<T>>
+/// but this can be used for `Option<&Option<T>>`.
 #[expect(dead_code, reason = "Could still be useful in the future.")]
 pub const fn flatten_option_ref<T>(nested: Option<&Option<T>>) -> Option<&T> {
     match nested {

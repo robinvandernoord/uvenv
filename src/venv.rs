@@ -10,7 +10,7 @@ use uv_pep508::Requirement;
 
 use uv_python::PythonEnvironment;
 
-/// Create a new virtualenv via `uv venv` at a Path
+/// Create a new virtualenv via `uv venv` at a Path.
 pub async fn create_venv_raw(
     venv_path: &Path,
     python: Option<&str>,
@@ -96,7 +96,7 @@ pub async fn setup_environ_from_requirement(
     Ok((requirement, environ))
 }
 
-/// remove a venv directory
+/// remove a venv directory.
 pub async fn remove_venv(venv: &PathBuf) -> anyhow::Result<()> {
     Ok(
         // ? + Ok for anyhow casting

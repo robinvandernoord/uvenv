@@ -227,7 +227,7 @@ impl Metadata {
     //     }
     // }
 
-    /// return `PythonEnvironment` (if available) for this metadata
+    /// return `PythonEnvironment` (if available) for this metadata.
     pub fn venv(&self) -> Option<PythonEnvironment> {
         let venv_dir = venv_path(&self.name);
 
@@ -283,7 +283,7 @@ impl Metadata {
         }
     }
 
-    /// try to guess/deduce some values
+    /// try to guess/deduce some values.
     pub fn fill(
         &mut self,
         maybe_venv: Option<&PythonEnvironment>,
@@ -313,7 +313,8 @@ impl Metadata {
     }
 
     /// like `for_dir` but with an owned dirname Pathbuf instead of &Path
-    /// (required to work with Futures) -> also returns a Result which is more useful with a future
+    /// (required to work with Futures)
+    /// -> also returns a Result which is more useful with a future.
     pub async fn for_owned_dir(
         dirname: PathBuf,
         config: &LoadMetadataConfig,
@@ -541,7 +542,7 @@ impl Metadata {
     }
 }
 
-/// Drop the `MAGIC_HEADER` from a buffer (if present)
+/// Drop the `MAGIC_HEADER` from a buffer (if present).
 pub fn strip_header(buf: &mut Vec<u8>) {
     // postponed: the current header is 7 chars long.
     //            the version should be ignored for starts_with,
@@ -551,7 +552,7 @@ pub fn strip_header(buf: &mut Vec<u8>) {
     }
 }
 
-/// Prepend the `MAGIC_HEADER` to a buffer
+/// Prepend the `MAGIC_HEADER` to a buffer.
 pub fn add_header(buf: &mut Vec<u8>) {
     let mut new_buf = Vec::with_capacity(MAGIC_HEADER_V2.len() + buf.len());
     new_buf.extend_from_slice(MAGIC_HEADER_V2);

@@ -13,11 +13,11 @@ use uv_client::{
 };
 use uv_distribution_types::IndexCapabilities;
 
-/// Shadow `RegistryClient` to hide new complexity of .simple
+/// Shadow `RegistryClient` to hide new complexity of `.simple`.
 struct SimplePypi(RegistryClient);
 
 impl SimplePypi {
-    /// Use `RegistryClient.package_metadata` to lookup a package on default package index
+    /// Use `RegistryClient.package_metadata` to lookup a package on default package index.
     async fn lookup(
         &self,
         package_name: &PackageName,
@@ -48,7 +48,7 @@ impl SimplePypi {
 }
 
 impl Default for SimplePypi {
-    /// Create a (default) Registry
+    /// Create a (default) Registry.
     fn default() -> Self {
         let cache = uv_cache();
         let base_client = BaseClientBuilder::default();

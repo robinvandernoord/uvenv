@@ -130,3 +130,4 @@ pub_with_shorthand = "allow" # otherwise it will complain about the opposite :(
 mod_module_files = "allow" # grouping mods like tests and 'commands' is useful
 unused_trait_names = "allow" # heh?
 arbitrary_source_item_ordering = "allow" # I prefer the current ordering over alphabetical.
+missing_inline_in_public_items = "allow" # only relevant for library crates, not end-product cli tools
