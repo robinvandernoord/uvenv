@@ -140,9 +140,7 @@ pub fn system_environment() -> anyhow::Result<PythonEnvironment> {
 }
 
 fn uv_offline_client() -> BaseClientBuilder<'static> {
-    BaseClientBuilder::default()
-        .connectivity(Connectivity::Offline)
-        .native_tls(false)
+    BaseClientBuilder::default().connectivity(Connectivity::Offline)
 }
 
 /// e.g. 3.12 -> /usr/lib/python3.12, to match with `metadata.python_raw`.
