@@ -54,7 +54,7 @@ impl Default for SimplePypi {
         let base_client = BaseClientBuilder::default();
         let inner = RegistryClientBuilder::new(base_client, cache).build();
 
-        Self(inner)
+        Self(inner.expect("pypi client with default settings is not supposed to fail."))
     }
 }
 
