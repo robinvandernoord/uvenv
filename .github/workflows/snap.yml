@@ -7,7 +7,7 @@ on:
   workflow_dispatch:  # Allow manual triggering
 
 env:
-  SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_LOGIN }}
+  SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 
 jobs:
   build:
@@ -36,8 +36,10 @@ jobs:
         run: cp ./venv/bin/uv target/release/uv
 
       - name: Build snap
-        # this installs snapcraft, sets up LXD and runs `snapcraft`:
+        # this installs snapcraft, sets up LXD and runs `snapcraft pack`:
         uses: snapcore/action-build@v1
+        with:
+          snapcraft-args: pack
 
       - name: Upload snap
         run: |

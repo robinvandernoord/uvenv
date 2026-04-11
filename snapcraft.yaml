@@ -2,6 +2,12 @@ name: uvenv
 base: core24
 adopt-info: version
 # note: current metadata is managed at https://snapcraft.io/uvenv/listing
+title: uvenv
+contact: https://github.com/robinvandernoord/uvenv/issues
+license: MIT
+website: https://github.com/robinvandernoord/uvenv
+issues: https://github.com/robinvandernoord/uvenv/issues
+source-code: https://github.com/robinvandernoord/uvenv
 summary: "uvenv: pipx for uv (🦀)"
 description: |
   uvenv is a simple command-line tool for managing virtual environments, written in Rust. 
@@ -55,10 +61,10 @@ parts:
     build-packages:
       - git
     override-pull: |
-      snapcraftctl pull
+      craftctl default
       git pull
       git fetch --tags
-      snapcraftctl set-version "$(git describe --tags `git rev-list --tags --max-count=1`)"
+      craftctl set version="$(git describe --tags "$(git rev-list --tags --max-count=1)")"
 
   link-app:
     # build happens outside of snapcraft, this step turns binary into snap.
@@ -66,6 +72,5 @@ parts:
     source: target/release
     override-build: |
       set -eu
-      install -D ./uv $SNAPCRAFT_PART_INSTALL/usr/bin/uv
-      install -D ./uvenv $SNAPCRAFT_PART_INSTALL/usr/bin/uvenv
-
+      install -D ./uv "$CRAFT_PART_INSTALL/usr/bin/uv"
+      install -D ./uvenv "$CRAFT_PART_INSTALL/usr/bin/uvenv"
