@@ -6614,7 +6614,7 @@ dependencies = [
 
 [[package]]
 name = "uvenv"
-version = "3.10.22"
+version = "3.10.23"
 dependencies = [
  "anstyle",
  "anyhow",
