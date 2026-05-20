@@ -99,7 +99,7 @@ impl FakeInstallResult {
 pub async fn fake_install(install_spec: &str) -> anyhow::Result<FakeInstallResult> {
     let tempfile = NamedTempFile::new()?;
     let Some(tempfile_path) = tempfile.as_ref().to_str() else {
-        bail!("No temp file could be created for a dry pip install.",)
+        bail!("No temp file could be created for a dry pip install.")
     };
 
     // array instead of vec:
@@ -120,7 +120,7 @@ pub async fn fake_install(install_spec: &str) -> anyhow::Result<FakeInstallResul
     let mut pip_data: PipData = serde_json::from_reader(json_file)?;
 
     let Some(install) = pip_data.install.pop_front() else {
-        bail!("Failed to find package name for local install.",)
+        bail!("Failed to find package name for local install.")
     };
 
     // if extras exist, the full name is name[extras]. Otherwise, it's just the name.

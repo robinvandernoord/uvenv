@@ -90,7 +90,7 @@ pub async fn setup_environ_from_requirement(
     let requirement_name = requirement.name.to_string();
     let venv_dir = venv_path(&requirement_name);
     if !venv_dir.exists() {
-        bail!("No virtualenv for '{}'.", install_spec.green(),);
+        bail!("No virtualenv for '{}'.", install_spec.green());
     }
     let environ = activate_venv(&venv_dir).await?;
     Ok((requirement, environ))

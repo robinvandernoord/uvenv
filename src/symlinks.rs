@@ -142,8 +142,7 @@ pub async fn create_symlink(
 pub fn is_symlink(symlink_path: &Path) -> bool {
     symlink_path
         .symlink_metadata()
-        .map(|metadata| metadata.file_type().is_symlink())
-        .unwrap_or(false)
+        .is_ok_and(|metadata| metadata.file_type().is_symlink())
 }
 
 pub fn points_to(

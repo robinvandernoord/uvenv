@@ -213,7 +213,7 @@ pub async fn install_package<S: AsRef<str> + Display>(
             format!("- {}", script.red())
         };
 
-        let _ = write!(feedback, "\n  {text}",);
+        let _ = write!(feedback, "\n  {text}");
     }
 
     Ok(feedback)

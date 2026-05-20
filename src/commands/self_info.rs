@@ -28,7 +28,7 @@ async fn get_latest_versions(package_names: Vec<&str>) -> BTreeMap<&str, Option<
     let resolved = future::join_all(promises).await;
 
     let mut result = BTreeMap::new();
-    for (package, version) in package_names.into_iter().zip(resolved.into_iter()) {
+    for (package, version) in package_names.into_iter().zip(resolved) {
         result.insert(package, version);
     }
 

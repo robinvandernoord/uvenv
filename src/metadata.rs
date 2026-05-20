@@ -55,9 +55,7 @@ pub fn get_work_dir() -> PathBuf {
     if cfg!(feature = "snap") {
         // on snap, store everything in the 'common' ($SNAP_USER_COMMON)
         // dir because that's scoped to the snap and not changed across revisions
-        std::env::var("SNAP_USER_COMMON")
-            .map(PathBuf::from)
-            .unwrap_or(home_dir)
+        std::env::var("SNAP_USER_COMMON").map_or(home_dir, PathBuf::from)
     } else {
         home_dir.join(".local/uvenv")
     }

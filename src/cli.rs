@@ -40,8 +40,21 @@ pub const fn get_styles() -> clap::builder::Styles {
         )
 }
 
-pub trait Process {
+pub trait Process: Sized + 'static {
     async fn process(self) -> anyhow::Result<i32>;
+
+    /// Use this instead of `process().await` inside large enum dispatches
+    /// (like `Commands::process`) when each match arm has a different future type.
+    ///
+    /// Why: awaiting each arm inline can make the outer async state machine capture
+    /// the whole enum and trigger warnings like:
+    /// "this function may allocate ... bytes on the stack".
+    ///
+    /// `boxed_process` erases the concrete future type (`dyn Future`) and moves that
+    /// branch state to the heap (`Box`), so the outer state stays small.
+    fn boxed_process(self) -> core::pin::Pin<Box<dyn Future<Output = anyhow::Result<i32>>>> {
+        Box::pin(self.process())
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Parser)]
@@ -528,31 +541,43 @@ pub enum Commands {
 
 impl Process for Commands {
     async fn process(self) -> anyhow::Result<i32> {
+        // Keep this dispatch boxed: matching + awaiting inline can make the
+        // outer async state capture the full `Commands` enum and trigger large
+        // stack-allocation warnings for this function.
+        //
+        // `Box` moves each branch future to the heap and erases its concrete
+        // type behind `dyn Future`, so the outer future only stores one small,
+        // fixed-size pointer instead of the largest command state.
+        //
+        // `Pin` is needed because async futures are generally not `Unpin`;
+        // polling requires a pinned location so the future is not moved after
+        // polling begins.
         match self {
-            Self::List(opts) => opts.process().await,
-            Self::Install(opts) => opts.process().await,
-            Self::Upgrade(opts) => opts.process().await,
-            Self::Uninstall(opts) => opts.process().await,
-            Self::Reinstall(opts) => opts.process().await,
-            Self::Inject(opts) => opts.process().await,
-            Self::Activate(opts) => opts.process().await,
-            Self::UpgradeAll(opts) => opts.process().await,
-            Self::Runuv(opts) => opts.process().await,
-            Self::Runpip(opts) => opts.process().await,
-            Self::Runpython(opts) => opts.process().await,
-            Self::Ensurepath(opts) => opts.process().await,
-            Self::UninstallAll(opts) => opts.process().await,
-            Self::ReinstallAll(opts) => opts.process().await,
-            Self::Uninject(opts) => opts.process().await,
-            Self::Completions(opts) => opts.process().await,
-            Self::Run(opts) => opts.process().await,
-            Self::Setup(opts) => opts.process().await,
-            Self::Freeze(opts) => opts.process().await,
-            Self::Thaw(opts) => opts.process().await,
-            Self::Create(opts) => opts.process().await,
-            Self::Self_(opts) => opts.process().await,
-            Self::Check(opts) => opts.process().await,
+            Self::List(opts) => opts.boxed_process(),
+            Self::Install(opts) => opts.boxed_process(),
+            Self::Upgrade(opts) => opts.boxed_process(),
+            Self::Uninstall(opts) => opts.boxed_process(),
+            Self::Reinstall(opts) => opts.boxed_process(),
+            Self::Inject(opts) => opts.boxed_process(),
+            Self::Activate(opts) => opts.boxed_process(),
+            Self::UpgradeAll(opts) => opts.boxed_process(),
+            Self::Runuv(opts) => opts.boxed_process(),
+            Self::Runpip(opts) => opts.boxed_process(),
+            Self::Runpython(opts) => opts.boxed_process(),
+            Self::Ensurepath(opts) => opts.boxed_process(),
+            Self::UninstallAll(opts) => opts.boxed_process(),
+            Self::ReinstallAll(opts) => opts.boxed_process(),
+            Self::Uninject(opts) => opts.boxed_process(),
+            Self::Completions(opts) => opts.boxed_process(),
+            Self::Run(opts) => opts.boxed_process(),
+            Self::Setup(opts) => opts.boxed_process(),
+            Self::Freeze(opts) => opts.boxed_process(),
+            Self::Thaw(opts) => opts.boxed_process(),
+            Self::Create(opts) => opts.boxed_process(),
+            Self::Self_(opts) => opts.boxed_process(),
+            Self::Check(opts) => opts.boxed_process(),
         }
+        .await
     }
 }
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
@@ -619,12 +644,13 @@ pub enum SelfCommands {
 impl Process for SelfCommands {
     async fn process(self) -> anyhow::Result<i32> {
         match self {
-            Self::Update(opts) => opts.process().await,
-            Self::Link(opts) => opts.process().await,
-            Self::Changelog(opts) => opts.process().await,
-            Self::Migrate(opts) => opts.process().await,
-            Self::Info(opts) => opts.process().await,
-            Self::Version(opts) => opts.process().await,
+            Self::Update(opts) => opts.boxed_process(),
+            Self::Link(opts) => opts.boxed_process(),
+            Self::Changelog(opts) => opts.boxed_process(),
+            Self::Migrate(opts) => opts.boxed_process(),
+            Self::Info(opts) => opts.boxed_process(),
+            Self::Version(opts) => opts.boxed_process(),
         }
+        .await
     }
 }
