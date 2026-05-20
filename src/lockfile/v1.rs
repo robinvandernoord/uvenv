@@ -11,7 +11,6 @@ use anyhow::{Context, anyhow};
 use core::fmt::Debug;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
-use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
@@ -98,10 +97,7 @@ impl From<Metadata> for PackageSpecV1 {
 impl PackageSpec for PackageSpecV1 {}
 
 impl Freeze for LockfileV1 {
-    async fn freeze(options: &FreezeOptions) -> anyhow::Result<i32>
-    where
-        Self: Sized + Debug + Serialize,
-    {
+    async fn freeze(options: &FreezeOptions) -> anyhow::Result<i32> {
         let pkg_metadata = list_packages(&LoadMetadataConfig::none(), None, None).await?;
 
         let packages: PackageMap<PackageSpecV1> = if !options.include.is_empty() {
@@ -144,10 +140,7 @@ impl Thaw for LockfileV1 {
         options: &ThawOptions,
         data: &[u8],
         format: OutputFormat,
-    ) -> anyhow::Result<i32>
-    where
-        Self: Sized + Debug + DeserializeOwned,
-    {
+    ) -> anyhow::Result<i32> {
         let instance = match Self::from_format(data, format) {
             Err(err) => return Err(err).with_context(|| "Could not thaw data."),
             Ok(instance) => instance,

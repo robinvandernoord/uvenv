@@ -14,14 +14,12 @@ struct OnlyVersion {
     version: i8,
 }
 
-pub trait Thaw {
+pub trait Thaw: Sized + Debug + DeserializeOwned {
     async fn thaw(
         options: &ThawOptions,
         data: &[u8],
         format: OutputFormat,
-    ) -> anyhow::Result<i32>
-    where
-        Self: Sized + Debug + DeserializeOwned;
+    ) -> anyhow::Result<i32>;
 }
 
 async fn search_default_files() -> std::io::Result<Vec<u8>> {

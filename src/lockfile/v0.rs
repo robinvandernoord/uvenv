@@ -5,7 +5,6 @@ use crate::commands::thaw::Thaw;
 use crate::lockfile::{Lockfile, PackageMap, PackageSpec};
 use crate::metadata::{Metadata, serialize_msgpack};
 use core::fmt::Debug;
-use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
@@ -42,10 +41,7 @@ impl Lockfile<'_, PackageSpecV0> for LockfileV0 {
 }
 
 impl Freeze for LockfileV0 {
-    async fn freeze(options: &FreezeOptions) -> anyhow::Result<i32>
-    where
-        Self: Sized + Debug + Serialize,
-    {
+    async fn freeze(options: &FreezeOptions) -> anyhow::Result<i32> {
         let packages = PackageMap::new();
         Ok(Self::write(packages, options).await?.into())
     }
@@ -56,10 +52,7 @@ impl Thaw for LockfileV0 {
         _options: &ThawOptions,
         _data: &[u8],
         _format: OutputFormat,
-    ) -> anyhow::Result<i32>
-    where
-        Self: Sized + Debug + DeserializeOwned,
-    {
+    ) -> anyhow::Result<i32> {
         Ok(0)
     }
 }

@@ -7,10 +7,8 @@ use serde::Serialize;
 
 static LATEST_VERSION: &str = "1";
 
-pub trait Freeze {
-    async fn freeze(options: &FreezeOptions) -> anyhow::Result<i32>
-    where
-        Self: Sized + Debug + Serialize;
+pub trait Freeze: Sized + Debug + Serialize {
+    async fn freeze(options: &FreezeOptions) -> anyhow::Result<i32>;
 }
 
 impl Process for FreezeOptions {

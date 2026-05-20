@@ -15,25 +15,22 @@ type PackageMap<P> = BTreeMap<String, P>;
 
 trait PackageSpec: From<Metadata> {}
 
-trait Lockfile<'de, P: PackageSpec + From<Metadata> + Debug + Serialize> {
+trait Lockfile<'de, P: PackageSpec + From<Metadata> + Debug + Serialize>:
+    Sized + Debug + Serialize
+{
     fn new(packages: PackageMap<P>) -> Self;
 
     async fn serialize_and_patch(
         &self,
         options: &FreezeOptions,
-    ) -> anyhow::Result<Vec<u8>>
-    where
-        Self: Sized + Serialize;
+    ) -> anyhow::Result<Vec<u8>>;
 
     // predefined implementations:
 
     async fn dump_to_file(
         &self,
         options: &FreezeOptions,
-    ) -> anyhow::Result<()>
-    where
-        Self: Sized + Serialize,
-    {
+    ) -> anyhow::Result<()> {
         let format = &options.format;
         let filename = &options.filename;
 
@@ -53,10 +50,7 @@ trait Lockfile<'de, P: PackageSpec + From<Metadata> + Debug + Serialize> {
     async fn write(
         packages: PackageMap<P>,
         options: &FreezeOptions,
-    ) -> anyhow::Result<bool>
-    where
-        Self: Sized + Debug + Serialize,
-    {
+    ) -> anyhow::Result<bool> {
         let instance = Self::new(packages);
         instance.dump_to_file(options).await?;
         Ok(true)
