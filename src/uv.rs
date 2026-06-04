@@ -14,7 +14,6 @@ use uv_distribution_types::{InstalledDistKind, Name};
 use uv_installer::SitePackages;
 use uv_normalize::PackageName;
 use uv_pep508::Requirement;
-use uv_preview::Preview;
 use uv_python::{
     EnvironmentPreference, Interpreter, PythonDownloads, PythonEnvironment, PythonInstallation,
     PythonPreference, PythonRequest,
@@ -88,10 +87,6 @@ pub fn uv_cache() -> Cache {
     )
 }
 
-fn uv_featureflags() -> Preview {
-    Preview::default()
-}
-
 /// try to find a `PythonEnvironment` based on Cache or currently active virtualenv (`VIRTUAL_ENV`).
 pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> {
     let cache = maybe_cache.unwrap_or_else(uv_cache);
@@ -102,7 +97,6 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> 
         EnvironmentPreference::OnlyVirtual, // venv is always virtual
         PythonPreference::Managed,
         &cache,
-        uv_featureflags(),
     )?;
 
     Ok(environ)
@@ -117,7 +111,6 @@ pub fn environment_from_path_str(path: &str) -> anyhow::Result<PythonEnvironment
         EnvironmentPreference::ExplicitSystem, // based on above python wishes
         PythonPreference::Managed,
         &cache,
-        uv_featureflags(),
     )?)
 }
 
@@ -135,7 +128,6 @@ pub fn system_environment() -> anyhow::Result<PythonEnvironment> {
         EnvironmentPreference::OnlySystem,
         PythonPreference::OnlySystem,
         &cache,
-        uv_featureflags(),
     )?)
 }
 
@@ -164,7 +156,6 @@ pub async fn uv_search_python(python: Option<&str>) -> Option<String> {
         None,
         None,
         None,
-        uv_featureflags(),
     )
     .await
     .ok()?;

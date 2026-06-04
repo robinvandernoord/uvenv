@@ -80,14 +80,13 @@ pub async fn find_symlinks(
 
     // fallback:
 
-    let entrypoints_ini = venv
-        .interpreter()
-        .purelib()
-        .join(dist_info_fname)
-        .join("entry_points.txt");
-    let entrypoints_path = entrypoints_ini.as_str();
-
-    let scripts = console_scripts(entrypoints_path).await.unwrap_or_default();
+    let scripts = if let Some(site_packages) = venv.site_packages().next() {
+        let entrypoints_ini = site_packages.join(dist_info_fname).join("entry_points.txt");
+        let entrypoints_path = entrypoints_ini.as_str();
+        console_scripts(entrypoints_path).await.unwrap_or_default()
+    } else {
+        Vec::new()
+    };
 
     if scripts.is_empty() {
         // no scripts found, use requirement name as fallback (e.g. for `uv`)
