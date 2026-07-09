@@ -21,10 +21,7 @@ impl Process for RunpipOptions {
         match runpip(&self.venv, &self.pip_args).await {
             Ok(code) => Ok(code),
             Err(msg) => Err(msg).with_context(|| {
-                format!(
-                    "Something went wrong trying to run pip in '{}';",
-                    &self.venv
-                )
+                format!("Something went wrong trying to run pip in '{}';", self.venv)
             }),
         }
     }

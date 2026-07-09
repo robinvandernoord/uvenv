@@ -33,7 +33,7 @@ pub async fn inject_package<S: AsRef<str> + Display>(
     let to_inject_str = &to_inject_specs_vec.join(", ");
     show_loading_indicator(
         promise,
-        format!("injecting {} into {}", &to_inject_str, &metadata.name),
+        format!("injecting {} into {}", to_inject_str, metadata.name),
         AnimationSettings::default(),
     )
     .await?;
@@ -47,8 +47,8 @@ pub async fn inject_package<S: AsRef<str> + Display>(
 
     Ok(format!(
         "💉 Injected [{}] into {}.",
-        &to_inject_str,
-        &metadata.name.green(),
+        to_inject_str,
+        metadata.name.green(),
     ))
 }
 
@@ -63,7 +63,7 @@ impl Process for InjectOptions {
             Err(msg) => Err(msg).with_context(|| {
                 format!(
                     "Something went wrong trying to inject {:?} into '{}';",
-                    &self.package_specs, self.into
+                    self.package_specs, self.into
                 )
             }),
         }

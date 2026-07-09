@@ -22,7 +22,7 @@ impl Process for ActivateOptions {
             run_if_supported_shell_else_warn(|shell| {
                 println!("Your shell ({}) is supported, but the shell extension is not set up.\n\
                 You can use `uvenv setup` to do this automatically, or add `{}` to your shell's configuration file to enable it manually.",
-                         &shell.blue(),
+                         shell.blue(),
                          format!(r#"eval "$(uvenv --generate={shell} activate _)""#).green()
                 );
                 Some(1)

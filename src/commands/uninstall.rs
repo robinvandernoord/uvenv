@@ -24,12 +24,12 @@ pub async fn uninstall_package(
             bail!(
                 "{}: No virtualenv for '{}'.",
                 "Warning".yellow(),
-                &requirement_name.green()
+                requirement_name.green()
             )
         } else {
             bail!(
                 "No virtualenv for '{}', stopping.\nUse '{}' to remove an executable with that name anyway.",
-                &requirement_name.green(),
+                requirement_name.green(),
                 "--force".blue()
             )
         };
@@ -67,7 +67,7 @@ impl Process for UninstallOptions {
             Err(msg) => Err(msg).with_context(|| {
                 format!(
                     "Something went wrong while uninstalling '{}';",
-                    &self.package_name
+                    self.package_name
                 )
             }),
         }

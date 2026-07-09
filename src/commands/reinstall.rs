@@ -26,9 +26,7 @@ pub async fn reinstall(
 
     if !venv_dir.exists() && !force {
         bail!(
-            "'{}' was not previously installed. Please run 'uvenv install {}' or pass `--force` instead.",
-            &requirement_name,
-            &install_spec,
+            "'{requirement_name}' was not previously installed. Please run 'uvenv install {install_spec}' or pass `--force` instead.",
         );
     }
 

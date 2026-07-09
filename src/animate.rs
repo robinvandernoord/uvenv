@@ -48,10 +48,10 @@ pub async fn animation(
         let char = spinner_chars.next()?; // Cycle never returns None, but ? required for type
         match &ordering {
             AnimationOrder::Before => {
-                eprint!("\r{} {} ", &char, &message);
+                eprint!("\r{char} {message} ");
             },
             AnimationOrder::After => {
-                eprint!("\r{} {} ", &message, &char);
+                eprint!("\r{message} {char} ");
             },
         }
 

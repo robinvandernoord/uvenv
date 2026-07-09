@@ -152,7 +152,7 @@ impl Process for RunOptions {
         .with_context(|| {
             format!(
                 "Something went wrong while trying to run '{}';",
-                &self.package_name
+                self.package_name
             )
         })
     }

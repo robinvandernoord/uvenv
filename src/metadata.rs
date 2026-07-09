@@ -437,7 +437,7 @@ impl Metadata {
 
     // #[expect(clippy::use_debug, reason = "Print the struct on --verbose")]
     pub fn format_debug(&self) -> String {
-        format!("{:#?}", &self)
+        format!("{self:#?}")
     }
 
     pub fn format_short(&self) -> String {

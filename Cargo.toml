@@ -2,7 +2,7 @@
 name = "uvenv"
 description = "uvenv: pipx for uv (🦀)"
 version = "3.10.25"
-rust-version = "1.96"
+rust-version = "1.97"
 edition = "2024"
 categories = ["development-tools", "development-tools::build-utils", "virtualization", "external-ffi-bindings", "command-line-interface"]
 keywords = ["Python", "uv", "pip", "packaging"]
@@ -131,3 +131,4 @@ mod_module_files = "allow" # grouping mods like tests and 'commands' is useful
 unused_trait_names = "allow" # heh?
 arbitrary_source_item_ordering = "allow" # I prefer the current ordering over alphabetical.
 missing_inline_in_public_items = "allow" # only relevant for library crates, not end-product cli tools
+inline_trait_bounds = "allow" # I don't like `where`

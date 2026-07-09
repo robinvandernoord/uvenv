@@ -126,7 +126,7 @@ pub async fn fake_install(install_spec: &str) -> anyhow::Result<FakeInstallResul
     // if extras exist, the full name is name[extras]. Otherwise, it's just the name.
     let name = install.requested_extras.as_ref().map_or_else(
         || String::from(&install.metadata.name),
-        |extras| format!("{}[{}]", &install.metadata.name, extras.join(",")),
+        |extras| format!("{}[{}]", install.metadata.name, extras.join(",")),
     );
 
     let PipDownloadInfo { url: file_url, .. } = install.download_info;

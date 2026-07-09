@@ -25,7 +25,7 @@ pub async fn eject_package(
     let to_eject_str = &to_eject_specs.iter().map(|it| it.green()).join(", ");
     show_loading_indicator(
         promise,
-        format!("injecting {} into {}", &to_eject_str, &metadata.name),
+        format!("injecting {} into {}", to_eject_str, metadata.name),
         AnimationSettings::default(),
     )
     .await?;
@@ -41,8 +41,8 @@ pub async fn eject_package(
 
     Ok(format!(
         "⏏️  Ejected [{}] from {}.",
-        &to_eject_str,
-        &metadata.name.green(),
+        to_eject_str,
+        metadata.name.green(),
     ))
 }
 

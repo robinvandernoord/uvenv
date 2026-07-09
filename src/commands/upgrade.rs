@@ -47,8 +47,8 @@ fn build_msg(
         let _ = write!(
             msg,
             "🌟 '{}' is already up to date at version {}!",
-            &metadata.name.green(),
-            &new_version.cyan()
+            metadata.name.green(),
+            new_version.cyan()
         );
 
         if !metadata.requested_version.is_empty() {
@@ -59,8 +59,8 @@ fn build_msg(
             let _ = write!(
                 msg,
                 "\n💡 This package was installed with a version constraint ({}). If you want to ignore this constraint, use `{}`.",
-                &metadata.requested_version.cyan(),
-                format!("uvenv upgrade --force {}", &metadata.name).green()
+                metadata.requested_version.cyan(),
+                format!("uvenv upgrade --force {}", metadata.name).green()
             );
         }
     } else {
@@ -128,7 +128,7 @@ pub async fn upgrade_package_from_requirement(
 
     show_loading_indicator(
         promise,
-        format!("upgrading {}", &metadata.name),
+        format!("upgrading {}", metadata.name),
         AnimationSettings::default(),
     )
     .await?;

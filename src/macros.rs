@@ -1,3 +1,7 @@
+#[expect(
+    clippy::inline_modules,
+    reason = "external code, don't want to touch this"
+)]
 pub mod iterable_enum_macro {
     /// [Source: Stackoverflow](https://stackoverflow.com/questions/21371534/in-rust-is-there-a-way-to-iterate-through-the-values-of-an-enum).
     macro_rules! iterable_enum {(

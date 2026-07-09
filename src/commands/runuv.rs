@@ -19,7 +19,7 @@ impl Process for RunuvOptions {
         match runuv(&self.venv, &self.uv_args).await {
             Ok(code) => Ok(code),
             Err(msg) => Err(msg).with_context(|| {
-                format!("Something went wrong trying to run uv in '{}';", &self.venv)
+                format!("Something went wrong trying to run uv in '{}';", self.venv)
             }),
         }
     }
