@@ -11,7 +11,7 @@ use uv_client::{
     BaseClientBuilder, MetadataFormat, OwnedArchive, RegistryClient, RegistryClientBuilder,
     SimpleDetailMetadata,
 };
-use uv_distribution_types::IndexCapabilities;
+use uv_distribution_types::{File, IndexCapabilities};
 
 /// Shadow `RegistryClient` to hide new complexity of `.simple`.
 struct SimplePypi(RegistryClient);
@@ -72,19 +72,19 @@ fn is_yanked(maybe_yanked_box: Option<&Box<Yanked>>) -> bool {
     }
 }
 
-fn find_non_yanked_versions(metadata: &SimpleDetailMetadata) -> HashSet<&Version> {
+fn find_non_yanked_versions(metadata: SimpleDetailMetadata) -> HashSet<Version> {
     let mut valid_versions = HashSet::new();
 
-    for metadatum in metadata.iter() {
-        for source_dist in &metadatum.files.source_dists {
-            if !is_yanked(source_dist.file.yanked.as_ref()) {
-                valid_versions.insert(&source_dist.name.version);
+    for metadatum in metadata {
+        for source_dist in metadatum.files.source_dists {
+            if !is_yanked(File::from(source_dist).yanked.as_ref()) {
+                valid_versions.insert(metadatum.version.clone());
             }
         }
 
-        for wheel in &metadatum.files.wheels {
-            if !is_yanked(wheel.file.yanked.as_ref()) {
-                valid_versions.insert(&wheel.name.version);
+        for wheel in metadatum.files.wheels {
+            if !is_yanked(File::from(wheel).yanked.as_ref()) {
+                valid_versions.insert(metadatum.version.clone());
             }
         }
     }
@@ -111,16 +111,8 @@ pub async fn get_versions_for_packagename(
 
     if let Some(metadata_archived) = data.iter().next_back() {
         let metadata = OwnedArchive::deserialize(metadata_archived);
-        let not_yanked = find_non_yanked_versions(&metadata);
-
-        versions = metadata
-            .iter()
-            .filter_map(|metadatum| {
-                let version = metadatum.version.clone();
-
-                not_yanked.contains(&version).then_some(version)
-            })
-            .collect();
+        versions = find_non_yanked_versions(metadata).into_iter().collect();
+        versions.sort();
     }
 
     if stable {
