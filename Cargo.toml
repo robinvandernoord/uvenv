@@ -62,21 +62,21 @@ anstyle = "1.0" # color styling for clap
 owo-colors = "4.3" # color styling for strings
 
 # uv
-uv = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-configuration = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-normalize = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-preview = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-pep440 = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-pep508 = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-pypi-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
-uv-tool = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.1" }
+uv = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-configuration = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-normalize = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-preview = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-python = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-pep440 = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-pep508 = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-pypi-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
+uv-tool = { git = "https://github.com/astral-sh/uv.git", tag = "0.12.2" }
 
 [patch.crates-io]
 # black magic fuckery, see https://github.com/astral-sh/uv/blob/main/Cargo.toml#L300
