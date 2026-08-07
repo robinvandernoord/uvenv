@@ -43,3 +43,48 @@ dev = [
 
 [tool.maturin]
 bindings = "bin"
+
+[tool.vommit]
+allow_breaking_bang = true
+allow_breaking_footer = true
+prerelease_token = "beta"
+confirm = true
+
+[tool.vommit.git]
+enabled = true
+origin = "origin"
+branch = "uvenv"
+on_wrong_branch = "error"
+tag_format = "v{version}"
+commit_format = "{version}"
+
+[tool.vommit.changelog]
+enabled = true
+file = "CHANGELOG.md"
+include_prereleases = false
+placeholder = "<!--next-version-placeholder-->"
+placeholder_regex = "^<!\\-\\-next\\-version\\-placeholder\\-\\->$"
+entry_title_format = "## v{version} ({date:%Y-%m-%d})"
+
+[tool.vommit.changelog.levels]
+break = "Breaking Change{s}"
+feat = "Feature{s}"
+fix = "Fix{es}"
+perf = "Performance"
+docs = "Documentation"
+
+[tool.vommit.pypi]
+enabled = false
+
+[tool.vommit.commands]
+clean = "rm -rf ./target"
+build = "cargo check"
+publish = "cargo clippy"
+post_publish = "rm -rf ./target"
+
+[tool.vommit.version_bump_map]
+break = "major"
+feat = "minor"
+fix = "patch"
+perf = "patch"
+
