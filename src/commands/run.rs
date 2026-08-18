@@ -8,12 +8,13 @@ use uv_python::PythonEnvironment;
 use crate::cli::{Process, RunOptions};
 use crate::commands::install::uv_install_package;
 use crate::commands::runpython::process_subprocess;
-use crate::helpers::PathAsStr;
+use crate::helpers::{PathAsStr, PathToString};
 use crate::pip::parse_requirement;
 use crate::symlinks::find_symlinks;
 use crate::uv::uv_get_installed_version;
-use crate::venv::{activate_venv, create_venv, remove_venv};
+use crate::venv::{activate_venv, create_venv};
 use core::fmt::Write;
+use tempdir::TempDir;
 
 async fn find_executable_raw(
     requirement: &Requirement,
@@ -103,19 +104,26 @@ pub async fn run_package<S: AsRef<str>>(
 
     let (requirement, _) = parse_requirement(package_spec).await?;
 
+    let tmp_dir = TempDir::new("uvenv")?;
+
+    // not into_path because that disables Drop cleanup
+    let directory_base = tmp_dir.path();
+    let prefix_base = directory_base.join("venv-");
+    // -> /tmp/uvenv.<randomvalue>/venv-<packagename>
+
     let venv_path = &create_venv(
         &requirement.name,
         python,
         true,
         true,
-        Some(String::from("/tmp/uvenv-")),
+        Some(prefix_base.to_string()),
     )
     .await?;
 
-    let venv_name = &venv_path.as_str();
-
     if keep {
-        eprintln!("ℹ️ Using virtualenv {}", venv_name.blue());
+        // into_path disables its Drop behavior
+        let _ = tmp_dir.into_path();
+        eprintln!("ℹ️ Using virtualenv {}", venv_path.as_str().blue());
     }
 
     // ### 2 ###
@@ -125,16 +133,8 @@ pub async fn run_package<S: AsRef<str>>(
     uv_install_package(package_spec, inject, no_cache, false, false).await?;
 
     // ### 3 ###
-    let result = run_executable(&requirement, binary, package_spec, venv, venv_path, args).await;
-
-    // ### 4 ###
-
-    if !keep {
-        // defer! not possible here because of await
-        remove_venv(venv_path).await?;
-    }
-
-    result
+    run_executable(&requirement, binary, package_spec, venv, venv_path, args).await
+    // clean up handled by Drop(tmp_dir) unless --keep
 }
 
 impl Process for RunOptions {
