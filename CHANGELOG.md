@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v3.11.0 (2026-08-18)
+
+### Feature
+* **run:** improve temporary directory naming and cleanup
+
 ## 3.10.27 (2026-07-22)
 
 ### Updates
