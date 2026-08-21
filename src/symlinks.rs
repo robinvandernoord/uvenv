@@ -150,8 +150,7 @@ pub fn points_to(
 ) -> bool {
     symlink_path
         .read_link()
-        .ok()
-        .is_some_and(|link| link.starts_with(target_path))
+        .is_ok_and(|link| link.starts_with(target_path))
 }
 
 pub async fn check_symlink(

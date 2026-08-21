@@ -36,10 +36,6 @@ async fn search_default_files() -> std::io::Result<Vec<u8>> {
         }
     }
 
-    #[expect(
-        clippy::std_instead_of_core,
-        reason = "Otherwise 'use of unstable library feature `core_io`'"
-    )]
     Err(last_err
         .unwrap_or_else(|| std::io::Error::new(std::io::ErrorKind::NotFound, "No lockfile found")))
 }
