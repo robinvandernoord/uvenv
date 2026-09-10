@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v3.11.1 (2026-09-10)
+
+* update uv dependencies to 0.12.12
+* update Rust version to 1.98
+
 ## v3.11.0 (2026-08-18)
 
 ### Feature
