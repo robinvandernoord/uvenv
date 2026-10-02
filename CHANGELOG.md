@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v3.11.2 (2026-10-02)
+
+### Fix
+* bump to 0.12.22 and resolve signature changes
+
 ## v3.11.1 (2026-09-10)
 
 * update uv dependencies to 0.12.12
