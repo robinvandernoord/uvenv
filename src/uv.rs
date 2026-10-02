@@ -96,6 +96,7 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> 
         &PythonRequest::Any,                // just find me a python
         EnvironmentPreference::OnlyVirtual, // venv is always virtual
         PythonPreference::Managed,
+        None,
         &cache,
     )?;
 
@@ -110,6 +111,7 @@ pub fn environment_from_path_str(path: &str) -> anyhow::Result<PythonEnvironment
         &PythonRequest::parse(path),
         EnvironmentPreference::ExplicitSystem, // based on above python wishes
         PythonPreference::Managed,
+        None, // PythonArchitecture
         &cache,
     )?)
 }
@@ -127,6 +129,7 @@ pub fn system_environment() -> anyhow::Result<PythonEnvironment> {
         &PythonRequest::Any, // just find me a python
         EnvironmentPreference::OnlySystem,
         PythonPreference::OnlySystem,
+        None,
         &cache,
     )?)
 }
@@ -146,16 +149,17 @@ pub async fn uv_search_python(python: Option<&str>) -> Option<String> {
 
     // Locate the Python interpreter to use in the environment
     let python_installation = PythonInstallation::find_or_download(
-        Some(python_request),
-        EnvironmentPreference::OnlySystem,
-        PythonPreference::OnlySystem,
-        PythonDownloads::Never,
-        &client,
-        &cache,
-        None,
-        None,
-        None,
-        None,
+        Some(python_request),              // request
+        EnvironmentPreference::OnlySystem, // environments
+        PythonPreference::OnlySystem,      // preference
+        None,                              // arch
+        PythonDownloads::Never,            // python_downloads
+        &client,                           // client_builder
+        &cache,                            // cache
+        None,                              // reporter
+        None,                              // python_install_mirror
+        None,                              // pypy_install_mirror
+        None,                              // python_downloads_json_url
     )
     .await
     .ok()?;
