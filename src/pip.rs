@@ -129,7 +129,10 @@ pub async fn fake_install(install_spec: &str) -> anyhow::Result<FakeInstallResul
         |extras| format!("{}[{}]", install.metadata.name, extras.join(",")),
     );
 
-    let PipDownloadInfo { url: file_url, .. } = install.download_info;
+    let PipDownloadInfo {
+        url: file_url,
+        dir_info: _,
+    } = install.download_info;
 
     Ok(FakeInstallResult { name, file_url })
 }

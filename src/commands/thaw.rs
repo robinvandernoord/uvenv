@@ -1,5 +1,5 @@
 use crate::cli::{OutputFormat, Process, ThawOptions};
-use crate::lockfile::AutoDeserialize;
+use crate::lockfile::types::AutoDeserialize;
 use crate::lockfile::v0::LockfileV0;
 use crate::lockfile::v1::LockfileV1;
 use anyhow::{Context, bail};
@@ -60,7 +60,7 @@ impl Process for ThawOptions {
             match version {
                 OnlyVersion { version: 0 } => LockfileV0::thaw(&self, &contents, format).await,
                 OnlyVersion { version: 1 } => LockfileV1::thaw(&self, &contents, format).await,
-                OnlyVersion { .. } => {
+                OnlyVersion { version: _ } => {
                     bail!("Unsupported version!")
                 },
             }

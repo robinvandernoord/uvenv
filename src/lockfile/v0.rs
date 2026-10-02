@@ -2,7 +2,7 @@
 use crate::cli::{FreezeOptions, OutputFormat, ThawOptions};
 use crate::commands::freeze::Freeze;
 use crate::commands::thaw::Thaw;
-use crate::lockfile::{Lockfile, PackageMap, PackageSpec};
+use crate::lockfile::types::{Lockfile, PackageMap, PackageSpec};
 use crate::metadata::{Metadata, serialize_msgpack};
 use core::fmt::Debug;
 use serde::{Deserialize, Serialize};

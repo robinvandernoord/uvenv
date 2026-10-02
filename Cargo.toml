@@ -114,6 +114,7 @@ single_call_fn = "allow" # # not everything should be one big function
 print_stdout = "allow" # it's a cli tool, printing is fine
 print_stderr = "allow" # eprintln is nice even for prd
 implicit_return = "allow" # conflicts with needless_return
+unneeded_field_pattern = "allow" # prefer explicit field: _ patterns over ..
 default_numeric_fallback = "allow" # why do 1_i32 if it's fine to let Rust figure out the types?
 question_mark_used = "allow" # it's a nice operator?
 missing_docs_in_private_items = "allow" # only docs for pub items is fine for now

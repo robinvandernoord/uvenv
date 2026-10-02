@@ -67,7 +67,11 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
         reason = "map_or_else complains about moved 'err'"
     )]
     match command_result {
-        Ok(Output { status, stderr, .. }) => {
+        Ok(Output {
+            status,
+            stderr,
+            stdout: _,
+        }) => {
             if status.success() {
                 Ok(true)
             } else {
