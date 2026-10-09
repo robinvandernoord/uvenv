@@ -6,7 +6,7 @@ use anyhow::anyhow;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
 
-use crate::uv::{Helpers, uv};
+use crate::uv::uv;
 
 pub async fn eject_package(
     from: &str,
@@ -37,7 +37,7 @@ pub async fn eject_package(
         .map(ToString::to_string)
         .collect();
 
-    metadata.save(&environ.to_path_buf()).await?;
+    metadata.save(environ.root()).await?;
 
     Ok(format!(
         "⏏️  Ejected [{}] from {}.",

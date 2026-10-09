@@ -3,7 +3,7 @@ use owo_colors::OwoColorize;
 use std::path::{Path, PathBuf};
 use uv_pep508::Requirement;
 
-use uv_python::PythonEnvironment;
+use uv_python_interpreter::PythonEnvironment;
 
 use crate::cli::{Process, RunOptions};
 use crate::commands::install::uv_install_package;

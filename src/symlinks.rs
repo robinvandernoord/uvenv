@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 
 use uv_normalize::PackageName;
 use uv_pep508::Requirement;
-use uv_python::PythonEnvironment;
+use uv_python_interpreter::PythonEnvironment;
 
 use crate::helpers::PathAsStr;
 use crate::metadata::ensure_bin_dir;

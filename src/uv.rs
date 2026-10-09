@@ -14,15 +14,16 @@ use uv_distribution_types::{InstalledDistKind, Name};
 use uv_installer::SitePackages;
 use uv_normalize::PackageName;
 use uv_pep508::Requirement;
-use uv_python::{
-    EnvironmentPreference, Interpreter, PythonDownloads, PythonEnvironment, PythonInstallation,
-    PythonPreference, PythonRequest,
-};
 
-use uv_pep508::VersionOrUrl::VersionSpecifier;
+use uv_python_interpreter::{Interpreter, PythonEnvironment};
+use uv_python_types::{
+    EnvironmentPreference, PythonDownloadMirrors, PythonDownloads, PythonPreference, PythonRequest,
+};
 
 use crate::helpers::{PathToString, set_env_var};
 use crate::metadata::get_work_dir;
+use uv_pep508::VersionOrUrl::VersionSpecifier;
+use uv_python_discovery::PythonInstallation;
 
 pub async fn maybe_get_uv_binary() -> Option<String> {
     find_sibling("uv").await.map(PathToString::to_string)
@@ -92,7 +93,7 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> 
     let cache = maybe_cache.unwrap_or_else(uv_cache);
     cache.venv_dir()?; // set up the cache
 
-    let environ = PythonEnvironment::find(
+    let environ = uv_python_discovery::find_environment(
         &PythonRequest::Any,                // just find me a python
         EnvironmentPreference::OnlyVirtual, // venv is always virtual
         PythonPreference::Managed,
@@ -107,7 +108,7 @@ pub fn uv_venv(maybe_cache: Option<Cache>) -> anyhow::Result<PythonEnvironment> 
 pub fn environment_from_path_str(path: &str) -> anyhow::Result<PythonEnvironment> {
     let cache = uv_cache();
 
-    Ok(PythonEnvironment::find(
+    Ok(uv_python_discovery::find_environment(
         &PythonRequest::parse(path),
         EnvironmentPreference::ExplicitSystem, // based on above python wishes
         PythonPreference::Managed,
@@ -125,7 +126,7 @@ pub fn environment_from_path(path: &Path) -> anyhow::Result<PythonEnvironment> {
 pub fn system_environment() -> anyhow::Result<PythonEnvironment> {
     let cache = uv_cache();
 
-    Ok(PythonEnvironment::find(
+    Ok(uv_python_discovery::find_environment(
         &PythonRequest::Any, // just find me a python
         EnvironmentPreference::OnlySystem,
         PythonPreference::OnlySystem,
@@ -157,8 +158,7 @@ pub async fn uv_search_python(python: Option<&str>) -> Option<String> {
         &client,                           // client_builder
         &cache,                            // cache
         None,                              // reporter
-        None,                              // python_install_mirror
-        None,                              // pypy_install_mirror
+        PythonDownloadMirrors::default(),  // python_install_mirror
         None,                              // python_downloads_json_url
     )
     .await

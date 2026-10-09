@@ -16,7 +16,7 @@ use crate::helpers::PathToString;
 use anyhow::{Context, bail};
 use core::fmt::Write;
 use std::path::{Path, PathBuf};
-use uv_python::PythonEnvironment;
+use uv_python_interpreter::PythonEnvironment;
 
 pub async fn uv_install_package<S: AsRef<str>>(
     package_name: &str,

@@ -3,7 +3,7 @@ use core::fmt::Write;
 use itertools::Itertools;
 use owo_colors::OwoColorize;
 use uv_pep508::Requirement;
-use uv_python::PythonEnvironment;
+use uv_python_interpreter::PythonEnvironment;
 
 use crate::commands::list::{is_uvenv_outdated, list_packages};
 use crate::commands::upgrade_all::upgrade_all;

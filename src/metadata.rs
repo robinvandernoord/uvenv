@@ -15,7 +15,7 @@ use tokio::io::AsyncReadExt;
 use tokio::io::AsyncWriteExt;
 use uv_pep440::{Version, VersionSpecifier};
 use uv_pep508::Requirement;
-use uv_python::PythonEnvironment;
+use uv_python_interpreter::PythonEnvironment;
 
 const INDENT: &str = "    ";
 

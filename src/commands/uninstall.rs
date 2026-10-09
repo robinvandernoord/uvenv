@@ -1,5 +1,4 @@
 use crate::pip::parse_requirement;
-use crate::uv::Helpers;
 use anyhow::{Context, bail};
 use owo_colors::OwoColorize;
 
@@ -44,7 +43,7 @@ pub async fn uninstall_package(
 
     remove_symlinks(&symlinks).await?;
 
-    remove_venv(&venv.to_path_buf()).await?;
+    remove_venv(&venv.root().to_path_buf()).await?;
 
     let version_msg = if metadata.installed_version.is_empty() {
         String::new()

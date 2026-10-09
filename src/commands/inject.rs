@@ -3,7 +3,7 @@ use crate::{
     animate::{AnimationSettings, show_loading_indicator},
     cli::{InjectOptions, Process},
     metadata::Metadata,
-    uv::{Helpers, uv},
+    uv::uv,
     venv::setup_environ_from_requirement,
 };
 use anyhow::Context;
@@ -43,7 +43,7 @@ pub async fn inject_package<S: AsRef<str> + Display>(
         // Vec<&str> -> Vec<String>
         .extend(to_inject_specs_vec.iter().map(ToString::to_string));
 
-    metadata.save(&environ.to_path_buf()).await?;
+    metadata.save(environ.root()).await?;
 
     Ok(format!(
         "💉 Injected [{}] into {}.",

@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use uv_normalize::PackageName;
 use uv_pep508::Requirement;
 
-use uv_python::PythonEnvironment;
+use uv_python_interpreter::PythonEnvironment;
 
 /// Create a new virtualenv via `uv venv` at a Path.
 pub async fn create_venv_raw(
