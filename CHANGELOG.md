@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v3.11.3 (2026-10-09)
+
+### Fix
+* use new split uv python- crates
+
 ## v3.11.2 (2026-10-02)
 
 ### Fix
