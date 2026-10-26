@@ -63,24 +63,24 @@ anstyle = "1.0" # color styling for clap
 owo-colors = "4.3" # color styling for strings
 
 # uv
-uv = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-configuration = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-normalize = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-preview = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-pep440 = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-pep508 = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-pypi-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-python-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-python-interpreter = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-python-managed = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-python-discovery = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
-uv-tool = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.1" }
+uv = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-cache = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-client = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-configuration = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-distribution-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-installer = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-normalize = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-preview = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-resolver = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-pep440 = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-pep508 = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-pypi-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-python-types = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-python-interpreter = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-python-managed = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-python-discovery = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-requirements = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
+uv-tool = { git = "https://github.com/astral-sh/uv.git", tag = "0.13.5" }
 
 [patch.crates-io]
 # black magic fuckery, see https://github.com/astral-sh/uv/blob/main/Cargo.toml#L300
