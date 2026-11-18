@@ -2,6 +2,14 @@
 
 <!--next-version-placeholder-->
 
+## v3.13.0 (2026-11-18)
+
+### Feature
+* **outdated:** add package update checks
+
+### Fix
+* **pip:** improve Git install spec parsing
+
 ## v3.12.0 (2026-11-18)
 
 ### Feature
