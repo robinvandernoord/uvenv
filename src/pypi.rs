@@ -92,22 +92,73 @@ fn find_non_yanked_versions(metadata: SimpleDetailMetadata) -> HashSet<Version> 
     valid_versions
 }
 
+/// Why the package index could not say which versions a package has.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum LookupError {
+    /// The index does not have the package, such as one from a private index.
+    NotFound,
+    /// The index could not be asked, or its answer could not be read.
+    Failed(String),
+}
+
+impl core::fmt::Display for LookupError {
+    fn fmt(
+        &self,
+        f: &mut core::fmt::Formatter<'_>,
+    ) -> core::fmt::Result {
+        match self {
+            Self::NotFound => write!(f, "not found on the package index"),
+            Self::Failed(reason) => write!(f, "{reason}"),
+        }
+    }
+}
+
+impl LookupError {
+    fn from_lookup(err: &anyhow::Error) -> Self {
+        let not_found = err
+            .downcast_ref::<uv_client::Error>()
+            .is_some_and(|client_error| {
+                matches!(
+                    client_error.kind(),
+                    uv_client::ErrorKind::RemotePackageNotFound(_)
+                )
+            });
+
+        if not_found {
+            Self::NotFound
+        } else {
+            Self::Failed(format!("{err:#}"))
+        }
+    }
+}
+
 pub async fn get_versions_for_packagename(
     package_name: &PackageName,
     stable: bool,
     constraint: Option<VersionSpecifier>,
 ) -> Vec<Version> {
+    try_get_versions_for_packagename(package_name, stable, constraint)
+        .await
+        .unwrap_or_else(|err| {
+            eprintln!("Something went wrong: {err};");
+            Vec::new()
+        })
+}
+
+/// Like `get_versions_for_packagename`, but says why the index could not be asked.
+pub async fn try_get_versions_for_packagename(
+    package_name: &PackageName,
+    stable: bool,
+    constraint: Option<VersionSpecifier>,
+) -> Result<Vec<Version>, LookupError> {
     let mut versions: Vec<Version> = vec![];
 
     let client = SimplePypi::default();
 
-    let data = match client.lookup(package_name).await {
-        Err(err) => {
-            eprintln!("Something went wrong: {err};");
-            return versions;
-        },
-        Ok(data) => data,
-    };
+    let data = client
+        .lookup(package_name)
+        .await
+        .map_err(|err| LookupError::from_lookup(&err))?;
 
     if let Some(metadata_archived) = data.iter().next_back() {
         let metadata = OwnedArchive::deserialize(metadata_archived);
@@ -123,7 +174,7 @@ pub async fn get_versions_for_packagename(
         versions.retain(|version| specifier.contains(version));
     }
 
-    versions
+    Ok(versions)
 }
 
 pub async fn get_latest_version_for_packagename(

@@ -54,7 +54,7 @@ fn test_1_write_file() -> shared::TestResult {
 #[test]
 /// special test which makes sure uvenv uses a custom home directory
 /// to prevent breaking normal installed uvenv packages on host system.
-fn test_home_dir_flow() -> shared::TestResult {
+fn home_dir_flow() -> shared::TestResult {
     test_0_custom_home_dir();
     test_1_write_file()?;
     shared::cleanup();

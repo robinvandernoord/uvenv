@@ -3,7 +3,7 @@ use core::iter::Cycle;
 use core::slice::Iter;
 use core::time::Duration;
 use scopeguard::defer;
-use std::io::{self, Write};
+use std::io::{self, IsTerminal as _, Write};
 use tokio::task;
 
 #[derive(Debug, Copy, Clone, PartialEq, PartialOrd, Ord, Eq, Hash, Default)]
@@ -65,6 +65,12 @@ pub async fn show_loading_indicator<T, S: Into<String>, P: Future<Output = T>>(
     message: S,
     style: AnimationSettings,
 ) -> T {
+    // Without a terminal, such as when another program reads the output,
+    // the frames would only pile up on one line.
+    if !io::stderr().is_terminal() {
+        return promise.await;
+    }
+
     let spinner = task::spawn(animation(message.into(), style));
 
     defer! {

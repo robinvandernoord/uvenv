@@ -475,6 +475,23 @@ pub struct CheckOptions {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
+pub struct OutdatedOptions {
+    #[clap(long, help = "Show prerelease updates")]
+    pub show_prereleases: bool,
+    #[clap(long, help = "Ignore version constraints when checking updates")]
+    pub ignore_constraints: bool,
+
+    #[clap(
+        long,
+        short,
+        help = "Output as JSON: `self`, `outdated`, `failed` and `skipped`"
+    )]
+    pub json: bool,
+
+    pub venv_names: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Parser)]
 pub struct CompletionsOptions {
     #[clap(long, short, help = "Add to ~/.bashrc (or ~/.zshrc)")]
     pub install: bool,
@@ -513,6 +530,10 @@ pub enum Commands {
     Uninject(UnInjectOptions),
     #[clap(about = "Check for possible issues and updates.")]
     Check(CheckOptions),
+    #[clap(
+        about = "List packages with a newer version on the package index, and those that could not be checked."
+    )]
+    Outdated(OutdatedOptions),
 
     #[clap(aliases=["x"], about = "Run a package in a temporary virtual environment.")]
     Run(RunOptions),
@@ -576,6 +597,7 @@ impl Process for Commands {
             Self::Create(opts) => opts.boxed_process(),
             Self::Self_(opts) => opts.boxed_process(),
             Self::Check(opts) => opts.boxed_process(),
+            Self::Outdated(opts) => opts.boxed_process(),
         }
         .await
     }

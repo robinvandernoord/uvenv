@@ -196,12 +196,22 @@ async fn patchelf_version_info(python_exe: &Path) -> PackageVersionInfo {
     }
 }
 
+/// The version in `uv --version`, which follows the name and may be
+/// followed by build details: `uv 0.13.9 (x86_64-unknown-linux-gnu)` or
+/// `uv 0.4.0 (d9bd3bc7a 2024-08-28)`.
+pub fn parse_uv_version(output: &str) -> String {
+    output
+        .split_whitespace()
+        .nth(1)
+        .unwrap_or_default()
+        .to_owned()
+}
+
 async fn uv_version_info(_: &Path) -> PackageVersionInfo {
     let uv = get_uv_binary().await;
     let output = run_get_output(uv, &["--version"]).await.unwrap_or_default();
-    let (_, version) = output.trim().split_once(' ').unwrap_or_default();
 
-    let current = version.to_owned();
+    let current = parse_uv_version(&output);
     let latest = get_latest_version("uv", true, None).await;
 
     PackageVersionInfo {
@@ -497,5 +507,25 @@ impl Process for SelfInfoOptions {
         print!("{to_print}");
 
         Ok(0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{compare_versions, parse_uv_version};
+
+    #[test]
+    fn uv_version_without_build_details() {
+        assert_eq!(
+            parse_uv_version("uv 0.13.9 (x86_64-unknown-linux-gnu)\n"),
+            "0.13.9"
+        );
+        assert_eq!(parse_uv_version("uv 0.4.0 (d9bd3bc7a 2024-08-28)"), "0.4.0");
+        assert_eq!(parse_uv_version("uv 0.13.9"), "0.13.9");
+        assert_eq!(parse_uv_version(""), "");
+        assert!(compare_versions(
+            &parse_uv_version("uv 0.13.9 (x86_64-unknown-linux-gnu)"),
+            "0.13.9"
+        ));
     }
 }

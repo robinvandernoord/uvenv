@@ -8,6 +8,7 @@ pub mod freeze;
 pub mod inject;
 pub mod install;
 pub mod list;
+pub mod outdated;
 pub mod reinstall;
 pub mod reinstall_all;
 pub mod run;
