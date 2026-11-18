@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v3.12.0 (2026-11-18)
+
+### Feature
+* **git-install:** support detecting and managing Git repository installs
+
 ## v3.11.4 (2026-11-14)
 
 * update uv dependencies to 0.13.8
