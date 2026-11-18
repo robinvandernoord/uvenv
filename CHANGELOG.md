@@ -2,6 +2,11 @@
 
 <!--next-version-placeholder-->
 
+## v3.13.1 (2026-11-18)
+
+### Fix
+* **pip:** handle private GitHub installs
+
 ## v3.13.0 (2026-11-18)
 
 ### Feature
