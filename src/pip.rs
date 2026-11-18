@@ -1,9 +1,10 @@
 use crate::animate::{AnimationSettings, show_loading_indicator};
-use crate::cmd::{run, run_get_output};
+use crate::cmd::{run_get_output, run_with_env};
 use anyhow::bail;
 use core::str::FromStr;
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
+use std::env;
 use std::path::Path;
 use std::process::Stdio;
 use tempfile::NamedTempFile;
@@ -37,7 +38,15 @@ pub async fn pip(args: &[&str]) -> anyhow::Result<bool> {
     // unwrap_or_default doesn't work on &&str :(
     let err_prefix = format!("pip {}", args.first().unwrap_or(&""));
 
-    run("pip", args, Some(err_prefix)).await
+    // A credential prompt from git would hide behind the loading spinner and
+    // wait forever, so git fails instead and the error says what to do.
+    run_with_env(
+        "pip",
+        args,
+        &[("GIT_TERMINAL_PROMPT", "0")],
+        Some(err_prefix),
+    )
+    .await
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Default, Serialize, Deserialize)]
@@ -118,42 +127,103 @@ fn split_fragment(install_spec: &str) -> (&str, &str) {
         .unwrap_or((install_spec, ""))
 }
 
-fn normalize_git_source(install_spec: &str) -> Option<String> {
+const GITHUB_HTTPS: &str = "https://github.com/";
+const GITHUB_SSH: &str = "ssh://git@github.com/";
+
+/// A GitHub repository written as `owner/repo[@revision][#fragment]`.
+struct GithubShorthand<'spec> {
+    owner: &'spec str,
+    repository: &'spec str,
+    revision: Option<&'spec str>,
+    fragment: &'spec str,
+}
+
+impl GithubShorthand<'_> {
+    /// The repository URL on `base` (`GITHUB_HTTPS` or `GITHUB_SSH`), as git takes it.
+    fn repository_url(
+        &self,
+        base: &str,
+    ) -> String {
+        format!("{base}{}/{}.git", self.owner, self.repository)
+    }
+
+    /// The `git+` install source on `base`, with the revision and fragment.
+    fn install_source(
+        &self,
+        base: &str,
+    ) -> String {
+        let at_revision = self
+            .revision
+            .map_or_else(String::new, |rev| format!("@{rev}"));
+        format!(
+            "git+{}{at_revision}{}",
+            self.repository_url(base),
+            self.fragment
+        )
+    }
+}
+
+fn parse_github_shorthand(install_spec: &str) -> Option<GithubShorthand<'_>> {
     if Path::new(install_spec).exists() || install_spec.starts_with('.') {
         return None;
     }
 
     let (source, fragment) = split_fragment(install_spec);
+    if source.contains("://") {
+        return None;
+    }
 
-    let Some((scheme, url_rest)) = http_url_parts(source) else {
-        if source.contains("://") {
-            return None;
-        }
+    let (repository_path, revision) = source
+        .split_once('@')
+        .map_or((source, None), |(path, rev)| (path, Some(rev)));
+    let (owner, repository_name) = repository_path.split_once('/')?;
+    if repository_name.contains('/') || !valid_git_component(owner) {
+        return None;
+    }
 
-        let (repository_path, revision) = source
-            .split_once('@')
-            .map_or((source, None), |(path, rev)| (path, Some(rev)));
-        let (owner, repository_name) = repository_path.split_once('/')?;
-        if repository_name.contains('/') || !valid_git_component(owner) {
-            return None;
-        }
+    let repository = repository_name
+        .strip_suffix(".git")
+        .unwrap_or(repository_name);
+    if !valid_git_component(repository)
+        || repository == "."
+        || repository == ".."
+        || revision == Some("")
+    {
+        return None;
+    }
 
-        let repository = repository_name
-            .strip_suffix(".git")
-            .unwrap_or(repository_name);
-        if !valid_git_component(repository)
-            || repository == "."
-            || repository == ".."
-            || revision == Some("")
-        {
-            return None;
-        }
+    Some(GithubShorthand {
+        owner,
+        repository,
+        revision,
+        fragment,
+    })
+}
 
-        let at_revision = revision.map_or_else(String::new, |rev| format!("@{rev}"));
-        return Some(format!(
-            "git+https://github.com/{owner}/{repository}.git{at_revision}{fragment}"
-        ));
-    };
+/// Use HTTPS when it is reachable without credentials, otherwise SSH when
+/// that works (a private repository with an SSH key). If neither answers,
+/// HTTPS is kept so the install reports the real error.
+async fn resolve_github_shorthand(shorthand: &GithubShorthand<'_>) -> String {
+    if !probe_git_remote(&shorthand.repository_url(GITHUB_HTTPS)).await
+        && probe_git_remote(&shorthand.repository_url(GITHUB_SSH)).await
+    {
+        return shorthand.install_source(GITHUB_SSH);
+    }
+
+    shorthand.install_source(GITHUB_HTTPS)
+}
+
+fn normalize_git_source(install_spec: &str) -> Option<String> {
+    if let Some(shorthand) = parse_github_shorthand(install_spec) {
+        return Some(shorthand.install_source(GITHUB_HTTPS));
+    }
+
+    if Path::new(install_spec).exists() || install_spec.starts_with('.') {
+        return None;
+    }
+
+    let (source, fragment) = split_fragment(install_spec);
+    let (scheme, url_rest) = http_url_parts(source)?;
 
     let (authority, path_and_query) = url_rest.split_once('/')?;
     if authority.is_empty() || authority.chars().any(char::is_whitespace) {
@@ -222,6 +292,12 @@ async fn probe_git_remote(url: &str) -> bool {
         .env("GIT_TERMINAL_PROMPT", "0")
         .kill_on_drop(true);
 
+    // Keep ssh from asking for a passphrase or a host key confirmation,
+    // unless the user chose their own ssh command.
+    if env::var_os("GIT_SSH_COMMAND").is_none() && env::var_os("GIT_SSH").is_none() {
+        command.env("GIT_SSH_COMMAND", "ssh -o BatchMode=yes");
+    }
+
     matches!(
         timeout(Duration::from_secs(5), command.status()).await,
         Ok(Ok(status)) if status.success()
@@ -229,6 +305,10 @@ async fn probe_git_remote(url: &str) -> bool {
 }
 
 async fn resolve_git_source(install_spec: &str) -> Option<String> {
+    if let Some(shorthand) = parse_github_shorthand(install_spec) {
+        return Some(resolve_github_shorthand(&shorthand).await);
+    }
+
     if let Some(source) = normalize_git_source(install_spec) {
         return Some(source);
     }
@@ -297,7 +377,8 @@ async fn try_parse_git_requirement(
         format!("Finding package name for {install_spec}"),
         AnimationSettings::default(),
     )
-    .await?;
+    .await
+    .map_err(|err| explain_git_auth_failure(err, git_source))?;
 
     let new_install_spec = format!("{} @ {git_source}", result.name);
     let requirement = Requirement::from_str(&new_install_spec)?;
@@ -305,12 +386,49 @@ async fn try_parse_git_requirement(
     Ok((requirement, new_install_spec))
 }
 
+/// Messages from git (and the servers it talks to) when a repository needs
+/// credentials it could not get.
+const GIT_AUTH_FAILURES: [&str; 5] = [
+    "could not read Username",
+    "terminal prompts disabled",
+    "Authentication failed",
+    "Permission denied (publickey",
+    "Repository not found",
+];
+
+fn explain_git_auth_failure(
+    err: anyhow::Error,
+    git_source: &str,
+) -> anyhow::Error {
+    let message = format!("{err:#}");
+    if !GIT_AUTH_FAILURES
+        .iter()
+        .any(|needle| message.contains(needle))
+    {
+        return err;
+    }
+
+    let source = sanitize_git_install_spec(git_source);
+    err.context(format!(
+        "Could not access {source}: the repository is private or does not exist. \
+         For a private repository, install it over SSH \
+         (git+ssh://git@host/owner/repo.git) or set up a git credential helper for this host."
+    ))
+}
+
 pub async fn parse_requirement(install_spec: &str) -> anyhow::Result<(Requirement, String)> {
     if let Ok(requirement) = Requirement::from_str(install_spec) {
         return Ok((requirement, String::from(install_spec)));
     }
 
-    if let Some(git_source) = resolve_git_source(install_spec).await {
+    let resolved_git_source = show_loading_indicator(
+        resolve_git_source(install_spec),
+        format!("Finding package name for {install_spec}"),
+        AnimationSettings::default(),
+    )
+    .await;
+
+    if let Some(git_source) = resolved_git_source {
         try_parse_git_requirement(install_spec, &git_source).await
     } else {
         try_parse_local_requirement(install_spec).await
@@ -325,8 +443,9 @@ pub async fn pip_freeze(python: &Path) -> anyhow::Result<String> {
 #[cfg(test)]
 mod tests {
     use super::{
-        PipInstallReport, git_probe_url, is_git_install_spec, normalize_git_source,
-        parse_requirement, resolve_git_source, sanitize_git_install_spec,
+        GITHUB_HTTPS, GITHUB_SSH, PipInstallReport, explain_git_auth_failure, git_probe_url,
+        is_git_install_spec, normalize_git_source, parse_github_shorthand, parse_requirement,
+        resolve_git_source, sanitize_git_install_spec,
     };
     use core::str::FromStr;
     use core::time::Duration;
@@ -456,6 +575,48 @@ mod tests {
         assert_eq!(
             normalize_git_source("https://github.com/robinvandernoord/tileception-odoo"),
             None
+        );
+    }
+
+    #[test]
+    fn github_shorthand_builds_https_and_ssh_sources() {
+        let shorthand =
+            parse_github_shorthand("owner/repo.git@v1.2#subdirectory=python").expect("shorthand");
+
+        assert_eq!(
+            shorthand.repository_url(GITHUB_SSH),
+            "ssh://git@github.com/owner/repo.git"
+        );
+        assert_eq!(
+            shorthand.install_source(GITHUB_HTTPS),
+            "git+https://github.com/owner/repo.git@v1.2#subdirectory=python"
+        );
+        assert_eq!(
+            shorthand.install_source(GITHUB_SSH),
+            "git+ssh://git@github.com/owner/repo.git@v1.2#subdirectory=python"
+        );
+        assert!(parse_github_shorthand("https://github.com/owner/repo").is_none());
+        assert!(parse_github_shorthand("requests>=2").is_none());
+    }
+
+    #[test]
+    fn git_auth_failures_get_a_hint_and_other_errors_pass_through() {
+        let auth = anyhow::anyhow!(
+            "pip install | fatal: could not read Username for 'https://github.com': terminal prompts disabled"
+        );
+        let explained = format!(
+            "{:?}",
+            explain_git_auth_failure(auth, "git+https://user:token@github.com/owner/repo.git")
+        );
+        assert!(explained.starts_with(
+            "Could not access git+https://github.com/owner/repo.git: the repository is private"
+        ));
+        assert!(explained.contains("terminal prompts disabled"));
+
+        let other = anyhow::anyhow!("pip install | No matching distribution");
+        assert_eq!(
+            explain_git_auth_failure(other, "git+https://github.com/owner/repo.git").to_string(),
+            "pip install | No matching distribution"
         );
     }
 

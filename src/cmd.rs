@@ -60,7 +60,21 @@ pub async fn run<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
     args: &[S2],
     err_prefix: Option<String>,
 ) -> anyhow::Result<bool> {
-    let command_result = Command::new(script).args(args).output().await;
+    run_with_env(script, args, &[], err_prefix).await
+}
+
+/// Like `run`, with extra environment variables for the child process.
+pub async fn run_with_env<S1: AsRef<OsStr>, S2: AsRef<OsStr>>(
+    script: S1,
+    args: &[S2],
+    envs: &[(&str, &str)],
+    err_prefix: Option<String>,
+) -> anyhow::Result<bool> {
+    let command_result = Command::new(script)
+        .args(args)
+        .envs(envs.iter().copied())
+        .output()
+        .await;
 
     #[expect(
         clippy::option_if_let_else,
