@@ -182,9 +182,9 @@ pub async fn install_package<S: AsRef<str> + Display>(
     no_cache: bool,
     editable: bool,
 ) -> anyhow::Result<String> {
-    let (requirement, resolved_install_spec) = parse_requirement(install_spec).await?;
+    let (requirement, parsed_install_spec) = parse_requirement(install_spec).await?;
     let resolved_install_spec =
-        strip_compatible_release_constraint(&requirement, &resolved_install_spec);
+        strip_compatible_release_constraint(&requirement, &parsed_install_spec);
 
     let venv_path = ensure_venv(maybe_venv, &requirement, python, force).await?;
     let uv_venv = activate_venv(&venv_path).await?;
@@ -236,31 +236,6 @@ pub async fn install_package<S: AsRef<str> + Display>(
     Ok(feedback)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use core::str::FromStr;
-
-    #[test]
-    fn only_strip_compatible_release_versions_from_package_requirements() {
-        let package_requirement = Requirement::from_str("sample-package~=1.2").unwrap();
-        assert_eq!(
-            strip_compatible_release_constraint(&package_requirement, "sample-package~=1.2"),
-            "sample-package"
-        );
-
-        let git_requirement = Requirement::from_str(
-            "sample-package @ git+https://git.example.com/team/repo.git#subdirectory=app~=dev",
-        )
-        .unwrap();
-        let git_spec = git_requirement.to_string();
-        assert_eq!(
-            strip_compatible_release_constraint(&git_requirement, &git_spec),
-            git_spec
-        );
-    }
-}
-
 impl Process for InstallOptions {
     async fn process(self) -> anyhow::Result<i32> {
         match install_package(
@@ -285,5 +260,31 @@ impl Process for InstallOptions {
                 )
             }),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use core::str::FromStr;
+
+    #[test]
+    fn only_strip_compatible_release_versions_from_package_requirements() {
+        let package_requirement =
+            Requirement::from_str("sample-package~=1.2").expect("a valid requirement");
+        assert_eq!(
+            strip_compatible_release_constraint(&package_requirement, "sample-package~=1.2"),
+            "sample-package"
+        );
+
+        let git_requirement = Requirement::from_str(
+            "sample-package @ git+https://git.example.com/team/repo.git#subdirectory=app~=dev",
+        )
+        .expect("a valid git requirement");
+        let git_spec = git_requirement.to_string();
+        assert_eq!(
+            strip_compatible_release_constraint(&git_requirement, &git_spec),
+            git_spec
+        );
     }
 }

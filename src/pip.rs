@@ -110,16 +110,20 @@ pub async fn try_parse_local_requirement(
     Ok((requirement, new_install_spec))
 }
 
+/// The spec before its `#fragment`, and the fragment with its `#`.
+fn split_fragment(install_spec: &str) -> (&str, &str) {
+    install_spec
+        .find('#')
+        .and_then(|index| install_spec.split_at_checked(index))
+        .unwrap_or((install_spec, ""))
+}
+
 fn normalize_git_source(install_spec: &str) -> Option<String> {
     if Path::new(install_spec).exists() || install_spec.starts_with('.') {
         return None;
     }
 
-    let (source, fragment) = install_spec
-        .split_once('#')
-        .map_or((install_spec, ""), |(source, _fragment)| {
-            (source, &install_spec[source.len()..])
-        });
+    let (source, fragment) = split_fragment(install_spec);
 
     let Some((scheme, url_rest)) = http_url_parts(source) else {
         if source.contains("://") {
@@ -128,13 +132,15 @@ fn normalize_git_source(install_spec: &str) -> Option<String> {
 
         let (repository_path, revision) = source
             .split_once('@')
-            .map_or((source, None), |(path, revision)| (path, Some(revision)));
-        let (owner, repository) = repository_path.split_once('/')?;
-        if repository.contains('/') || !valid_git_component(owner) {
+            .map_or((source, None), |(path, rev)| (path, Some(rev)));
+        let (owner, repository_name) = repository_path.split_once('/')?;
+        if repository_name.contains('/') || !valid_git_component(owner) {
             return None;
         }
 
-        let repository = repository.strip_suffix(".git").unwrap_or(repository);
+        let repository = repository_name
+            .strip_suffix(".git")
+            .unwrap_or(repository_name);
         if !valid_git_component(repository)
             || repository == "."
             || repository == ".."
@@ -143,9 +149,9 @@ fn normalize_git_source(install_spec: &str) -> Option<String> {
             return None;
         }
 
-        let revision = revision.map_or_else(String::new, |revision| format!("@{revision}"));
+        let at_revision = revision.map_or_else(String::new, |rev| format!("@{rev}"));
         return Some(format!(
-            "git+https://github.com/{owner}/{repository}.git{revision}{fragment}"
+            "git+https://github.com/{owner}/{repository}.git{at_revision}{fragment}"
         ));
     };
 
@@ -157,14 +163,13 @@ fn normalize_git_source(install_spec: &str) -> Option<String> {
     let (path, _) = path_and_query
         .split_once('?')
         .map_or((path_and_query, None), |(path, query)| (path, Some(query)));
-    let path_without_revision = path.split_once('@').map_or(path, |(path, _)| path);
+    let path_without_revision = path.split_once('@').map_or(path, |(before, _)| before);
     if path_without_revision.is_empty() {
         return None;
     }
 
-    if !path_without_revision.ends_with(".git") {
-        return None;
-    }
+    // Only a path ending in `.git` is taken as a repository without asking it.
+    path_without_revision.strip_suffix(".git")?;
 
     Some(format!(
         "git+{scheme}://{authority}/{path_and_query}{fragment}"
@@ -188,21 +193,23 @@ fn git_probe_url(install_spec: &str) -> Option<String> {
         return None;
     }
 
-    let (path, query) = path_and_query
+    let (path_with_revision, query) = path_and_query
         .split_once('?')
-        .map_or((path_and_query, ""), |(path, query)| (path, query));
-    let path = path.split_once('@').map_or(path, |(path, _revision)| path);
+        .map_or((path_and_query, ""), |(path, rest)| (path, rest));
+    let path = path_with_revision
+        .split_once('@')
+        .map_or(path_with_revision, |(before, _revision)| before);
     if path.is_empty() {
         return None;
     }
 
-    let query = if query.is_empty() {
+    let with_query = if query.is_empty() {
         String::new()
     } else {
         format!("?{query}")
     };
 
-    Some(format!("{scheme}://{authority}/{path}{query}"))
+    Some(format!("{scheme}://{authority}/{path}{with_query}"))
 }
 
 async fn probe_git_remote(url: &str) -> bool {
@@ -235,11 +242,7 @@ async fn resolve_git_source(install_spec: &str) -> Option<String> {
         return None;
     }
 
-    let (source, fragment) = install_spec
-        .split_once('#')
-        .map_or((install_spec, ""), |(source, _fragment)| {
-            (source, &install_spec[source.len()..])
-        });
+    let (source, fragment) = split_fragment(install_spec);
     Some(format!("git+{source}{fragment}"))
 }
 
@@ -251,25 +254,24 @@ fn valid_git_component(component: &str) -> bool {
 }
 
 pub fn is_git_install_spec(install_spec: &str) -> bool {
-    let install_spec = install_spec.trim();
-    install_spec.starts_with("git+")
-        || install_spec
+    let spec = install_spec.trim();
+    spec.starts_with("git+")
+        || spec
             .split_once('@')
             .is_some_and(|(_, source)| source.trim_start().starts_with("git+"))
-        || normalize_git_source(install_spec).is_some()
+        || normalize_git_source(spec).is_some()
 }
 
 pub fn sanitize_git_install_spec(install_spec: &str) -> String {
     for scheme in ["git+https://", "git+http://"] {
-        let Some(scheme_start) = install_spec.find(scheme) else {
+        let Some((before, after_scheme)) = install_spec.split_once(scheme) else {
             continue;
         };
 
-        let authority_start = scheme_start + scheme.len();
-        let authority_end = install_spec[authority_start..]
+        let (authority, rest) = after_scheme
             .find('/')
-            .map_or(install_spec.len(), |offset| authority_start + offset);
-        let authority = &install_spec[authority_start..authority_end];
+            .and_then(|offset| after_scheme.split_at_checked(offset))
+            .unwrap_or((after_scheme, ""));
         let host = authority
             .rsplit_once('@')
             .map_or(authority, |(_, host)| host);
@@ -278,13 +280,7 @@ pub fn sanitize_git_install_spec(install_spec: &str) -> String {
             return String::from(install_spec);
         }
 
-        return format!(
-            "{}{}{}{}",
-            &install_spec[..scheme_start],
-            scheme,
-            host,
-            &install_spec[authority_end..]
-        );
+        return format!("{before}{scheme}{host}{rest}");
     }
 
     String::from(install_spec)
@@ -310,17 +306,14 @@ async fn try_parse_git_requirement(
 }
 
 pub async fn parse_requirement(install_spec: &str) -> anyhow::Result<(Requirement, String)> {
-    match Requirement::from_str(install_spec) {
-        Ok(requirement) => Ok((requirement, String::from(install_spec))),
-        Err(_) => {
-            let git_source = resolve_git_source(install_spec).await;
+    if let Ok(requirement) = Requirement::from_str(install_spec) {
+        return Ok((requirement, String::from(install_spec)));
+    }
 
-            if let Some(git_source) = git_source {
-                try_parse_git_requirement(install_spec, &git_source).await
-            } else {
-                try_parse_local_requirement(install_spec).await
-            }
-        },
+    if let Some(git_source) = resolve_git_source(install_spec).await {
+        try_parse_git_requirement(install_spec, &git_source).await
+    } else {
+        try_parse_local_requirement(install_spec).await
     }
 }
 
@@ -335,11 +328,11 @@ mod tests {
         PipInstallReport, git_probe_url, is_git_install_spec, normalize_git_source,
         parse_requirement, resolve_git_source, sanitize_git_install_spec,
     };
+    use core::str::FromStr;
+    use core::time::Duration;
     use std::net::{TcpListener, TcpStream};
     use std::process::{Child, Command, Stdio};
-    use std::str::FromStr;
     use std::thread;
-    use std::time::Duration;
     use uv_pep508::Requirement;
 
     struct HttpServer(Child);
@@ -383,14 +376,16 @@ mod tests {
             .expect("start local HTTP server");
         let server = HttpServer(child);
 
-        for _ in 0..100 {
-            if TcpStream::connect(("127.0.0.1", port)).is_ok() {
-                return (server, port);
+        let started = (0..100).any(|_| {
+            let connected = TcpStream::connect(("127.0.0.1", port)).is_ok();
+            if !connected {
+                thread::sleep(Duration::from_millis(20));
             }
-            thread::sleep(Duration::from_millis(20));
-        }
+            connected
+        });
+        assert!(started, "local HTTP server did not start");
 
-        panic!("local HTTP server did not start");
+        (server, port)
     }
 
     fn create_bare_repository(directory: &std::path::Path) {
@@ -494,15 +489,16 @@ mod tests {
 
         let parsed = serde_json::from_value::<PipInstallReport>(report)
             .expect("report discovery fields should deserialize");
-        assert_eq!(parsed.install.len(), 3);
-        assert_eq!(parsed.install[0].metadata.name, "git-package");
+        let [git, local, archive] =
+            <[_; 3]>::try_from(Vec::from(parsed.install)).expect("the report lists three installs");
+        assert_eq!(git.metadata.name, "git-package");
         assert_eq!(
-            parsed.install[0].download_info.url,
+            git.download_info.url,
             "git+https://example.com/team/project.git"
         );
-        assert_eq!(parsed.install[0].requested_extras, None);
-        assert_eq!(parsed.install[1].metadata.name, "local-package");
-        assert_eq!(parsed.install[2].metadata.name, "archive-package");
+        assert_eq!(git.requested_extras, None);
+        assert_eq!(local.metadata.name, "local-package");
+        assert_eq!(archive.metadata.name, "archive-package");
     }
 
     #[test]
@@ -591,7 +587,7 @@ mod tests {
     fn leave_local_paths_archives_and_other_requirements_unchanged() {
         let temp_dir = tempfile::tempdir().expect("temporary directory");
         let local_path = temp_dir.path().join("owner");
-        std::fs::create_dir(&local_path).expect("create local path");
+        std::fs::create_dir_all(&local_path).expect("create local path");
 
         assert_eq!(
             normalize_git_source(local_path.to_str().expect("UTF-8 path")),
