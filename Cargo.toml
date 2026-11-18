@@ -33,7 +33,7 @@ clap_complete = "4.6"
 anyhow = { version = "1.0", features = ["default", "backtrace"] }
 
 # async
-tokio = { version = "1.53", features = ["default", "process", "rt-multi-thread"] }
+tokio = { version = "1.53", features = ["default", "process", "rt-multi-thread", "time"] }
 
 # serialize
 rmp-serde = "1.3"

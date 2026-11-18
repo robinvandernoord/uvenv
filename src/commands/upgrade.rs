@@ -9,6 +9,7 @@ use crate::commands::list::{is_uvenv_outdated, list_packages};
 use crate::commands::upgrade_all::upgrade_all;
 use crate::helpers::StringExt;
 use crate::metadata::LoadMetadataConfig;
+use crate::pip::is_git_install_spec;
 use crate::venv::setup_environ_from_requirement;
 use crate::{
     animate::{AnimationSettings, show_loading_indicator},
@@ -98,21 +99,38 @@ pub async fn upgrade_package_from_requirement(
         args.push("--no-cache");
     }
 
-    let version = requirement.version().or(if force {
-        ""
+    let is_git_source = is_git_install_spec(&metadata.install_spec);
+    let version = if is_git_source {
+        String::new()
     } else {
-        &metadata.requested_version
-    });
-
-    let mut upgrade_spec = metadata.name.clone();
+        requirement.version().or(if force {
+            ""
+        } else {
+            &metadata.requested_version
+        })
+    };
 
     let mut extras = metadata.extras.clone();
     extras.extend(requirement.extras());
 
-    if !extras.is_empty() {
-        // upgrade_spec.push_str(&format!("[{}]", extras.iter().join(",")));
-        write!(upgrade_spec, "[{}]", extras.iter().join(","))?;
-    }
+    let mut upgrade_spec = if is_git_source {
+        if let Some((_, source)) = metadata.install_spec.split_once(" @ ") {
+            let mut requirement_name = metadata.name.clone();
+            if !extras.is_empty() {
+                write!(requirement_name, "[{}]", extras.iter().join(","))?;
+            }
+            format!("{requirement_name} @ {source}")
+        } else {
+            metadata.install_spec.clone()
+        }
+    } else {
+        let mut requirement_name = metadata.name.clone();
+        if !extras.is_empty() {
+            // upgrade_spec.push_str(&format!("[{}]", extras.iter().join(",")));
+            write!(requirement_name, "[{}]", extras.iter().join(","))?;
+        }
+        requirement_name
+    };
 
     if !version.is_empty() {
         upgrade_spec.push_str(&version);
@@ -178,8 +196,17 @@ async fn find_outdated() -> Vec<String> {
 
     packages_info
         .into_iter()
-        .filter_map(|meta| meta.outdated.then_some(meta.name))
+        .filter_map(|meta| {
+            should_auto_upgrade(meta.outdated, &meta.install_spec).then_some(meta.name)
+        })
         .collect()
+}
+
+fn should_auto_upgrade(
+    outdated: bool,
+    install_spec: &str,
+) -> bool {
+    outdated || is_git_install_spec(install_spec)
 }
 
 impl Process for UpgradeOptions {
@@ -189,18 +216,15 @@ impl Process for UpgradeOptions {
         let package_names = if self.package_names.is_empty() {
             let outdated = find_outdated().await;
 
-            #[expect(
-                clippy::else_if_without_else,
-                reason = "If I put the return value in the `else` it still complains about unnecessary `else`"
-            )]
             if self_outdated {
                 eprintln!(
                     "{} Use {} to get the latest version.",
                     "A newer version of uvenv is available.".yellow(),
                     "uvenv self update".blue()
                 );
-                bail!("{}", "All regular packages are already up to date.".blue());
-            } else if outdated.is_empty() {
+            }
+
+            if outdated.is_empty() {
                 bail!("{}", "No packages are outdated.".blue());
             }
 
@@ -217,5 +241,20 @@ impl Process for UpgradeOptions {
         )
         .await
         .map(|()| 0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::should_auto_upgrade;
+
+    #[test]
+    fn automatic_upgrade_includes_git_sources_even_without_a_pypi_update() {
+        assert!(should_auto_upgrade(
+            false,
+            "package @ git+https://git.example.com/team/repo.git@main"
+        ));
+        assert!(should_auto_upgrade(true, "regular-package"));
+        assert!(!should_auto_upgrade(false, "regular-package"));
     }
 }

@@ -50,6 +50,19 @@ uvenv
 Most `pipx` commands are supported, such as `install`, `upgrade` `inject`, `run`, `runpip`.  
 Run `uvenv` without any arguments to see all possible subcommands.
 
+`uvenv install` accepts GitHub repositories as either `owner/repo` or a repository URL. HTTP(S) repository URLs from any Git host are detected by checking whether Git can list their remote refs; URLs that do not pass this check continue through normal package installation. For private or authenticated repositories that cannot be probed, use an explicit `git+` URL:
+
+```bash
+uvenv install robinvandernoord/tileception-odoo
+uvenv install https://github.com/robinvandernoord/tileception-odoo
+uvenv install https://gitlab.com/group/subgroup/project
+uvenv install https://git.example.com/team/project
+uvenv install https://git.example.com/team/project.git
+uvenv install 'package-name @ git+https://git.example.com/team/private-project.git'
+```
+
+GitHub shorthand is treated as a repository only when a matching local path does not exist. Use an explicit `./` path for local directories to avoid ambiguity.
+
 ### 🆕 Freeze and Thaw
 
 You can snapshot your current setup into a `uvenv.lock` file using:

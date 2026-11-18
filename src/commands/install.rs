@@ -2,7 +2,7 @@ use crate::animate::{AnimationSettings, show_loading_indicator};
 use crate::cli::{InstallOptions, Process};
 
 use crate::metadata::Metadata;
-use crate::pip::parse_requirement;
+use crate::pip::{is_git_install_spec, parse_requirement, sanitize_git_install_spec};
 use crate::symlinks::{create_symlink, find_symlinks};
 use crate::uv::{ExtractInfo, Helpers, uv, uv_get_installed_version};
 use crate::venv::{activate_venv, create_venv, remove_venv};
@@ -98,7 +98,7 @@ async fn store_metadata<S: Display>(
     let python_info = venv.interpreter().markers();
 
     metadata.editable = editable;
-    metadata.install_spec = String::from(install_spec);
+    metadata.install_spec = sanitize_git_install_spec(install_spec);
     metadata.python_spec = python_spec.map(String::from);
 
     metadata.requested_version = {
@@ -158,6 +158,21 @@ pub async fn install_symlinks(
     Ok(results)
 }
 
+fn strip_compatible_release_constraint(
+    requirement: &Requirement,
+    install_spec: &str,
+) -> String {
+    if requirement.version().contains("~=") {
+        // remove loosey goosey version: `x~=1.1.1` -> `x`
+        install_spec.split_once("~=").map_or_else(
+            || String::from(install_spec),
+            |(name, _)| String::from(name),
+        )
+    } else {
+        String::from(install_spec)
+    }
+}
+
 pub async fn install_package<S: AsRef<str> + Display>(
     install_spec: &str,
     maybe_venv: Option<&Path>,
@@ -167,18 +182,20 @@ pub async fn install_package<S: AsRef<str> + Display>(
     no_cache: bool,
     editable: bool,
 ) -> anyhow::Result<String> {
-    let (requirement, mut resolved_install_spec) = parse_requirement(install_spec).await?;
-
-    if resolved_install_spec.contains("~=") {
-        // remove loosey goosey version: `x~=1.1.1` -> `x`
-        let (name, _version) = &resolved_install_spec.split_once("~=").unwrap_or_default();
-        resolved_install_spec = String::from(*name);
-    }
+    let (requirement, resolved_install_spec) = parse_requirement(install_spec).await?;
+    let resolved_install_spec =
+        strip_compatible_release_constraint(&requirement, &resolved_install_spec);
 
     let venv_path = ensure_venv(maybe_venv, &requirement, python, force).await?;
     let uv_venv = activate_venv(&venv_path).await?;
 
-    if let Err(err) = uv_install_package(install_spec, inject, no_cache, force, editable).await {
+    let install_arg = if is_git_install_spec(&resolved_install_spec) {
+        &resolved_install_spec
+    } else {
+        install_spec
+    };
+
+    if let Err(err) = uv_install_package(install_arg, inject, no_cache, force, editable).await {
         let _ = remove_venv(&venv_path).await;
 
         return Err(err);
@@ -217,6 +234,31 @@ pub async fn install_package<S: AsRef<str> + Display>(
     }
 
     Ok(feedback)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use core::str::FromStr;
+
+    #[test]
+    fn only_strip_compatible_release_versions_from_package_requirements() {
+        let package_requirement = Requirement::from_str("sample-package~=1.2").unwrap();
+        assert_eq!(
+            strip_compatible_release_constraint(&package_requirement, "sample-package~=1.2"),
+            "sample-package"
+        );
+
+        let git_requirement = Requirement::from_str(
+            "sample-package @ git+https://git.example.com/team/repo.git#subdirectory=app~=dev",
+        )
+        .unwrap();
+        let git_spec = git_requirement.to_string();
+        assert_eq!(
+            strip_compatible_release_constraint(&git_requirement, &git_spec),
+            git_spec
+        );
+    }
 }
 
 impl Process for InstallOptions {

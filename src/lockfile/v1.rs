@@ -7,6 +7,7 @@ use crate::helpers::{PathAsStr, ResultToString};
 use crate::lockfile::types::{Lockfile, PackageMap, PackageSpec};
 use crate::lockfile::{AutoDeserialize, extract_python_version};
 use crate::metadata::{LoadMetadataConfig, Metadata, get_venv_dir, serialize_msgpack, venv_path};
+use crate::pip::sanitize_git_install_spec;
 use crate::venv::remove_venv;
 use anyhow::{Context, anyhow};
 use core::fmt::Debug;
@@ -86,7 +87,7 @@ impl From<Metadata> for PackageSpecV1 {
         let injected = value.injected.into_iter().collect();
 
         Self {
-            spec: value.install_spec,
+            spec: sanitize_git_install_spec(&value.install_spec),
             editable: value.editable,
             version,
             python,
@@ -245,5 +246,28 @@ impl Thaw for LockfileV1 {
         } else {
             Err(anyhow!(errors)).with_context(|| "Not everything went as expected.")
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::PackageSpecV1;
+    use crate::metadata::Metadata;
+
+    #[test]
+    fn freeze_removes_inline_git_credentials_from_legacy_metadata() {
+        let metadata = Metadata {
+            install_spec: String::from(
+                "package @ git+https://user:token@git.example.com/team/repo.git@main#subdirectory=app",
+            ),
+            ..Metadata::default()
+        };
+
+        let frozen = PackageSpecV1::from(metadata);
+
+        assert_eq!(
+            frozen.spec,
+            "package @ git+https://git.example.com/team/repo.git@main#subdirectory=app"
+        );
     }
 }

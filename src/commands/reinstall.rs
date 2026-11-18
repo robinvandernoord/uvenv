@@ -7,7 +7,7 @@ use crate::{
     cli::{Process, ReinstallOptions},
     commands::{install::install_package, uninstall::uninstall_package},
     metadata::{Metadata, venv_path},
-    pip::parse_requirement,
+    pip::{is_git_install_spec, parse_requirement},
     uv::ExtractInfo,
 };
 
@@ -19,8 +19,9 @@ pub async fn reinstall(
     no_cache: bool,
     editable: bool,
 ) -> anyhow::Result<String> {
-    let (requirement, _resolved_install_spec) = parse_requirement(install_spec).await?;
+    let (requirement, resolved_install_spec) = parse_requirement(install_spec).await?;
     let requirement_name = requirement.name.to_string();
+    let resolved_is_git_source = is_git_install_spec(&resolved_install_spec);
 
     let venv_dir = venv_path(&requirement_name);
 
@@ -33,8 +34,10 @@ pub async fn reinstall(
     let current_metadata =
         Metadata::for_requirement(&requirement, &LoadMetadataConfig::none()).await;
 
-    let install_spec_changed =
-        editable || !requirement.version().is_empty() || !requirement.extras().is_empty();
+    let install_spec_changed = editable
+        || resolved_is_git_source
+        || !requirement.version().is_empty()
+        || !requirement.extras().is_empty();
 
     if let Err(err) = uninstall_package(&requirement_name, force).await {
         eprintln!(
@@ -44,7 +47,9 @@ pub async fn reinstall(
         );
     }
 
-    let new_install_spec = if install_spec_changed {
+    let new_install_spec = if install_spec_changed && resolved_is_git_source {
+        &resolved_install_spec
+    } else if install_spec_changed {
         install_spec
     } else {
         &current_metadata.install_spec
